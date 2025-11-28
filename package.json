@@ -3,16 +3,28 @@
   "version": "1.0.0",
   "description": "Desktop transcription app powered by OpenAI Whisper",
   "main": "electron/main.js",
+  "author": {
+    "name": "Pedro Siqueira",
+    "email": "pedro.v.siqueira@gmail.com"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "electron": "electron .",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "vite build && electron-builder",
+    "electron:build": "npm run icons && vite build && electron-builder",
+    "electron:build:mac": "npm run icons && vite build && electron-builder --mac",
+    "electron:build:dir": "npm run icons && vite build && electron-builder --dir",
+    "icons": "node scripts/generate-icons.js",
     "preview": "vite preview"
   },
-  "keywords": ["whisper", "transcription", "electron", "audio", "video"],
-  "author": "",
+  "keywords": [
+    "whisper",
+    "transcription",
+    "electron",
+    "audio",
+    "video"
+  ],
   "license": "MIT",
   "dependencies": {
     "react": "^19.2.0",
@@ -23,7 +35,80 @@
     "concurrently": "^9.2.1",
     "electron": "^39.2.4",
     "electron-builder": "^26.0.12",
+    "sharp": "^0.34.5",
     "vite": "^7.2.4",
     "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.whisperdesk.app",
+    "productName": "WhisperDesk",
+    "copyright": "Copyright © 2025 WhisperDesk",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "python/**/*",
+      "!python/__pycache__",
+      "!python/*.pyc",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/.bin"
+    ],
+    "extraResources": [
+      {
+        "from": "python",
+        "to": "python",
+        "filter": [
+          "**/*",
+          "!__pycache__",
+          "!*.pyc"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "backgroundColor": "#1a1a2e",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
   }
 }

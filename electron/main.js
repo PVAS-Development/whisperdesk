@@ -5,13 +5,62 @@ const { spawn, execSync } = require('child_process')
 
 let mainWindow
 let pythonProcess = null
+let cachedPythonPath = null
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
+// Find Python executable
+const findPython = () => {
+  if (cachedPythonPath) return cachedPythonPath
+  
+  // In development, use the venv
+  if (isDev) {
+    const venvPython = path.join(__dirname, '../venv/bin/python3')
+    if (fs.existsSync(venvPython)) {
+      cachedPythonPath = venvPython
+      return venvPython
+    }
+  }
+  
+  // List of possible Python paths to check
+  const pythonCandidates = [
+    // Check venv in resources (for potential future bundling)
+    path.join(process.resourcesPath || '', 'python/venv/bin/python3'),
+    // System Python paths
+    '/usr/local/bin/python3',
+    '/opt/homebrew/bin/python3',
+    '/usr/bin/python3',
+    'python3',
+    'python'
+  ]
+  
+  for (const pythonPath of pythonCandidates) {
+    try {
+      if (pythonPath.startsWith('/') && !fs.existsSync(pythonPath)) {
+        continue
+      }
+      // Verify it's actually Python and has whisper
+      const result = execSync(`"${pythonPath}" -c "import whisper; print('ok')"`, {
+        encoding: 'utf-8',
+        timeout: 10000,
+        stdio: ['pipe', 'pipe', 'pipe']
+      })
+      if (result.trim() === 'ok') {
+        cachedPythonPath = pythonPath
+        console.log(`Found Python with Whisper at: ${pythonPath}`)
+        return pythonPath
+      }
+    } catch (e) {
+      // Continue to next candidate
+    }
+  }
+  
+  // Last resort: just return python3 and let it fail with a clear message
+  return 'python3'
+}
+
 // Get Python paths
-const getPythonPath = () => isDev 
-  ? path.join(__dirname, '../venv/bin/python3')
-  : path.join(process.resourcesPath, 'python/bin/python3')
+const getPythonPath = () => findPython()
 
 const getScriptPath = (script) => isDev
   ? path.join(__dirname, '../python', script)
@@ -540,5 +589,29 @@ ipcMain.handle('app:getInfo', async () => {
     isDev,
     version: app.getVersion(),
     platform: process.platform,
+  }
+})
+
+// Check Python and Whisper installation
+ipcMain.handle('app:checkPython', async () => {
+  try {
+    const pythonPath = getPythonPath()
+    
+    // Check if Python exists and Whisper is installed
+    const result = execSync(`"${pythonPath}" -c "import whisper; import torch; print(whisper.__version__)"`, {
+      encoding: 'utf-8',
+      timeout: 15000
+    })
+    
+    return {
+      available: true,
+      pythonPath,
+      whisperVersion: result.trim()
+    }
+  } catch (err) {
+    return {
+      available: false,
+      error: 'Python or Whisper not found. Please install Python 3.9+ and run: pip install openai-whisper'
+    }
   }
 })

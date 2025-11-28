@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App info
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   getMemoryUsage: () => ipcRenderer.invoke('app:getMemoryUsage'),
+  checkPython: () => ipcRenderer.invoke('app:checkPython'),
   
   // Menu event listeners
   onMenuOpenFile: (callback) => {
