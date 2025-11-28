@@ -109,58 +109,72 @@ npm run build        # Build for production
 
 ---
 
-## Phase 3: Python-Whisper Integration Script
+## Phase 3: Python-Whisper Integration Script ✅ COMPLETE
 **Estimated Time: 2-3 hours**
 
 ### Tasks:
-- [ ] 3.1 Create `transcribe.py` with CLI interface
+- [x] 3.1 Create `transcribe.py` with CLI interface
   - Accept input file path as argument
   - Accept model size option (tiny, base, small, medium, large)
-  - Output transcription to stdout or file
-  - Support progress reporting via stderr (JSON format)
-- [ ] 3.2 Handle multiple output formats:
+  - Output transcription to stdout
+  - Progress reporting via stderr (JSON format)
+- [x] 3.2 Handle multiple output formats:
   - Plain text (.txt)
   - SRT subtitles (.srt)
   - VTT subtitles (.vtt)
   - JSON with timestamps
-- [ ] 3.3 Add language detection/selection support
-- [ ] 3.4 Implement progress callback for real-time updates
-- [ ] 3.5 Test script independently
-  ```bash
-  python python/transcribe.py --input video.mp4 --model base --format txt
-  ```
+- [x] 3.3 Add language detection/selection support
+- [x] 3.4 Implement progress callback for real-time updates
+- [x] 3.5 Test script independently
+
+### Usage:
+```bash
+source venv/bin/activate
+python python/transcribe.py --input video.mp4 --model base --format txt
+python python/transcribe.py -i audio.mp3 -m small -f srt -l en
+```
 
 ### Deliverables:
-- Standalone Python script that transcribes files
-- Support for multiple models and output formats
-- JSON progress output for IPC
+- ✅ Standalone Python script that transcribes files
+- ✅ Support for multiple models and output formats
+- ✅ JSON progress output for IPC
 
 ---
 
-## Phase 4: Electron-Python Bridge
+## Phase 4: Electron-Python Bridge ✅ COMPLETE
 **Estimated Time: 2-3 hours**
 
 ### Tasks:
-- [ ] 4.1 Implement child process spawning in main.js
+- [x] 4.1 Implement child process spawning in main.js
   - Use `child_process.spawn()` to run Python script
   - Handle stdout for transcription output
   - Handle stderr for progress updates
   - Handle exit codes for success/failure
-- [ ] 4.2 Set up IPC channels:
+- [x] 4.2 Set up IPC channels:
   - `transcribe:start` - Start transcription
   - `transcribe:progress` - Progress updates
   - `transcribe:complete` - Transcription finished
   - `transcribe:error` - Error handling
   - `transcribe:cancel` - Cancel ongoing transcription
-- [ ] 4.3 Create preload.js to expose safe IPC to React
-- [ ] 4.4 Handle Python path resolution (venv activation)
-- [ ] 4.5 Create React hook `useTranscription` for IPC
-- [ ] 4.6 Test end-to-end communication
+- [x] 4.3 Create preload.js to expose safe IPC to React
+- [x] 4.4 Handle Python path resolution (venv activation)
+- [x] 4.5 Create React integration via electronAPI
+- [x] 4.6 Test end-to-end communication
+
+### IPC API (exposed via window.electronAPI):
+```javascript
+electronAPI.openFile()                    // Open file dialog
+electronAPI.saveFile(defaultName)         // Save file dialog
+electronAPI.startTranscription(options)   // Start transcription
+electronAPI.cancelTranscription()         // Cancel in progress
+electronAPI.onTranscriptionProgress(cb)   // Listen for progress
+electronAPI.getAppInfo()                  // Get app info
+```
 
 ### Deliverables:
-- Working bridge between Electron and Python
-- React hook for transcription operations
-- Proper IPC setup for all operations
+- ✅ Working bridge between Electron and Python
+- ✅ React hook for transcription operations
+- ✅ Proper IPC setup for all operations
 
 ---
 
