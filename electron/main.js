@@ -1,11 +1,21 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
-const { spawn } = require('child_process')
+const fs = require('fs')
+const { spawn, execSync } = require('child_process')
 
 let mainWindow
 let pythonProcess = null
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+
+// Get Python paths
+const getPythonPath = () => isDev 
+  ? path.join(__dirname, '../venv/bin/python3')
+  : path.join(process.resourcesPath, 'python/bin/python3')
+
+const getScriptPath = (script) => isDev
+  ? path.join(__dirname, '../python', script)
+  : path.join(process.resourcesPath, 'python', script)
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -62,32 +72,156 @@ ipcMain.handle('dialog:openFile', async () => {
   return result.canceled ? null : result.filePaths[0]
 })
 
-// Save file dialog
-ipcMain.handle('dialog:saveFile', async (event, defaultName) => {
+// Save file dialog and write content
+ipcMain.handle('dialog:saveFile', async (event, { defaultName, content, format }) => {
+  const filters = []
+  
+  switch (format) {
+    case 'srt':
+      filters.push({ name: 'SRT Subtitles', extensions: ['srt'] })
+      break
+    case 'vtt':
+      filters.push({ name: 'VTT Subtitles', extensions: ['vtt'] })
+      break
+    case 'json':
+      filters.push({ name: 'JSON', extensions: ['json'] })
+      break
+    default:
+      filters.push({ name: 'Text Files', extensions: ['txt'] })
+  }
+  filters.push({ name: 'All Files', extensions: ['*'] })
+
   const result = await dialog.showSaveDialog(mainWindow, {
     defaultPath: defaultName,
-    filters: [
-      { name: 'Text Files', extensions: ['txt'] },
-      { name: 'SRT Subtitles', extensions: ['srt'] },
-      { name: 'VTT Subtitles', extensions: ['vtt'] },
-      { name: 'JSON', extensions: ['json'] }
-    ]
+    filters
   })
-  return result.canceled ? null : result.filePath
+  
+  if (result.canceled || !result.filePath) {
+    return { success: false, canceled: true }
+  }
+  
+  try {
+    fs.writeFileSync(result.filePath, content, 'utf-8')
+    return { success: true, filePath: result.filePath }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+// Get file info
+ipcMain.handle('file:getInfo', async (event, filePath) => {
+  try {
+    const stats = fs.statSync(filePath)
+    return {
+      size: stats.size,
+      name: path.basename(filePath),
+      path: filePath
+    }
+  } catch (err) {
+    return null
+  }
+})
+
+// Model Management
+
+// Get list of all models with status
+ipcMain.handle('models:list', async () => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = getPythonPath()
+    const scriptPath = getScriptPath('model_manager.py')
+    
+    const proc = spawn(pythonPath, [scriptPath, '--action', 'list'])
+    let stdout = ''
+    let stderr = ''
+    
+    proc.stdout.on('data', (data) => { stdout += data.toString() })
+    proc.stderr.on('data', (data) => { stderr += data.toString() })
+    
+    proc.on('close', (code) => {
+      if (code === 0) {
+        try {
+          resolve(JSON.parse(stdout))
+        } catch (e) {
+          reject(new Error('Failed to parse model list'))
+        }
+      } else {
+        reject(new Error(stderr || 'Failed to get model list'))
+      }
+    })
+  })
+})
+
+// Check GPU status
+ipcMain.handle('models:gpuStatus', async () => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = getPythonPath()
+    const scriptPath = getScriptPath('model_manager.py')
+    
+    const proc = spawn(pythonPath, [scriptPath, '--action', 'gpu'])
+    let stdout = ''
+    
+    proc.stdout.on('data', (data) => { stdout += data.toString() })
+    
+    proc.on('close', (code) => {
+      if (code === 0) {
+        try {
+          resolve(JSON.parse(stdout))
+        } catch (e) {
+          resolve({ available: false, type: 'cpu', name: 'Unknown' })
+        }
+      } else {
+        resolve({ available: false, type: 'cpu', name: 'Unknown' })
+      }
+    })
+  })
+})
+
+// Download a specific model
+ipcMain.handle('models:download', async (event, modelName) => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = getPythonPath()
+    const scriptPath = getScriptPath('model_manager.py')
+    
+    const proc = spawn(pythonPath, [scriptPath, '--action', 'download', '--model', modelName])
+    let stdout = ''
+    let stderr = ''
+    
+    proc.stdout.on('data', (data) => { stdout += data.toString() })
+    proc.stderr.on('data', (data) => {
+      const message = data.toString()
+      stderr += message
+      // Send progress updates
+      try {
+        const lines = message.split('\n').filter(line => line.trim())
+        for (const line of lines) {
+          if (line.startsWith('{')) {
+            const status = JSON.parse(line)
+            mainWindow.webContents.send('models:downloadProgress', status)
+          }
+        }
+      } catch (e) {}
+    })
+    
+    proc.on('close', (code) => {
+      if (code === 0) {
+        try {
+          resolve(JSON.parse(stdout))
+        } catch (e) {
+          resolve({ success: true })
+        }
+      } else {
+        reject(new Error(stderr || 'Failed to download model'))
+      }
+    })
+  })
 })
 
 // Start transcription
 ipcMain.handle('transcribe:start', async (event, options) => {
   const { filePath, model, language, outputFormat } = options
   
-  // Get the Python path from venv
-  const pythonPath = isDev 
-    ? path.join(__dirname, '../venv/bin/python3')
-    : path.join(process.resourcesPath, 'python/bin/python3')
-  
-  const scriptPath = isDev
-    ? path.join(__dirname, '../python/transcribe.py')
-    : path.join(process.resourcesPath, 'python/transcribe.py')
+  const pythonPath = getPythonPath()
+  const scriptPath = getScriptPath('transcribe.py')
 
   return new Promise((resolve, reject) => {
     const args = [

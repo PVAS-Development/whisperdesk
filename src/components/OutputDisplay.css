@@ -14,6 +14,7 @@
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
+  gap: 12px;
 }
 
 .output-header h3 {
@@ -22,6 +23,15 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.output-meta {
+  flex: 1;
+}
+
+.word-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .output-actions {
@@ -40,6 +50,12 @@
 
 .btn-icon:hover {
   background: var(--border);
+}
+
+.btn-icon.success {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: var(--success);
+  color: var(--success);
 }
 
 .output-content {
@@ -71,4 +87,9 @@
 .placeholder-icon {
   font-size: 3rem;
   opacity: 0.5;
+}
+
+.placeholder-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
 }

@@ -19,6 +19,33 @@
   letter-spacing: 0.5px;
 }
 
+/* GPU Status */
+.gpu-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+.gpu-available {
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: var(--success);
+}
+
+.gpu-unavailable {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.gpu-icon {
+  font-size: 1.1rem;
+}
+
 .setting-group {
   margin-bottom: 16px;
 }
@@ -56,10 +83,92 @@
   border-color: var(--accent);
 }
 
-.model-info {
+/* Model Details */
+.model-details {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.model-info-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 8px;
-  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.model-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
   color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.stat-value.quality {
+  color: #fbbf24;
+  letter-spacing: 1px;
+}
+
+/* Model Download */
+.model-download {
+  margin-top: 8px;
+}
+
+.btn-download {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.downloading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.model-ready {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--success);
+  padding: 4px;
 }
