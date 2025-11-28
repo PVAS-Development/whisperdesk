@@ -27,6 +27,16 @@ const saveHistory = (history) => {
   }
 }
 
+// Load theme from localStorage
+const loadTheme = () => {
+  try {
+    const saved = localStorage.getItem('whisperdesk_theme')
+    return saved || 'light'
+  } catch {
+    return 'light'
+  }
+}
+
 function App() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [settings, setSettings] = useState({
@@ -36,11 +46,23 @@ function App() {
   })
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [progress, setProgress] = useState({ percent: 0, status: '' })
+  const [transcriptionStartTime, setTranscriptionStartTime] = useState(null)
   const [transcription, setTranscription] = useState('')
   const [error, setError] = useState(null)
   const [history, setHistory] = useState(loadHistory)
   const [showHistory, setShowHistory] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
+  const [theme, setTheme] = useState(loadTheme)
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('whisperdesk_theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
 
   useEffect(() => {
     // Listen for progress updates from main process
@@ -122,6 +144,7 @@ function App() {
     setIsTranscribing(true)
     setError(null)
     setProgress({ percent: 0, status: 'Starting transcription...' })
+    setTranscriptionStartTime(Date.now())
 
     const startTime = Date.now()
 
@@ -163,6 +186,7 @@ function App() {
     await window.electronAPI?.cancelTranscription()
     setIsTranscribing(false)
     setProgress({ percent: 0, status: 'Cancelled' })
+    setTranscriptionStartTime(null)
   }
 
   const handleSave = async () => {
@@ -205,18 +229,31 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <div>
-            <h1>🎙️ WhisperDesk</h1>
-            <p>Transcribe audio & video with OpenAI Whisper</p>
+          <div className="header-left">
+            <div className="app-logo">🎙️</div>
+            <div className="header-title">
+              <h1>WhisperDesk</h1>
+              <p>Transcribe audio & video with AI</p>
+            </div>
           </div>
-          <button 
-            className="btn-icon history-btn"
-            onClick={() => setShowHistory(!showHistory)}
-            title="Transcription History"
-            aria-label={`${showHistory ? 'Hide' : 'Show'} transcription history. ${history.length} items.`}
-          >
-            📜 History ({history.length})
-          </button>
+          <div className="header-actions">
+            <button 
+              className="theme-toggle"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <button 
+              className="btn-icon history-btn"
+              onClick={() => setShowHistory(!showHistory)}
+              title="Transcription History"
+              aria-label={`${showHistory ? 'Hide' : 'Show'} transcription history. ${history.length} items.`}
+            >
+              📜 History ({history.length})
+            </button>
+          </div>
         </div>
       </header>
 
@@ -259,6 +296,8 @@ function App() {
             <ProgressBar 
               percent={progress.percent}
               status={progress.status}
+              startTime={transcriptionStartTime}
+              isActive={isTranscribing}
             />
           )}
 

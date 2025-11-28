@@ -96,21 +96,21 @@ function createMenu() {
     {
       label: 'Edit',
       submenu: [
-        {
-          label: 'Copy Transcription',
-          accelerator: 'CmdOrCtrl+C',
-          click: () => {
-            mainWindow.webContents.send('menu:copyTranscription')
-          }
-        },
-        { type: 'separator' },
         { role: 'undo' },
         { role: 'redo' },
         { type: 'separator' },
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
-        { role: 'selectAll' }
+        { role: 'selectAll' },
+        { type: 'separator' },
+        {
+          label: 'Copy All Transcription',
+          accelerator: 'CmdOrCtrl+Shift+C',
+          click: () => {
+            mainWindow.webContents.send('menu:copyTranscription')
+          }
+        }
       ]
     },
     {
@@ -197,6 +197,22 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+  })
+
+  // Enable context menu for text selection (copy/paste)
+  mainWindow.webContents.on('context-menu', (event, params) => {
+    const { selectionText, isEditable } = params
+    
+    if (selectionText || isEditable) {
+      const contextMenu = Menu.buildFromTemplate([
+        { label: 'Copy', role: 'copy', enabled: !!selectionText },
+        { label: 'Select All', role: 'selectAll' },
+        { type: 'separator' },
+        { label: 'Cut', role: 'cut', enabled: isEditable },
+        { label: 'Paste', role: 'paste', enabled: isEditable },
+      ])
+      contextMenu.popup()
+    }
   })
 
   if (isDev) {

@@ -1,7 +1,7 @@
 .settings-panel {
   background: var(--bg-primary);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px;
   border: 1px solid var(--border);
 }
 
@@ -11,9 +11,9 @@
 }
 
 .settings-panel h3 {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -25,19 +25,19 @@
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
   font-size: 0.85rem;
 }
 
 .gpu-available {
-  background: rgba(74, 222, 128, 0.15);
-  border: 1px solid rgba(74, 222, 128, 0.3);
+  background: var(--success-light);
+  border: 1px solid var(--success);
   color: var(--success);
 }
 
 .gpu-unavailable {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border);
   color: var(--text-secondary);
 }
@@ -47,7 +47,7 @@
 }
 
 .setting-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .setting-group:last-child {
@@ -56,7 +56,7 @@
 
 .setting-group label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   margin-bottom: 6px;
   color: var(--text-primary);
@@ -65,13 +65,18 @@
 .setting-group select {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-secondary);
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
 }
 
 .setting-group select:hover {
@@ -81,6 +86,7 @@
 .setting-group select:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 /* Model Details */
@@ -88,7 +94,7 @@
   margin-top: 10px;
   padding: 12px;
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
 
@@ -100,46 +106,45 @@
 
 .model-stat {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .stat-value {
-  font-size: 0.9rem;
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 .stat-value.quality {
-  color: #fbbf24;
-  letter-spacing: 1px;
+  color: var(--warning);
+  letter-spacing: 2px;
 }
 
 /* Model Download */
 .model-download {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .btn-download {
   width: 100%;
   padding: 8px 12px;
   font-size: 0.85rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: 6px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-download:hover {
   background: var(--accent);
-  border-color: var(--accent);
+  color: white;
 }
 
 .downloading {
@@ -153,12 +158,12 @@
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -166,9 +171,9 @@
 }
 
 .model-ready {
-  display: block;
-  text-align: center;
   font-size: 0.85rem;
   color: var(--success);
-  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
