@@ -1,6 +1,6 @@
 {
   "name": "whisperdesk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Desktop transcription app powered by OpenAI Whisper",
   "main": "electron/main.js",
   "author": {

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- feat: Add changelog generation and update release process (`fae312e`)
 - feat: Implement auto-updater with notification UI and update handling (`c726254`)
 - feat: Add release script for version bumping and tagging (`d272ccf`)
 

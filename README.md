@@ -138,6 +138,55 @@ npm run electron:build:mac
 npm run electron:build:dir
 ```
 
+### Releasing a New Version
+
+The release process is automated. Just run:
+
+```bash
+# Release with patch version bump (1.0.0 -> 1.0.1)
+./scripts/release.sh
+
+# Release with minor version bump (1.0.0 -> 1.1.0)
+./scripts/release.sh minor
+
+# Release with major version bump (1.0.0 -> 2.0.0)
+./scripts/release.sh major
+
+# Re-release current version (e.g., to fix a failed build)
+./scripts/release.sh --force
+```
+
+This will:
+1. Bump the version in `package.json`
+2. Generate/update `CHANGELOG.md` from git commits
+3. Commit the changes
+4. Create and push a git tag
+5. Trigger GitHub Actions to build and publish the release
+
+**Commit Message Convention** (for better changelogs):
+```
+feat: add new feature        # ✨ Features
+fix: fix a bug               # 🐛 Bug Fixes  
+docs: update documentation   # 📚 Documentation
+style: styling changes       # 💄 Styling
+refactor: code refactoring   # ♻️ Refactoring
+perf: performance improvement # ⚡ Performance
+chore: maintenance tasks     # 🔨 Chores
+```
+
+### Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run electron:dev` | Start app in development mode |
+| `npm run electron:build:mac` | Build macOS DMG (bumps version) |
+| `npm run icons` | Generate app icons from SVG |
+| `npm run changelog` | Generate CHANGELOG.md |
+| `npm run bump:patch` | Bump patch version |
+| `npm run bump:minor` | Bump minor version |
+| `npm run bump:major` | Bump major version |
+
 ### Project Structure
 ```
 whisperdesk/
