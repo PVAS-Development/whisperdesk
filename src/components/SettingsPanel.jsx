@@ -111,18 +111,26 @@ function SettingsPanel({ settings, onChange, disabled }) {
       
       {/* GPU Status */}
       {gpuInfo && (
-        <div className={`gpu-status ${gpuInfo.available ? 'gpu-available' : 'gpu-unavailable'}`}>
-          <span className="gpu-icon">{gpuInfo.available ? '🚀' : '💻'}</span>
+        <div 
+          className={`gpu-status ${gpuInfo.available ? 'gpu-available' : 'gpu-unavailable'}`}
+          role="status"
+          aria-live="polite"
+          aria-label={`GPU acceleration: ${gpuInfo.available ? 'enabled' : 'disabled'}. Using ${gpuInfo.name}`}
+        >
+          <span className="gpu-icon" aria-hidden="true">{gpuInfo.available ? '🚀' : '💻'}</span>
           <span className="gpu-text">{gpuInfo.name}</span>
         </div>
       )}
       
       <div className="setting-group">
-        <label>Model</label>
+        <label htmlFor="model-select">Model</label>
         <select 
+          id="model-select"
           value={settings.model}
           onChange={(e) => handleChange('model', e.target.value)}
           disabled={disabled || loading}
+          aria-label="Select Whisper model"
+          aria-describedby={selectedModel ? 'model-details' : undefined}
         >
           {models.map(model => (
             <option key={model.name} value={model.name}>
@@ -133,7 +141,7 @@ function SettingsPanel({ settings, onChange, disabled }) {
         </select>
         
         {selectedModel && (
-          <div className="model-details">
+          <div className="model-details" id="model-details" role="status" aria-live="polite">
             <div className="model-info-row">
               <span className="model-stat">
                 <span className="stat-label">Speed:</span>
@@ -156,6 +164,7 @@ function SettingsPanel({ settings, onChange, disabled }) {
                     className="btn-download"
                     onClick={() => handleDownloadModel(selectedModel.name)}
                     disabled={disabled}
+                    aria-label={`Download ${selectedModel.name} model, size ${selectedModel.size}`}
                   >
                     ⬇️ Download {selectedModel.size}
                   </button>
@@ -171,11 +180,13 @@ function SettingsPanel({ settings, onChange, disabled }) {
       </div>
 
       <div className="setting-group">
-        <label>Language</label>
+        <label htmlFor="language-select">Language</label>
         <select
+          id="language-select"
           value={settings.language}
           onChange={(e) => handleChange('language', e.target.value)}
           disabled={disabled}
+          aria-label="Select transcription language"
         >
           {LANGUAGES.map(lang => (
             <option key={lang.value} value={lang.value}>
@@ -186,11 +197,13 @@ function SettingsPanel({ settings, onChange, disabled }) {
       </div>
 
       <div className="setting-group">
-        <label>Output Format</label>
+        <label htmlFor="format-select">Output Format</label>
         <select
+          id="format-select"
           value={settings.outputFormat}
           onChange={(e) => handleChange('outputFormat', e.target.value)}
           disabled={disabled}
+          aria-label="Select output format"
         >
           {OUTPUT_FORMATS.map(format => (
             <option key={format.value} value={format.value}>

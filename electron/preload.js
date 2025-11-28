@@ -25,6 +25,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeAllListeners('transcribe:progress')
   },
   
+  
   // App info
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
+  getMemoryUsage: () => ipcRenderer.invoke('app:getMemoryUsage'),
+  
+  // Menu event listeners
+  onMenuOpenFile: (callback) => {
+    ipcRenderer.on('menu:openFile', callback)
+    return () => ipcRenderer.removeListener('menu:openFile', callback)
+  },
+  onMenuSaveFile: (callback) => {
+    ipcRenderer.on('menu:saveFile', callback)
+    return () => ipcRenderer.removeListener('menu:saveFile', callback)
+  },
+  onMenuCopyTranscription: (callback) => {
+    ipcRenderer.on('menu:copyTranscription', callback)
+    return () => ipcRenderer.removeListener('menu:copyTranscription', callback)
+  },
+  onMenuStartTranscription: (callback) => {
+    ipcRenderer.on('menu:startTranscription', callback)
+    return () => ipcRenderer.removeListener('menu:startTranscription', callback)
+  },
+  onMenuCancelTranscription: (callback) => {
+    ipcRenderer.on('menu:cancelTranscription', callback)
+    return () => ipcRenderer.removeListener('menu:cancelTranscription', callback)
+  },
+  onMenuToggleHistory: (callback) => {
+    ipcRenderer.on('menu:toggleHistory', callback)
+    return () => ipcRenderer.removeListener('menu:toggleHistory', callback)
+  },
 })

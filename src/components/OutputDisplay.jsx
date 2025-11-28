@@ -22,21 +22,27 @@ function OutputDisplay({ text, onSave, onCopy, copySuccess }) {
               className={`btn-icon ${copySuccess ? 'success' : ''}`} 
               onClick={onCopy} 
               title="Copy to clipboard"
+              aria-label="Copy transcription to clipboard"
             >
               {copySuccess ? '✓ Copied!' : '📋 Copy'}
             </button>
-            <button className="btn-icon" onClick={onSave} title="Save to file">
+            <button 
+              className="btn-icon" 
+              onClick={onSave} 
+              title="Save to file"
+              aria-label="Save transcription to file"
+            >
               💾 Save
             </button>
           </div>
         )}
       </div>
       
-      <div className="output-content">
+      <div className="output-content" role="region" aria-label="Transcription output">
         {hasText ? (
-          <pre className="transcription-text">{text}</pre>
+          <pre className="transcription-text" aria-label="Transcribed text">{text}</pre>
         ) : (
-          <div className="output-placeholder">
+          <div className="output-placeholder" role="status" aria-live="polite">
             <span className="placeholder-icon">📝</span>
             <span>Transcription will appear here</span>
             <span className="placeholder-hint">Select a file and click Transcribe to start</span>

@@ -50,6 +50,65 @@ function App() {
     return () => unsubscribe?.()
   }, [])
 
+  // Listen for menu events
+  useEffect(() => {
+    const unsubscribers = []
+    
+    // Cmd+O: Open file
+    unsubscribers.push(window.electronAPI?.onMenuOpenFile(() => {
+      if (!isTranscribing) {
+        handleFileSelectFromMenu()
+      }
+    }))
+    
+    // Cmd+S: Save file
+    unsubscribers.push(window.electronAPI?.onMenuSaveFile(() => {
+      if (transcription && !isTranscribing) {
+        handleSave()
+      }
+    }))
+    
+    // Cmd+C: Copy transcription (when focus is in the output area)
+    unsubscribers.push(window.electronAPI?.onMenuCopyTranscription(() => {
+      if (transcription) {
+        handleCopy()
+      }
+    }))
+    
+    // Cmd+Return: Start transcription
+    unsubscribers.push(window.electronAPI?.onMenuStartTranscription(() => {
+      if (selectedFile && !isTranscribing) {
+        handleTranscribe()
+      }
+    }))
+    
+    // Escape: Cancel transcription
+    unsubscribers.push(window.electronAPI?.onMenuCancelTranscription(() => {
+      if (isTranscribing) {
+        handleCancel()
+      }
+    }))
+    
+    // Cmd+H: Toggle history
+    unsubscribers.push(window.electronAPI?.onMenuToggleHistory(() => {
+      setShowHistory(prev => !prev)
+    }))
+    
+    return () => {
+      unsubscribers.forEach(unsub => unsub?.())
+    }
+  }, [isTranscribing, selectedFile, transcription, showHistory])
+
+  const handleFileSelectFromMenu = async () => {
+    const filePath = await window.electronAPI?.openFile()
+    if (filePath) {
+      const fileInfo = await window.electronAPI?.getFileInfo(filePath)
+      if (fileInfo) {
+        handleFileSelect(fileInfo)
+      }
+    }
+  }
+
   const handleFileSelect = useCallback((file) => {
     setSelectedFile(file)
     setTranscription('')
@@ -154,6 +213,7 @@ function App() {
             className="btn-icon history-btn"
             onClick={() => setShowHistory(!showHistory)}
             title="Transcription History"
+            aria-label={`${showHistory ? 'Hide' : 'Show'} transcription history. ${history.length} items.`}
           >
             📜 History ({history.length})
           </button>
@@ -180,6 +240,7 @@ function App() {
                 className="btn-primary"
                 onClick={handleTranscribe}
                 disabled={!selectedFile}
+                aria-label="Start transcription"
               >
                 🚀 Transcribe
               </button>
@@ -187,8 +248,9 @@ function App() {
               <button 
                 className="btn-danger"
                 onClick={handleCancel}
+                aria-label="Cancel ongoing transcription"
               >
-                ✕ Cancel
+                <span className="loading-spinner" aria-hidden="true"></span> Cancel
               </button>
             )}
           </div>
@@ -201,7 +263,7 @@ function App() {
           )}
 
           {error && (
-            <div className="error-message">
+            <div className="error-message" role="alert" aria-live="assertive">
               ⚠️ {error}
             </div>
           )}

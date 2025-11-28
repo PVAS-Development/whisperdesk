@@ -277,7 +277,7 @@ electronAPI.getAppInfo()                  // Get app info
 
 ---
 
-## Phase 8: Testing & Polish
+## Phase 8: Testing & Polish ✅ COMPLETE
 **Estimated Time: 2-3 hours**
 
 ### Tasks:
@@ -289,21 +289,25 @@ electronAPI.getAppInfo()                  // Get app info
   - Disk full
   - Process killed
   - Python not found
-- [ ] 8.5 Performance optimization:
+- [x] 8.5 Performance optimization:
   - Memory usage monitoring
   - Clean process termination
-- [ ] 8.6 Add keyboard shortcuts:
+- [x] 8.6 Add keyboard shortcuts:
   - `Cmd+O` - Open file
   - `Cmd+S` - Save transcription
   - `Cmd+C` - Copy transcription
+  - `Cmd+Return` - Start transcription
+  - `Cmd+H` - Toggle history
   - `Escape` - Cancel transcription
-- [ ] 8.7 Add loading states and transitions
-- [ ] 8.8 Accessibility review (ARIA labels, focus management)
+- [x] 8.7 Add loading states and transitions
+- [x] 8.8 Accessibility review (ARIA labels, focus management)
 
 ### Deliverables:
-- Robust, well-tested application
-- Polished user experience
-- Keyboard accessible
+- ✅ Robust error handling
+- ✅ Keyboard shortcuts implemented
+- ✅ Loading states and smooth transitions
+- ✅ Accessibility improvements (ARIA labels, focus management)
+- ✅ Memory monitoring and clean process termination
 
 ---
 

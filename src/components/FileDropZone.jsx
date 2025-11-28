@@ -38,6 +38,15 @@ function FileDropZone({ onFileSelect, selectedFile, disabled }) {
       onClick={handleClick}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label={selectedFile ? `Selected file: ${selectedFile.name}. Click to change file.` : 'Drop audio or video file here, or click to browse'}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
     >
       {selectedFile ? (
         <div className="file-info">

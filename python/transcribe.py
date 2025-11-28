@@ -8,7 +8,19 @@ import argparse
 import json
 import sys
 import os
+import signal
 import whisper
+
+
+# Handle graceful shutdown
+def signal_handler(sig, frame):
+    """Handle interruption signals (SIGTERM, SIGINT)."""
+    send_progress(0, "Transcription cancelled by user")
+    sys.exit(130)  # 128 + SIGINT
+
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 
 def send_progress(percent, status):
@@ -35,9 +47,29 @@ def transcribe(input_path, model_name="base", language=None, output_format="txt"
     if not os.path.exists(input_path):
         raise FileNotFoundError(f"Input file not found: {input_path}")
     
+    # Check if file is readable
+    if not os.access(input_path, os.R_OK):
+        raise PermissionError(f"Cannot read file: {input_path}")
+    
+    # Check file size (warn if very large)
+    file_size = os.path.getsize(input_path)
+    if file_size == 0:
+        raise ValueError(f"File is empty: {input_path}")
+    if file_size > 2 * 1024 * 1024 * 1024:  # 2GB
+        send_progress(3, f"Warning: Large file ({file_size // (1024*1024)}MB). This may take a while...")
+    
+    # Validate file extension
+    valid_extensions = {'.mp4', '.mp3', '.wav', '.m4a', '.webm', '.mov', '.avi', '.flac', '.ogg', '.mkv'}
+    _, ext = os.path.splitext(input_path.lower())
+    if ext not in valid_extensions:
+        send_progress(2, f"Warning: Uncommon file format '{ext}'. Attempting to process...")
+    
     # Load model
     send_progress(5, f"Loading {model_name} model...")
-    model = whisper.load_model(model_name)
+    try:
+        model = whisper.load_model(model_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model '{model_name}': {str(e)}")
     
     send_progress(15, "Model loaded. Starting transcription...")
     
@@ -51,7 +83,17 @@ def transcribe(input_path, model_name="base", language=None, output_format="txt"
         options["language"] = language
     
     send_progress(20, "Transcribing audio...")
-    result = model.transcribe(input_path, **options)
+    try:
+        result = model.transcribe(input_path, **options)
+    except Exception as e:
+        raise RuntimeError(f"Transcription failed: {str(e)}")
+    
+    # Check if we got any results
+    if not result or "text" not in result:
+        raise RuntimeError("Transcription produced no output")
+    
+    if not result["text"].strip():
+        raise ValueError("No speech detected in the audio/video file")
     
     send_progress(90, "Formatting output...")
     
@@ -168,11 +210,31 @@ def main():
         sys.exit(0)
         
     except FileNotFoundError as e:
-        send_progress(0, f"Error: {e}")
+        send_progress(0, f"File Error: {str(e)}")
         sys.exit(1)
+    
+    except PermissionError as e:
+        send_progress(0, f"Permission Error: {str(e)}")
+        sys.exit(1)
+    
+    except ValueError as e:
+        send_progress(0, f"Validation Error: {str(e)}")
+        sys.exit(1)
+    
+    except RuntimeError as e:
+        send_progress(0, f"Runtime Error: {str(e)}")
+        sys.exit(1)
+    
+    except MemoryError:
+        send_progress(0, "Memory Error: Insufficient memory. Try using a smaller model.")
+        sys.exit(1)
+    
+    except KeyboardInterrupt:
+        send_progress(0, "Transcription cancelled by user")
+        sys.exit(130)
         
     except Exception as e:
-        send_progress(0, f"Error: {e}")
+        send_progress(0, f"Unexpected Error: {str(e)}")
         sys.exit(1)
 
 
