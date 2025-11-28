@@ -1,0 +1,27 @@
+.progress-container {
+  background: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-status {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
