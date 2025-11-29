@@ -1,7 +1,7 @@
 {
   "name": "whisperdesk",
-  "version": "1.0.0",
-  "description": "Desktop transcription app powered by OpenAI Whisper",
+  "version": "1.0.5",
+  "description": "Desktop transcription app powered by whisper.cpp",
   "main": "electron/main.js",
   "author": {
     "name": "Pedro Siqueira",
@@ -20,10 +20,13 @@
     "bump:minor": "node scripts/bump-version.js minor",
     "bump:major": "node scripts/bump-version.js major",
     "changelog": "node scripts/generate-changelog.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup:whisper": "bash scripts/setup-whisper-cpp.sh",
+    "lint": "eslint . --ext .js,.jsx"
   },
   "keywords": [
     "whisper",
+    "whisper.cpp",
     "transcription",
     "electron",
     "audio",
@@ -55,23 +58,9 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "python/**/*",
-      "!python/__pycache__",
-      "!python/*.pyc",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
       "!**/node_modules/.bin"
-    ],
-    "extraResources": [
-      {
-        "from": "python",
-        "to": "python",
-        "filter": [
-          "**/*",
-          "!__pycache__",
-          "!*.pyc"
-        ]
-      }
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -97,6 +86,7 @@
       "darkModeSupport": true
     },
     "dmg": {
+      "title": "WhisperDesk",
       "backgroundColor": "#1a1a2e",
       "window": {
         "width": 540,

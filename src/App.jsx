@@ -53,6 +53,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
   const [theme, setTheme] = useState(loadTheme)
+  const [modelDownloaded, setModelDownloaded] = useState(true) // Track if current model is downloaded
 
   // Apply theme to document
   useEffect(() => {
@@ -307,6 +308,7 @@ function App() {
             settings={settings}
             onChange={setSettings}
             disabled={isTranscribing}
+            onModelStatusChange={setModelDownloaded}
           />
 
           <div className="actions">
@@ -314,8 +316,9 @@ function App() {
               <button 
                 className="btn-primary"
                 onClick={handleTranscribe}
-                disabled={!selectedFile}
+                disabled={!selectedFile || !modelDownloaded}
                 aria-label="Start transcription"
+                title={!modelDownloaded ? "Please download the selected model first" : ""}
               >
                 🚀 Transcribe
               </button>

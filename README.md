@@ -1,6 +1,6 @@
 # 🎙️ WhisperDesk
 
-A beautiful, native macOS desktop application for transcribing audio and video files using OpenAI's Whisper AI model.
+A beautiful, native macOS desktop application for transcribing audio and video files using [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
 ![WhisperDesk Screenshot](docs/screenshot.png)
 
@@ -11,17 +11,17 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 - **Multiple Models** - Choose from tiny, base, small, medium, or large Whisper models
 - **Output Formats** - Export as plain text, SRT subtitles, VTT subtitles, or JSON with timestamps
 - **Language Support** - Auto-detect or select from 90+ languages
-- **Apple Silicon Optimized** - GPU acceleration with Metal/MPS on M1/M2/M3 Macs
+- **Apple Silicon Optimized** - Native Metal GPU acceleration on M1/M2/M3/M4 Macs
 - **Dark Mode** - Beautiful dark theme that respects your system preference
 - **Keyboard Shortcuts** - Full keyboard navigation support
 - **Transcription History** - Keep track of your recent transcriptions
+- **Native Performance** - Uses whisper.cpp for fast, efficient transcription
 
 ## 📋 Requirements
 
 - **macOS** 10.15 (Catalina) or later
-- **Python** 3.9 or later
 - **FFmpeg** (for audio processing)
-- ~2GB disk space (for Whisper models)
+- ~500MB disk space (for whisper.cpp and models)
 
 ## 🚀 Installation
 
@@ -32,25 +32,20 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-#### Install Python 3
-```bash
-brew install python@3.11
-```
-
 #### Install FFmpeg
 ```bash
 brew install ffmpeg
 ```
 
-#### Install Whisper
+#### Install CMake (for building whisper.cpp)
 ```bash
-pip3 install openai-whisper
+brew install cmake
 ```
 
 ### 2. Install WhisperDesk
 
 #### Option A: Download DMG (Recommended)
-1. Download the latest `WhisperDesk-x.x.x.dmg` from [Releases](https://github.com/whisperdesk/whisperdesk/releases)
+1. Download the latest `WhisperDesk-x.x.x.dmg` from [Releases](https://github.com/pedrovsiqueira/whisperdesk/releases)
 2. Open the DMG file
 3. Drag WhisperDesk to your Applications folder
 4. Launch WhisperDesk from Applications
@@ -58,16 +53,14 @@ pip3 install openai-whisper
 #### Option B: Build from Source
 ```bash
 # Clone the repository
-git clone https://github.com/whisperdesk/whisperdesk.git
+git clone https://github.com/pedrovsiqueira/whisperdesk.git
 cd whisperdesk
 
 # Install dependencies
 npm install
 
-# Create Python virtual environment (recommended)
-python3 -m venv venv
-source venv/bin/activate
-pip install openai-whisper
+# Build whisper.cpp with Metal support (downloads base model)
+npm run setup:whisper
 
 # Run in development mode
 npm run electron:dev
@@ -110,20 +103,18 @@ Models are downloaded automatically on first use and cached in `~/.cache/whisper
 
 ### Prerequisites
 - Node.js 18+
-- Python 3.9+
-- npm or yarn
+- CMake (for building whisper.cpp)
+- FFmpeg
 
 ### Setup
 ```bash
 # Clone and install
-git clone https://github.com/whisperdesk/whisperdesk.git
+git clone https://github.com/pedrovsiqueira/whisperdesk.git
 cd whisperdesk
 npm install
 
-# Setup Python environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r python/requirements.txt
+# Build whisper.cpp and download base model
+npm run setup:whisper
 
 # Run development server
 npm run electron:dev
@@ -180,6 +171,7 @@ chore: maintenance tasks     # 🔨 Chores
 |--------|-------------|
 | `npm run dev` | Start Vite dev server |
 | `npm run electron:dev` | Start app in development mode |
+| `npm run setup:whisper` | Build whisper.cpp and download base model |
 | `npm run electron:build:mac` | Build macOS DMG (bumps version) |
 | `npm run icons` | Generate app icons from SVG |
 | `npm run changelog` | Generate CHANGELOG.md |
@@ -192,24 +184,24 @@ chore: maintenance tasks     # 🔨 Chores
 whisperdesk/
 ├── electron/           # Electron main process
 │   ├── main.js         # Main process entry
-│   └── preload.js      # Preload scripts for IPC
+│   ├── preload.js      # Preload scripts for IPC
+│   └── whisper-cpp.js  # whisper.cpp integration
 ├── src/                # React frontend
 │   ├── App.jsx         # Main app component
 │   └── components/     # React components
-├── python/             # Python transcription scripts
-│   ├── transcribe.py   # Main transcription logic
-│   └── model_manager.py # Model management
-├── build/              # Build resources (icons, etc.)
-└── scripts/            # Build scripts
+├── scripts/            # Build and setup scripts
+│   └── setup-whisper-cpp.sh # Builds whisper.cpp
+├── bin/                # whisper-cli binary (built)
+├── models/             # Downloaded GGML models
+└── build/              # Build resources (icons, etc.)
 ```
 
 ## 🐛 Troubleshooting
 
-### "Python not found" error
-Make sure Python 3.9+ is installed and Whisper is installed:
+### "whisper.cpp not found" error
+Run the setup script to build whisper.cpp:
 ```bash
-python3 --version
-pip3 install openai-whisper
+npm run setup:whisper
 ```
 
 ### "FFmpeg not found" error
@@ -232,6 +224,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
+- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - High-performance C++ port of OpenAI Whisper
 - [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
 - [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
 - [React](https://react.dev/) - UI framework

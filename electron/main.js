@@ -4,9 +4,11 @@ const fs = require('fs')
 const { spawn, execSync } = require('child_process')
 const { autoUpdater } = require('electron-updater')
 
+// Import whisper.cpp module
+const whisperCpp = require('./whisper-cpp')
+
 let mainWindow
-let pythonProcess = null
-let cachedPythonPath = null
+let whisperProcess = null
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
@@ -50,63 +52,6 @@ function setupAutoUpdater() {
     mainWindow?.webContents.send('updater:error', err.message)
   })
 }
-
-// Find Python executable
-const findPython = () => {
-  if (cachedPythonPath) return cachedPythonPath
-  
-  // In development, use the venv
-  if (isDev) {
-    const venvPython = path.join(__dirname, '../venv/bin/python3')
-    if (fs.existsSync(venvPython)) {
-      cachedPythonPath = venvPython
-      return venvPython
-    }
-  }
-  
-  // List of possible Python paths to check
-  const pythonCandidates = [
-    // Check venv in resources (for potential future bundling)
-    path.join(process.resourcesPath || '', 'python/venv/bin/python3'),
-    // System Python paths
-    '/usr/local/bin/python3',
-    '/opt/homebrew/bin/python3',
-    '/usr/bin/python3',
-    'python3',
-    'python'
-  ]
-  
-  for (const pythonPath of pythonCandidates) {
-    try {
-      if (pythonPath.startsWith('/') && !fs.existsSync(pythonPath)) {
-        continue
-      }
-      // Verify it's actually Python and has whisper
-      const result = execSync(`"${pythonPath}" -c "import whisper; print('ok')"`, {
-        encoding: 'utf-8',
-        timeout: 10000,
-        stdio: ['pipe', 'pipe', 'pipe']
-      })
-      if (result.trim() === 'ok') {
-        cachedPythonPath = pythonPath
-        console.log(`Found Python with Whisper at: ${pythonPath}`)
-        return pythonPath
-      }
-    } catch (e) {
-      // Continue to next candidate
-    }
-  }
-  
-  // Last resort: just return python3 and let it fail with a clear message
-  return 'python3'
-}
-
-// Get Python paths
-const getPythonPath = () => findPython()
-
-const getScriptPath = (script) => isDev
-  ? path.join(__dirname, '../python', script)
-  : path.join(process.resourcesPath, 'python', script)
 
 function createMenu() {
   const template = [
@@ -230,7 +175,7 @@ function createMenu() {
               type: 'info',
               title: 'About WhisperDesk',
               message: 'WhisperDesk',
-              detail: `Version: ${app.getVersion()}\nA desktop transcription app powered by OpenAI Whisper`
+              detail: `Version: ${app.getVersion()}\nA desktop transcription app powered by whisper.cpp`
             })
           }
         }
@@ -300,18 +245,16 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-  // Clean up Python process
-  if (pythonProcess) {
-    console.log('Cleaning up Python process...')
-    pythonProcess.kill('SIGTERM')
-    // Force kill after 2 seconds if not terminated
+  // Clean up whisper process if running
+  if (whisperProcess) {
+    console.log('Cleaning up whisper process...')
+    whisperProcess.kill('SIGTERM')
     setTimeout(() => {
-      if (pythonProcess) {
-        console.log('Force killing Python process...')
-        pythonProcess.kill('SIGKILL')
+      if (whisperProcess) {
+        whisperProcess.kill('SIGKILL')
       }
     }, 2000)
-    pythonProcess = null
+    whisperProcess = null
   }
   if (process.platform !== 'darwin') {
     app.quit()
@@ -320,10 +263,10 @@ app.on('window-all-closed', () => {
 
 // Clean up on app quit
 app.on('before-quit', () => {
-  if (pythonProcess) {
-    console.log('App quitting, cleaning up Python process...')
-    pythonProcess.kill('SIGTERM')
-    pythonProcess = null
+  if (whisperProcess) {
+    console.log('App quitting, cleaning up whisper process...')
+    whisperProcess.kill('SIGTERM')
+    whisperProcess = null
   }
 })
 
@@ -403,104 +346,111 @@ ipcMain.handle('file:getInfo', async (event, filePath) => {
   }
 })
 
-// Model Management
+// Model Management (using whisper.cpp)
 
 // Get list of all models with status
 ipcMain.handle('models:list', async () => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = getPythonPath()
-    const scriptPath = getScriptPath('model_manager.py')
-    
-    const proc = spawn(pythonPath, [scriptPath, '--action', 'list'])
-    let stdout = ''
-    let stderr = ''
-    
-    proc.stdout.on('data', (data) => { stdout += data.toString() })
-    proc.stderr.on('data', (data) => { stderr += data.toString() })
-    
-    proc.on('close', (code) => {
-      if (code === 0) {
-        try {
-          resolve(JSON.parse(stdout))
-        } catch (e) {
-          reject(new Error('Failed to parse model list'))
-        }
-      } else {
-        reject(new Error(stderr || 'Failed to get model list'))
-      }
-    })
-  })
+  try {
+    const models = whisperCpp.listModels()
+    return { models }
+  } catch (err) {
+    throw new Error(`Failed to get model list: ${err.message}`)
+  }
 })
 
 // Check GPU status
 ipcMain.handle('models:gpuStatus', async () => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = getPythonPath()
-    const scriptPath = getScriptPath('model_manager.py')
-    
-    const proc = spawn(pythonPath, [scriptPath, '--action', 'gpu'])
-    let stdout = ''
-    
-    proc.stdout.on('data', (data) => { stdout += data.toString() })
-    
-    proc.on('close', (code) => {
-      if (code === 0) {
-        try {
-          resolve(JSON.parse(stdout))
-        } catch (e) {
-          resolve({ available: false, type: 'cpu', name: 'Unknown' })
-        }
-      } else {
-        resolve({ available: false, type: 'cpu', name: 'Unknown' })
-      }
-    })
-  })
+  return whisperCpp.checkGpuStatus()
 })
 
 // Download a specific model
 ipcMain.handle('models:download', async (event, modelName) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = getPythonPath()
-    const scriptPath = getScriptPath('model_manager.py')
-    
-    const proc = spawn(pythonPath, [scriptPath, '--action', 'download', '--model', modelName])
-    let stdout = ''
-    let stderr = ''
-    
-    proc.stdout.on('data', (data) => { stdout += data.toString() })
-    proc.stderr.on('data', (data) => {
-      const message = data.toString()
-      stderr += message
-      // Send progress updates
-      try {
-        const lines = message.split('\n').filter(line => line.trim())
-        for (const line of lines) {
-          if (line.startsWith('{')) {
-            const status = JSON.parse(line)
-            mainWindow.webContents.send('models:downloadProgress', status)
-          }
-        }
-      } catch (e) {}
+  try {
+    const result = await whisperCpp.downloadModel(modelName, (progress) => {
+      mainWindow.webContents.send('models:downloadProgress', {
+        status: 'downloading',
+        model: modelName,
+        percent: progress.percent,
+        downloaded: progress.downloaded,
+        total: progress.total
+      })
     })
     
-    proc.on('close', (code) => {
-      if (code === 0) {
-        try {
-          resolve(JSON.parse(stdout))
-        } catch (e) {
-          resolve({ success: true })
-        }
-      } else {
-        reject(new Error(stderr || 'Failed to download model'))
-      }
+    mainWindow.webContents.send('models:downloadProgress', {
+      status: 'complete',
+      model: modelName
     })
-  })
+    
+    return result
+  } catch (err) {
+    throw new Error(`Failed to download model: ${err.message}`)
+  }
+})
+
+// Delete a model
+ipcMain.handle('models:delete', async (event, modelName) => {
+  return whisperCpp.deleteModel(modelName)
 })
 
 // Track if user cancelled the transcription
 let transcriptionCancelled = false
 
-// Start transcription
+/**
+ * Convert audio/video file to WAV format using FFmpeg
+ */
+function convertToWav(inputPath, outputPath) {
+  return new Promise((resolve, reject) => {
+    // Find ffmpeg
+    const ffmpegPaths = [
+      '/opt/homebrew/bin/ffmpeg',
+      '/usr/local/bin/ffmpeg',
+      '/usr/bin/ffmpeg',
+      'ffmpeg'
+    ]
+    
+    let ffmpegPath = 'ffmpeg'
+    for (const p of ffmpegPaths) {
+      if (p === 'ffmpeg' || fs.existsSync(p)) {
+        ffmpegPath = p
+        break
+      }
+    }
+    
+    const args = [
+      '-i', inputPath,
+      '-ar', '16000',      // 16kHz sample rate (required by Whisper)
+      '-ac', '1',          // Mono
+      '-c:a', 'pcm_s16le', // 16-bit PCM
+      '-y',                // Overwrite output
+      outputPath
+    ]
+    
+    console.log('Converting audio with FFmpeg:', ffmpegPath, args.join(' '))
+    
+    const proc = spawn(ffmpegPath, args, {
+      stdio: ['pipe', 'pipe', 'pipe']
+    })
+    
+    let stderr = ''
+    proc.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+    
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve(outputPath)
+      } else {
+        reject(new Error(`FFmpeg conversion failed (code ${code}): ${stderr.slice(-500)}`))
+      }
+    })
+    
+    proc.on('error', (err) => {
+      reject(new Error(`FFmpeg not found. Please install: brew install ffmpeg`))
+    })
+  })
+}
+
+// Start transcription (using whisper.cpp)
 ipcMain.handle('transcribe:start', async (event, options) => {
   const { filePath, model, language, outputFormat } = options
   
@@ -511,125 +461,158 @@ ipcMain.handle('transcribe:start', async (event, options) => {
   if (!fs.existsSync(filePath)) {
     throw new Error('File not found. Please select a valid file.')
   }
-  
-  const pythonPath = getPythonPath()
-  const scriptPath = getScriptPath('transcribe.py')
-  
-  // Check if Python exists
-  if (!fs.existsSync(pythonPath)) {
-    throw new Error(`Python not found at ${pythonPath}. Please ensure Python environment is set up correctly.`)
-  }
-  
-  // Check if script exists
-  if (!fs.existsSync(scriptPath)) {
-    throw new Error(`Transcription script not found at ${scriptPath}. Please reinstall the application.`)
+
+  // Check if whisper.cpp binary exists
+  const whisperBinary = whisperCpp.getWhisperBinaryPath()
+  if (!fs.existsSync(whisperBinary)) {
+    throw new Error('whisper.cpp not found. Please run: npm run setup:whisper')
   }
 
-  // Build PATH with common FFmpeg locations
-  const ffmpegPaths = [
-    '/opt/homebrew/bin',  // Apple Silicon Homebrew
-    '/usr/local/bin',     // Intel Homebrew
-    '/opt/local/bin',     // MacPorts
-    '/usr/bin',
-    '/bin'
-  ]
-  const enhancedPath = [...ffmpegPaths, process.env.PATH].filter(Boolean).join(':')
+  // Check if model is downloaded
+  const actualModel = model || 'base'
+  if (!whisperCpp.isModelDownloaded(actualModel)) {
+    throw new Error(`Model '${actualModel}' not downloaded. Please download it from Settings.`)
+  }
+
+  // Create temp paths
+  const tempDir = require('os').tmpdir()
+  const outputBaseName = `whisperdesk_${Date.now()}`
+  const outputPath = path.join(tempDir, outputBaseName)
+  const tempWavPath = path.join(tempDir, `${outputBaseName}.wav`)
+
+  // Check if we need to convert the audio
+  // whisper.cpp supports: flac, mp3, ogg, wav
+  const ext = path.extname(filePath).toLowerCase()
+  const supportedFormats = ['.wav', '.mp3', '.ogg', '.flac']
+  let audioPath = filePath
+  let needsCleanup = false
+
+  if (!supportedFormats.includes(ext)) {
+    // Need to convert to WAV first
+    console.log(`Converting ${ext} to WAV...`)
+    mainWindow?.webContents.send('transcribe:progress', {
+      percent: 5,
+      status: 'Converting audio format...'
+    })
+    
+    try {
+      audioPath = await convertToWav(filePath, tempWavPath)
+      needsCleanup = true
+      console.log('Audio converted to:', audioPath)
+    } catch (err) {
+      throw new Error(`Failed to convert audio: ${err.message}`)
+    }
+  }
 
   return new Promise((resolve, reject) => {
+    // Build whisper-cli arguments
+    const modelPath = whisperCpp.getModelPath(actualModel)
+    const cpuCount = require('os').cpus().length
+    
     const args = [
-      scriptPath,
-      '--input', filePath,
-      '--model', model || 'base',
-      '--format', outputFormat || 'txt'
+      '-m', modelPath,
+      '-f', audioPath,  // Use converted audio path
+      '-t', String(Math.min(cpuCount, 8)),
+      '-of', outputPath,  // Output file base name
+      '-ovtt',            // Output VTT format
+      '-pp'               // Print progress
     ]
     
     if (language && language !== 'auto') {
-      args.push('--language', language)
+      args.push('-l', language)
     }
 
+    console.log('Running whisper-cli with args:', args)
+
     try {
-      pythonProcess = spawn(pythonPath, args, {
-        env: { ...process.env, PATH: enhancedPath }
-      })
+      whisperProcess = spawn(whisperBinary, args)
     } catch (err) {
-      reject(new Error(`Failed to start Python process: ${err.message}`))
+      reject(new Error(`Failed to start whisper.cpp: ${err.message}`))
       return
     }
     
     let stdout = ''
     let stderr = ''
-    let lastProgress = null
 
-    pythonProcess.stdout.on('data', (data) => {
+    whisperProcess.stdout.on('data', (data) => {
       stdout += data.toString()
     })
 
-    pythonProcess.stderr.on('data', (data) => {
+    whisperProcess.stderr.on('data', (data) => {
       const message = data.toString()
       stderr += message
       
-      // Try to parse progress updates
-      try {
-        const lines = message.split('\n').filter(line => line.trim())
-        for (const line of lines) {
-          if (line.startsWith('{')) {
-            const progress = JSON.parse(line)
-            lastProgress = progress
-            mainWindow.webContents.send('transcribe:progress', progress)
-          }
-        }
-      } catch (e) {
-        // Not JSON, just log output
-        console.log('Whisper:', message)
+      // Parse progress from whisper.cpp output
+      const progressMatch = message.match(/progress\s*=\s*(\d+)%/)
+      if (progressMatch) {
+        const percent = parseInt(progressMatch[1], 10)
+        mainWindow.webContents.send('transcribe:progress', {
+          percent: 10 + Math.round((percent / 100) * 85),
+          status: `Transcribing... ${percent}%`
+        })
       }
     })
 
-    pythonProcess.on('close', (code) => {
-      pythonProcess = null
+    // Cleanup function for temp files
+    const cleanup = () => {
+      if (needsCleanup && fs.existsSync(tempWavPath)) {
+        try {
+          fs.unlinkSync(tempWavPath)
+          console.log('Cleaned up temp WAV:', tempWavPath)
+        } catch (e) {
+          console.error('Failed to cleanup temp WAV:', e)
+        }
+      }
+    }
+
+    whisperProcess.on('close', (code) => {
+      whisperProcess = null
+      cleanup()
       
       if (code === 0) {
-        if (!stdout.trim()) {
+        // Read VTT output file
+        const vttPath = outputPath + '.vtt'
+        let text = ''
+        
+        console.log('Looking for VTT at:', vttPath)
+        
+        if (fs.existsSync(vttPath)) {
+          text = fs.readFileSync(vttPath, 'utf-8')
+          fs.unlinkSync(vttPath) // Clean up
+          console.log('VTT content length:', text.length)
+        } else {
+          // Fallback: try to extract transcription from stderr
+          // whisper.cpp prints timestamped text to stderr
+          const lines = stderr.split('\n')
+          const transcriptionLines = lines.filter(line => 
+            line.match(/^\[[\d:.]+ --> [\d:.]+\]/)
+          )
+          if (transcriptionLines.length > 0) {
+            text = transcriptionLines.join('\n')
+          }
+        }
+        
+        if (!text) {
           reject(new Error('Transcription produced no output'))
         } else {
-          resolve({ success: true, text: stdout.trim() })
+          resolve({ success: true, text })
         }
       } else if (transcriptionCancelled || code === 130 || code === 143) {
         // User cancelled - resolve gracefully instead of rejecting
-        // code 130 = SIGINT (128 + 2), code 143 = SIGTERM (128 + 15)
         resolve({ success: false, cancelled: true })
       } else {
-        // Extract error message from last progress or stderr
-        let errorMsg = 'Transcription failed'
-        if (lastProgress && lastProgress.status && lastProgress.status.includes('Error')) {
-          errorMsg = lastProgress.status
-        } else if (stderr.trim()) {
-          // Get last meaningful line from stderr
-          const lines = stderr.trim().split('\n').filter(l => l.trim())
-          if (lines.length > 0) {
-            const lastLine = lines[lines.length - 1]
-            if (lastLine.startsWith('{')) {
-              try {
-                const err = JSON.parse(lastLine)
-                errorMsg = err.status || errorMsg
-              } catch (e) {
-                errorMsg = lastLine
-              }
-            } else {
-              errorMsg = lastLine
-            }
-          }
-        }
-        reject(new Error(errorMsg))
+        reject(new Error(stderr || 'Transcription failed'))
       }
     })
 
-    pythonProcess.on('error', (err) => {
-      pythonProcess = null
+    whisperProcess.on('error', (err) => {
+      whisperProcess = null
+      cleanup()
       let errorMsg = 'Failed to start transcription process'
       if (err.code === 'ENOENT') {
-        errorMsg = 'Python not found. Please ensure Python is installed.'
+        errorMsg = 'whisper.cpp not found. Please run: npm run setup:whisper'
       } else if (err.code === 'EACCES') {
-        errorMsg = 'Permission denied. Cannot execute Python.'
+        errorMsg = 'Permission denied. Cannot execute whisper.cpp.'
       } else {
         errorMsg = `Process error: ${err.message}`
       }
@@ -638,33 +621,33 @@ ipcMain.handle('transcribe:start', async (event, options) => {
     
     // Set timeout for very long transcriptions (4 hours)
     const timeout = setTimeout(() => {
-      if (pythonProcess) {
-        pythonProcess.kill('SIGTERM')
-        pythonProcess = null
+      if (whisperProcess) {
+        whisperProcess.kill('SIGTERM')
+        whisperProcess = null
         reject(new Error('Transcription timeout (4 hours exceeded)'))
       }
     }, 4 * 60 * 60 * 1000)
     
     // Clear timeout when process finishes
-    pythonProcess.on('close', () => clearTimeout(timeout))
+    whisperProcess.on('close', () => clearTimeout(timeout))
   })
 })
 
 // Cancel transcription
 ipcMain.handle('transcribe:cancel', async () => {
-  if (pythonProcess) {
+  if (whisperProcess) {
     console.log('Cancelling transcription...')
     transcriptionCancelled = true
-    pythonProcess.kill('SIGTERM')
+    whisperProcess.kill('SIGTERM')
     // Force kill after 2 seconds if not terminated
     setTimeout(() => {
-      if (pythonProcess) {
-        console.log('Force killing Python process after cancel...')
-        pythonProcess.kill('SIGKILL')
-        pythonProcess = null
+      if (whisperProcess) {
+        console.log('Force killing whisper process after cancel...')
+        whisperProcess.kill('SIGKILL')
+        whisperProcess = null
       }
     }, 2000)
-    pythonProcess = null
+    whisperProcess = null
     return { success: true }
   }
   return { success: false, message: 'No transcription in progress' }
@@ -678,7 +661,7 @@ ipcMain.handle('app:getMemoryUsage', async () => {
     heapTotal: Math.round(processMemory.heapTotal / (1024 * 1024)),
     rss: Math.round(processMemory.rss / (1024 * 1024)),
     external: Math.round(processMemory.external / (1024 * 1024)),
-    isTranscribing: pythonProcess !== null
+    isTranscribing: whisperProcess !== null
   }
 })
 
@@ -691,26 +674,23 @@ ipcMain.handle('app:getInfo', async () => {
   }
 })
 
-// Check Python and Whisper installation
-ipcMain.handle('app:checkPython', async () => {
+// Check whisper.cpp installation
+ipcMain.handle('app:checkWhisper', async () => {
   try {
-    const pythonPath = getPythonPath()
-    
-    // Check if Python exists and Whisper is installed
-    const result = execSync(`"${pythonPath}" -c "import whisper; import torch; print(whisper.__version__)"`, {
-      encoding: 'utf-8',
-      timeout: 15000
-    })
+    const whisperPath = whisperCpp.getWhisperBinaryPath()
+    const exists = fs.existsSync(whisperPath)
+    const gpuStatus = whisperCpp.checkGpuStatus()
     
     return {
-      available: true,
-      pythonPath,
-      whisperVersion: result.trim()
+      available: exists,
+      whisperPath,
+      backend: 'whisper.cpp',
+      gpu: gpuStatus
     }
   } catch (err) {
     return {
       available: false,
-      error: 'Python or Whisper not found. Please install Python 3.9+ and run: pip install openai-whisper'
+      error: 'whisper.cpp not found. Please run: npm run setup:whisper'
     }
   }
 })

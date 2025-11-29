@@ -25,11 +25,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeAllListeners('transcribe:progress')
   },
   
-  
   // App info
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   getMemoryUsage: () => ipcRenderer.invoke('app:getMemoryUsage'),
-  checkPython: () => ipcRenderer.invoke('app:checkPython'),
   
   // Auto-updater
   checkForUpdates: () => ipcRenderer.invoke('updater:check'),

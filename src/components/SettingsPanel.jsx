@@ -19,7 +19,7 @@ const LANGUAGES = [
 
 const QUALITY_STARS = ['★☆☆☆☆', '★★☆☆☆', '★★★☆☆', '★★★★☆', '★★★★★']
 
-function SettingsPanel({ settings, onChange, disabled }) {
+function SettingsPanel({ settings, onChange, disabled, onModelStatusChange }) {
   const [models, setModels] = useState([])
   const [gpuInfo, setGpuInfo] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -38,6 +38,14 @@ function SettingsPanel({ settings, onChange, disabled }) {
     
     return () => unsubscribe?.()
   }, [])
+
+  // Notify parent when selected model's download status changes
+  useEffect(() => {
+    if (models.length > 0 && onModelStatusChange) {
+      const selectedModel = models.find(m => m.name === settings.model)
+      onModelStatusChange(selectedModel?.downloaded ?? false)
+    }
+  }, [models, settings.model, onModelStatusChange])
 
   const loadModelInfo = async () => {
     try {

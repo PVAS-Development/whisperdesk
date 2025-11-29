@@ -1,12 +1,9 @@
 # Dependencies
 node_modules/
-venv/
-.venv/
 
 # Build outputs
 dist/
 out/
-*.egg-info/
 
 # Build folder (except icon.svg)
 build/*
@@ -15,19 +12,13 @@ build/*
 # Electron
 release/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg
-*.manifest
-*.spec
+# whisper.cpp (built from source)
+whisper.cpp/
+bin/
+models/*.bin
 
 # Whisper models cache (large files)
 *.pt
-*.bin
 
 # Environment variables
 .env
