@@ -163,11 +163,13 @@ function App() {
       const historyItem = {
         id: Date.now(),
         fileName: selectedFile.name,
+        filePath: selectedFile.path,
         model: settings.model,
         language: settings.language,
         date: new Date().toISOString(),
         duration: Math.round((Date.now() - startTime) / 1000),
-        preview: result.text.substring(0, 100) + (result.text.length > 100 ? '...' : '')
+        preview: result.text.substring(0, 100) + (result.text.length > 100 ? '...' : ''),
+        fullText: result.text
       }
       const newHistory = [historyItem, ...history]
       setHistory(newHistory)
@@ -343,6 +345,11 @@ function App() {
               history={history}
               onClear={clearHistory}
               onClose={() => setShowHistory(false)}
+              onSelect={(item) => {
+                setTranscription(item.fullText)
+                setSelectedFile({ name: item.fileName, path: item.filePath })
+                setShowHistory(false)
+              }}
             />
           ) : (
             <OutputDisplay

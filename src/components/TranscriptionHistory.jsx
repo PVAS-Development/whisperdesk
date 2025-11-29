@@ -1,6 +1,6 @@
 import './TranscriptionHistory.css'
 
-function TranscriptionHistory({ history, onClear, onClose }) {
+function TranscriptionHistory({ history, onClear, onClose, onSelect }) {
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -39,7 +39,14 @@ function TranscriptionHistory({ history, onClear, onClose }) {
         ) : (
           <div className="history-list">
             {history.map((item) => (
-              <div key={item.id} className="history-item">
+              <div 
+                key={item.id} 
+                className="history-item"
+                onClick={() => onSelect(item)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && onSelect(item)}
+              >
                 <div className="history-item-header">
                   <span className="history-filename">{item.fileName}</span>
                   <span className="history-date">{formatDate(item.date)}</span>

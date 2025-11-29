@@ -89,9 +89,15 @@
   transition: all 0.2s ease;
 }
 
-.history-item:hover {
+.history-item:hover,
+.history-item:focus {
   border-color: var(--accent);
   background: var(--accent-light);
+  outline: none;
+}
+
+.history-item:focus {
+  box-shadow: 0 0 0 2px var(--accent-light);
 }
 
 .history-item-header {
