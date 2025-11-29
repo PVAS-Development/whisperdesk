@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- feat: Add changelog generation and update release process (`fae312e`)
-- feat: Implement auto-updater with notification UI and update handling (`c726254`)
-- feat: Add release script for version bumping and tagging (`d272ccf`)
+- feat: Enhance FFmpeg detection and update PATH handling in transcription process (`1031fe8`)
+
+## [1.2.0] - 2025-11-28
+
+### ✨ Features
+
+- Add changelog generation and update release process (`fae312e`)
+- Implement auto-updater with notification UI and update handling (`c726254`)
+- Add release script for version bumping and tagging (`d272ccf`)
+
+### 🔨 Chores
+
+- release v1.2.0 (`3c34f49`)
 
 ## [1.1.0] - 2025-11-28
 
