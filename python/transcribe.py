@@ -9,6 +9,43 @@ import json
 import sys
 import os
 import signal
+import shutil
+import subprocess
+
+
+def find_ffmpeg():
+    """Find FFmpeg executable and add to PATH if needed."""
+    # Check if ffmpeg is already in PATH
+    if shutil.which('ffmpeg'):
+        return True
+    
+    # Common FFmpeg locations on macOS
+    ffmpeg_paths = [
+        '/opt/homebrew/bin',           # Apple Silicon Homebrew
+        '/usr/local/bin',              # Intel Homebrew
+        '/opt/local/bin',              # MacPorts
+        '/usr/bin',                    # System
+        os.path.expanduser('~/bin'),   # User local
+    ]
+    
+    for ffmpeg_dir in ffmpeg_paths:
+        ffmpeg_path = os.path.join(ffmpeg_dir, 'ffmpeg')
+        if os.path.isfile(ffmpeg_path) and os.access(ffmpeg_path, os.X_OK):
+            # Add to PATH
+            current_path = os.environ.get('PATH', '')
+            os.environ['PATH'] = f"{ffmpeg_dir}:{current_path}"
+            return True
+    
+    return False
+
+
+# Find FFmpeg before importing whisper (which needs it)
+if not find_ffmpeg():
+    print(json.dumps({
+        "error": "FFmpeg not found. Please install FFmpeg:\n  brew install ffmpeg"
+    }))
+    sys.exit(1)
+
 import whisper
 
 

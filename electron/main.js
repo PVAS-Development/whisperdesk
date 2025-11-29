@@ -519,6 +519,16 @@ ipcMain.handle('transcribe:start', async (event, options) => {
     throw new Error(`Transcription script not found at ${scriptPath}. Please reinstall the application.`)
   }
 
+  // Build PATH with common FFmpeg locations
+  const ffmpegPaths = [
+    '/opt/homebrew/bin',  // Apple Silicon Homebrew
+    '/usr/local/bin',     // Intel Homebrew
+    '/opt/local/bin',     // MacPorts
+    '/usr/bin',
+    '/bin'
+  ]
+  const enhancedPath = [...ffmpegPaths, process.env.PATH].filter(Boolean).join(':')
+
   return new Promise((resolve, reject) => {
     const args = [
       scriptPath,
@@ -533,7 +543,7 @@ ipcMain.handle('transcribe:start', async (event, options) => {
 
     try {
       pythonProcess = spawn(pythonPath, args, {
-        env: { ...process.env }
+        env: { ...process.env, PATH: enhancedPath }
       })
     } catch (err) {
       reject(new Error(`Failed to start Python process: ${err.message}`))
