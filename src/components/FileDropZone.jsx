@@ -1,14 +1,28 @@
 import { useCallback } from 'react'
 import './FileDropZone.css'
 
+const SUPPORTED_EXTENSIONS = [
+  // Audio
+  'mp3', 'wav', 'm4a', 'flac', 'ogg', 'wma', 'aac', 'aiff',
+  // Video
+  'mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v'
+]
+
 function FileDropZone({ onFileSelect, selectedFile, disabled, onClear }) {
+  const isValidFile = (fileName) => {
+    const ext = fileName.split('.').pop()?.toLowerCase()
+    return SUPPORTED_EXTENSIONS.includes(ext)
+  }
+
   const handleClick = async () => {
     if (disabled) return
     
     const filePath = await window.electronAPI?.openFile()
     if (filePath) {
       const fileName = filePath.split('/').pop()
-      onFileSelect({ path: filePath, name: fileName })
+      if (isValidFile(fileName)) {
+        onFileSelect({ path: filePath, name: fileName })
+      }
     }
   }
 
@@ -17,7 +31,7 @@ function FileDropZone({ onFileSelect, selectedFile, disabled, onClear }) {
     if (disabled) return
     
     const file = e.dataTransfer.files[0]
-    if (file) {
+    if (file && isValidFile(file.name)) {
       onFileSelect({ path: file.path, name: file.name })
     }
   }, [disabled, onFileSelect])
