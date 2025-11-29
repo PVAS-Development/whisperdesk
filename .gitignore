@@ -62,3 +62,6 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# Development Plan
+.DEVELOPMENT_PLAN.md
