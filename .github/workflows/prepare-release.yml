@@ -49,14 +49,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
+            github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.pull_request?.number || 0,
-              body: `🚀 **Release Prepared**: v${{ steps.semantic.outputs.new_release_version }}\n\n` +
+              title: `🚀 Release Prepared: v${{ steps.semantic.outputs.new_release_version }}`,
+              body: `A new release has been prepared!\n\n` +
                     `Ready for deployment! Go to [Actions → Deploy Release](${context.payload.repository.html_url}/actions/workflows/deploy-release.yml) to trigger the build.\n\n` +
                     `**Changes**:\n${{ steps.semantic.outputs.new_release_notes }}`
-            }).catch(() => {
-              // Comment on release instead if this is not a PR
-              console.log('Release prepared. Trigger deployment from Actions tab.');
             });
