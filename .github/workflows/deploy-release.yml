@@ -96,7 +96,7 @@ jobs:
                 repo: context.repo.repo,
                 deployment_id: deployment.data.id,
                 state: 'success',
-                environment_url: 'https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}',
+                environment_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/v${inputs.version}`,
                 description: 'Build completed and uploaded to GitHub Release'
               });
             });
