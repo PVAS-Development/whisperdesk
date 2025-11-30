@@ -30,7 +30,7 @@
             { "type": "perf", "section": "⚡ Performance" },
             { "type": "refactor", "section": "♻️ Refactoring", "hidden": true },
             { "type": "docs", "section": "📚 Documentation", "hidden": true },
-            { "type": "style", "section": "💅 Styles", "hidden": true },
+            { "type": "style", "section": "💄 Styles", "hidden": true },
             { "type": "chore", "section": "🔧 Chores", "hidden": true },
             { "type": "test", "section": "🧪 Tests", "hidden": true },
             { "type": "ci", "section": "👷 CI", "hidden": true }
