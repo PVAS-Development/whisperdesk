@@ -3,7 +3,7 @@
   "version": "1.0.5",
   "type": "module",
   "description": "Desktop transcription app powered by whisper.cpp",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "author": {
     "name": "Pedro Siqueira",
     "email": "pedro.v.siqueira@gmail.com"
@@ -28,6 +28,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "typecheck": "tsc --noEmit",
+    "lint-staged": "lint-staged",
     "prepare": "husky"
   },
   "lint-staged": {

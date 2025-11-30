@@ -5,7 +5,7 @@ const { spawn, execSync } = require('child_process')
 const { autoUpdater } = require('electron-updater')
 
 // Import whisper.cpp module
-const whisperCpp = require('./whisper-cpp')
+const whisperCpp = require('./whisper-cpp.cjs')
 
 let mainWindow
 let whisperProcess = null
@@ -195,7 +195,7 @@ function createWindow() {
     minHeight: 600,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
     },

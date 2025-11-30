@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './UpdateNotification.css';
 
-import type { UpdateState, UpdateInfo, UpdateDownloadProgress, Unsubscribe } from '../types';
+import type {
+  UpdateState,
+  UpdateInfo,
+  UpdateDownloadProgress,
+  Unsubscribe,
+} from '../../../../types';
 
 function UpdateNotification(): React.JSX.Element | null {
   const [updateState, setUpdateState] = useState<UpdateState>('idle');

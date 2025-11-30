@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatTime } from '../../../utils';
 import './ProgressBar.css';
 
 interface ProgressBarProps {
@@ -6,20 +7,6 @@ interface ProgressBarProps {
   status: string;
   startTime: number | null;
   isActive: boolean;
-}
-
-function formatTime(seconds: number): string {
-  if (seconds < 60) {
-    return `${Math.round(seconds)}s`;
-  } else if (seconds < 3600) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
-    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
-  } else {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.round((seconds % 3600) / 60);
-    return `${hrs}h ${mins}m`;
-  }
 }
 
 function ProgressBar({

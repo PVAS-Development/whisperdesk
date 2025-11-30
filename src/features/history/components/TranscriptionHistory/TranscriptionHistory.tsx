@@ -1,7 +1,8 @@
 import React, { type KeyboardEvent } from 'react';
+import { formatDate, formatDuration } from '../../../../utils';
 import './TranscriptionHistory.css';
 
-import type { HistoryItem } from '../types';
+import type { HistoryItem } from '../../../../types';
 
 interface TranscriptionHistoryProps {
   history: HistoryItem[];
@@ -9,22 +10,6 @@ interface TranscriptionHistoryProps {
   onClose: () => void;
   onSelect: (item: HistoryItem) => void;
 }
-
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return (
-    date.toLocaleDateString() +
-    ' ' +
-    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  );
-};
-
-const formatDuration = (seconds: number): string => {
-  if (seconds < 60) return `${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}m ${secs}s`;
-};
 
 function TranscriptionHistory({
   history,

@@ -8,8 +8,8 @@ import type {
   ModelDownloadProgress,
   WhisperModelName,
   LanguageCode,
-} from '../types';
-import { LANGUAGES, QUALITY_STARS } from '../types';
+} from '../../../../types';
+import { LANGUAGES, QUALITY_STARS } from '../../../../config';
 
 interface SettingsPanelProps {
   settings: TranscriptionSettings;
@@ -128,7 +128,6 @@ function SettingsPanel({
     <div className={`settings-panel ${disabled ? 'disabled' : ''}`}>
       <h3>Settings</h3>
 
-      {/* GPU Status */}
       {gpuInfo && (
         <div
           className={`gpu-status ${gpuInfo.available ? 'gpu-available' : 'gpu-unavailable'}`}

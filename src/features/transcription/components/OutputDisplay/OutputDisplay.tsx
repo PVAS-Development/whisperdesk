@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, type ChangeEvent } from 'react';
+import type { OutputFormat } from '../../../../types';
+import { OUTPUT_FORMATS } from '../../../../config';
 import './OutputDisplay.css';
 
-import type { OutputFormat } from '../types';
-import { OUTPUT_FORMATS } from '../types';
-
-interface OutputDisplayProps {
+export interface OutputDisplayProps {
   text: string;
   onSave: (format: OutputFormat) => void;
   onCopy: () => void;

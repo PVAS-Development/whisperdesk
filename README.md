@@ -16,6 +16,8 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 - **Keyboard Shortcuts** - Full keyboard navigation support
 - **Transcription History** - Keep track of your recent transcriptions
 - **Native Performance** - Uses whisper.cpp for fast, efficient transcription
+- **TypeScript** - Fully typed codebase for better maintainability
+- **Feature-Driven Architecture** - Modular codebase organized by feature domains
 
 ## 📋 Requirements
 
@@ -28,16 +30,19 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 ### 1. Install Prerequisites
 
 #### Install Homebrew (if not already installed)
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 #### Install FFmpeg
+
 ```bash
 brew install ffmpeg
 ```
 
 #### Install CMake (for building whisper.cpp)
+
 ```bash
 brew install cmake
 ```
@@ -45,12 +50,14 @@ brew install cmake
 ### 2. Install WhisperDesk
 
 #### Option A: Download DMG (Recommended)
+
 1. Download the latest `WhisperDesk-x.x.x.dmg` from [Releases](https://github.com/pedrovsiqueira/whisperdesk/releases)
 2. Open the DMG file
 3. Drag WhisperDesk to your Applications folder
 4. Launch WhisperDesk from Applications
 
 #### Option B: Build from Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/pedrovsiqueira/whisperdesk.git
@@ -78,35 +85,37 @@ npm run electron:build
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd+O` | Open file |
-| `Cmd+S` | Save transcription |
-| `Cmd+C` | Copy transcription |
-| `Cmd+Return` | Start transcription |
-| `Cmd+H` | Toggle history |
-| `Escape` | Cancel transcription |
+| Shortcut     | Action               |
+| ------------ | -------------------- |
+| `Cmd+O`      | Open file            |
+| `Cmd+S`      | Save transcription   |
+| `Cmd+C`      | Copy transcription   |
+| `Cmd+Return` | Start transcription  |
+| `Cmd+H`      | Toggle history       |
+| `Escape`     | Cancel transcription |
 
 ## 🧠 Whisper Models
 
-| Model | Size | Speed | Quality | Best For |
-|-------|------|-------|---------|----------|
-| `tiny` | 39 MB | ~32x | ★☆☆☆☆ | Quick drafts, testing |
-| `base` | 74 MB | ~16x | ★★☆☆☆ | Fast transcription |
-| `small` | 244 MB | ~6x | ★★★☆☆ | Balanced speed/quality |
-| `medium` | 769 MB | ~2x | ★★★★☆ | High quality |
-| `large` | 1.5 GB | ~1x | ★★★★★ | Best quality |
+| Model    | Size   | Speed | Quality | Best For               |
+| -------- | ------ | ----- | ------- | ---------------------- |
+| `tiny`   | 39 MB  | ~32x  | ★☆☆☆☆   | Quick drafts, testing  |
+| `base`   | 74 MB  | ~16x  | ★★☆☆☆   | Fast transcription     |
+| `small`  | 244 MB | ~6x   | ★★★☆☆   | Balanced speed/quality |
+| `medium` | 769 MB | ~2x   | ★★★★☆   | High quality           |
+| `large`  | 1.5 GB | ~1x   | ★★★★★   | Best quality           |
 
 Models are downloaded automatically on first use and cached in `~/.cache/whisper/`.
 
 ## 🔧 Development
 
 ### Prerequisites
+
 - Node.js 18+
 - CMake (for building whisper.cpp)
 - FFmpeg
 
 ### Setup
+
 ```bash
 # Clone and install
 git clone https://github.com/pedrovsiqueira/whisperdesk.git
@@ -121,6 +130,7 @@ npm run electron:dev
 ```
 
 ### Building
+
 ```bash
 # Build for macOS
 npm run electron:build:mac
@@ -148,6 +158,7 @@ The release process is automated. Just run:
 ```
 
 This will:
+
 1. Bump the version in `package.json`
 2. Generate/update `CHANGELOG.md` from git commits
 3. Commit the changes
@@ -155,9 +166,10 @@ This will:
 5. Trigger GitHub Actions to build and publish the release
 
 **Commit Message Convention** (for better changelogs):
+
 ```
 feat: add new feature        # ✨ Features
-fix: fix a bug               # 🐛 Bug Fixes  
+fix: fix a bug               # 🐛 Bug Fixes
 docs: update documentation   # 📚 Documentation
 style: styling changes       # 💄 Styling
 refactor: code refactoring   # ♻️ Refactoring
@@ -167,55 +179,84 @@ chore: maintenance tasks     # 🔨 Chores
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run electron:dev` | Start app in development mode |
-| `npm run setup:whisper` | Build whisper.cpp and download base model |
-| `npm run electron:build:mac` | Build macOS DMG (bumps version) |
-| `npm run icons` | Generate app icons from SVG |
-| `npm run changelog` | Generate CHANGELOG.md |
-| `npm run bump:patch` | Bump patch version |
-| `npm run bump:minor` | Bump minor version |
-| `npm run bump:major` | Bump major version |
+| Script                       | Description                               |
+| ---------------------------- | ----------------------------------------- |
+| `npm run dev`                | Start Vite dev server                     |
+| `npm run electron:dev`       | Start app in development mode             |
+| `npm run setup:whisper`      | Build whisper.cpp and download base model |
+| `npm run electron:build:mac` | Build macOS DMG (bumps version)           |
+| `npm run icons`              | Generate app icons from SVG               |
+| `npm run changelog`          | Generate CHANGELOG.md                     |
+| `npm run bump:patch`         | Bump patch version                        |
+| `npm run bump:minor`         | Bump minor version                        |
+| `npm run bump:major`         | Bump major version                        |
+| `npm run lint`               | Run ESLint                                |
+| `npm run lint:fix`           | Run ESLint with auto-fix                  |
+| `npm run typecheck`          | Run TypeScript type checking              |
+| `npm run format`             | Format code with Prettier                 |
 
 ### Project Structure
+
 ```
 whisperdesk/
-├── electron/           # Electron main process
-│   ├── main.js         # Main process entry
-│   ├── preload.js      # Preload scripts for IPC
-│   └── whisper-cpp.js  # whisper.cpp integration
-├── src/                # React frontend
-│   ├── App.jsx         # Main app component
-│   └── components/     # React components
-├── scripts/            # Build and setup scripts
+├── electron/                # Electron main process
+│   ├── main.cjs             # Main process entry
+│   ├── preload.cjs          # Preload scripts for IPC
+│   └── whisper-cpp.cjs      # whisper.cpp integration
+├── src/                     # React frontend (TypeScript)
+│   ├── App.tsx              # Main app component
+│   ├── main.tsx             # React entry point
+│   ├── components/          # Shared UI components
+│   │   ├── ui/              # Reusable UI primitives (ProgressBar, etc.)
+│   │   └── layout/          # Layout components
+│   ├── features/            # Feature-based modules
+│   │   ├── transcription/   # Transcription feature
+│   │   │   ├── components/  # Feature-specific components
+│   │   │   ├── hooks/       # Feature-specific hooks
+│   │   │   ├── services/    # Feature-specific services
+│   │   │   └── types/       # Feature-specific types
+│   │   ├── settings/        # Settings feature
+│   │   ├── history/         # History feature
+│   │   └── updates/         # Updates feature
+│   ├── hooks/               # Shared custom hooks
+│   ├── services/            # Shared services (Electron API wrappers)
+│   ├── config/              # App configuration & constants
+│   ├── types/               # Shared TypeScript types
+│   ├── utils/               # Utility functions
+│   └── styles/              # Global styles
+├── scripts/                 # Build and setup scripts
 │   └── setup-whisper-cpp.sh # Builds whisper.cpp
-├── bin/                # whisper-cli binary (built)
-├── models/             # Downloaded GGML models
-└── build/              # Build resources (icons, etc.)
+├── bin/                     # whisper-cli binary (built)
+├── models/                  # Downloaded GGML models
+└── build/                   # Build resources (icons, etc.)
 ```
 
 ## 🐛 Troubleshooting
 
 ### "whisper.cpp not found" error
+
 Run the setup script to build whisper.cpp:
+
 ```bash
 npm run setup:whisper
 ```
 
 ### "FFmpeg not found" error
+
 Install FFmpeg via Homebrew:
+
 ```bash
 brew install ffmpeg
 ```
 
 ### Slow transcription
+
 - Use a smaller model (tiny or base) for faster results
 - Ensure you're using GPU acceleration (shown in app settings)
 - Close other resource-intensive applications
 
 ### App won't open (macOS Gatekeeper)
+
 Right-click the app and select "Open" to bypass Gatekeeper for unsigned apps.
 
 ## 📄 License
@@ -228,6 +269,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
 - [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
 - [React](https://react.dev/) - UI framework
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - [Vite](https://vitejs.dev/) - Build tool
 
 ---

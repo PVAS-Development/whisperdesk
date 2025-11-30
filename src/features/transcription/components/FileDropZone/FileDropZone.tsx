@@ -1,27 +1,14 @@
 import React, { useCallback, type DragEvent, type KeyboardEvent } from 'react';
+import { isValidMediaFile, formatFileSize } from '../../../../utils';
+import type { SelectedFile } from '../../../../types';
 import './FileDropZone.css';
 
-import type { SelectedFile } from '../types';
-import { SUPPORTED_EXTENSIONS } from '../types';
-
-interface FileDropZoneProps {
+export interface FileDropZoneProps {
   onFileSelect: (file: SelectedFile) => void;
   selectedFile: SelectedFile | null;
   disabled: boolean;
   onClear?: () => void;
 }
-
-const isValidFile = (fileName: string): boolean => {
-  const ext = fileName.split('.').pop()?.toLowerCase();
-  if (!ext) return false;
-  return (SUPPORTED_EXTENSIONS as readonly string[]).includes(ext);
-};
-
-const formatFileSize = (bytes: number | undefined): string => {
-  if (!bytes) return '';
-  const mb = bytes / (1024 * 1024);
-  return mb > 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(1)} KB`;
-};
 
 function FileDropZone({
   onFileSelect,
@@ -35,7 +22,7 @@ function FileDropZone({
     const filePath = await window.electronAPI?.openFile();
     if (filePath) {
       const fileName = filePath.split('/').pop();
-      if (fileName && isValidFile(fileName)) {
+      if (fileName && isValidMediaFile(fileName)) {
         onFileSelect({ path: filePath, name: fileName });
       }
     }
@@ -47,7 +34,7 @@ function FileDropZone({
       if (disabled) return;
 
       const file = e.dataTransfer.files[0];
-      if (file && isValidFile(file.name)) {
+      if (file && isValidMediaFile(file.name)) {
         const fileWithPath = file as File & { path: string };
         onFileSelect({ path: fileWithPath.path, name: file.name });
       }
