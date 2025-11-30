@@ -4,46 +4,24 @@ import './FileDropZone.css';
 import type { SelectedFile } from '../types';
 import { SUPPORTED_EXTENSIONS } from '../types';
 
-// =============================================================================
-// Props Interface
-// =============================================================================
-
 interface FileDropZoneProps {
-  /** Callback when a file is selected */
   onFileSelect: (file: SelectedFile) => void;
-  /** Currently selected file, if any */
   selectedFile: SelectedFile | null;
-  /** Whether the component is disabled */
   disabled: boolean;
-  /** Callback to clear the selected file */
   onClear?: () => void;
 }
 
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Check if a file extension is supported
- */
 const isValidFile = (fileName: string): boolean => {
   const ext = fileName.split('.').pop()?.toLowerCase();
   if (!ext) return false;
   return (SUPPORTED_EXTENSIONS as readonly string[]).includes(ext);
 };
 
-/**
- * Format file size for display
- */
 const formatFileSize = (bytes: number | undefined): string => {
   if (!bytes) return '';
   const mb = bytes / (1024 * 1024);
   return mb > 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(1)} KB`;
 };
-
-// =============================================================================
-// Component
-// =============================================================================
 
 function FileDropZone({
   onFileSelect,
@@ -51,10 +29,6 @@ function FileDropZone({
   disabled,
   onClear,
 }: FileDropZoneProps): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
-
   const handleClick = async (): Promise<void> => {
     if (disabled) return;
 
@@ -74,7 +48,6 @@ function FileDropZone({
 
       const file = e.dataTransfer.files[0];
       if (file && isValidFile(file.name)) {
-        // File from drag-drop has a path property in Electron
         const fileWithPath = file as File & { path: string };
         onFileSelect({ path: fileWithPath.path, name: file.name });
       }
@@ -97,10 +70,6 @@ function FileDropZone({
     e.stopPropagation();
     onClear?.();
   };
-
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
 
   return (
     <div

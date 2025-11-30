@@ -1,28 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './ProgressBar.css';
 
-// =============================================================================
-// Props Interface
-// =============================================================================
-
 interface ProgressBarProps {
-  /** Progress percentage (0-100) */
   percent: number;
-  /** Status message to display */
   status: string;
-  /** Timestamp when transcription started (for elapsed time calculation) */
   startTime: number | null;
-  /** Whether transcription is actively running */
   isActive: boolean;
 }
 
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Format seconds into human-readable time string
- */
 function formatTime(seconds: number): string {
   if (seconds < 60) {
     return `${Math.round(seconds)}s`;
@@ -37,24 +22,14 @@ function formatTime(seconds: number): string {
   }
 }
 
-// =============================================================================
-// Component
-// =============================================================================
-
 function ProgressBar({
   percent,
   status,
   startTime,
   isActive,
 }: ProgressBarProps): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // State
-  // -------------------------------------------------------------------------
   const [elapsed, setElapsed] = useState<number>(0);
 
-  // -------------------------------------------------------------------------
-  // Elapsed Time Effect
-  // -------------------------------------------------------------------------
   useEffect(() => {
     if (!isActive || !startTime) {
       setElapsed(0);
@@ -71,16 +46,8 @@ function ProgressBar({
     return () => clearInterval(interval);
   }, [startTime, isActive]);
 
-  // -------------------------------------------------------------------------
-  // Derived State
-  // -------------------------------------------------------------------------
-
-  // Show indeterminate state when in the middle of transcribing
   const isIndeterminate = isActive && percent >= 15 && percent <= 85;
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div
       className="progress-container"

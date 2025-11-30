@@ -16,19 +16,8 @@ import type {
   Unsubscribe,
 } from './types';
 
-// =============================================================================
-// Theme Type
-// =============================================================================
-
 type Theme = 'light' | 'dark';
 
-// =============================================================================
-// Local Storage Helpers
-// =============================================================================
-
-/**
- * Load transcription history from localStorage
- */
 const loadHistory = (): HistoryItem[] => {
   try {
     const saved = localStorage.getItem('whisperdesk_history');
@@ -41,9 +30,6 @@ const loadHistory = (): HistoryItem[] => {
   }
 };
 
-/**
- * Save transcription history to localStorage (keeps last 20 items)
- */
 const saveHistory = (history: HistoryItem[]): void => {
   try {
     const trimmed = history.slice(0, 20);
@@ -53,9 +39,6 @@ const saveHistory = (history: HistoryItem[]): void => {
   }
 };
 
-/**
- * Load theme preference from localStorage
- */
 const loadTheme = (): Theme => {
   try {
     const saved = localStorage.getItem('whisperdesk_theme');
@@ -68,14 +51,7 @@ const loadTheme = (): Theme => {
   }
 };
 
-// =============================================================================
-// App Component
-// =============================================================================
-
 function App(): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // State
-  // -------------------------------------------------------------------------
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const [settings, setSettings] = useState<TranscriptionSettings>({
     model: 'base',
@@ -95,9 +71,6 @@ function App(): React.JSX.Element {
   const [theme, setTheme] = useState<Theme>(loadTheme);
   const [modelDownloaded, setModelDownloaded] = useState<boolean>(true);
 
-  // -------------------------------------------------------------------------
-  // Theme Effect
-  // -------------------------------------------------------------------------
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('whisperdesk_theme', theme);
@@ -107,9 +80,6 @@ function App(): React.JSX.Element {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Transcription Progress Listener
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const unsubscribe = window.electronAPI?.onTranscriptionProgress(
       (data: TranscriptionProgress) => {
@@ -121,9 +91,6 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  // -------------------------------------------------------------------------
-  // File Selection Handler
-  // -------------------------------------------------------------------------
   const handleFileSelect = useCallback((file: SelectedFile): void => {
     setSelectedFile(file);
     setTranscription('');
@@ -131,9 +98,6 @@ function App(): React.JSX.Element {
     setProgress({ percent: 0, status: '' });
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Menu File Selection Handler
-  // -------------------------------------------------------------------------
   const handleFileSelectFromMenu = useCallback(async (): Promise<void> => {
     const filePath = await window.electronAPI?.openFile();
     if (filePath) {
@@ -144,9 +108,6 @@ function App(): React.JSX.Element {
     }
   }, [handleFileSelect]);
 
-  // -------------------------------------------------------------------------
-  // Transcription Handler
-  // -------------------------------------------------------------------------
   const handleTranscribe = useCallback(async (): Promise<void> => {
     if (!selectedFile) return;
 
@@ -169,7 +130,6 @@ function App(): React.JSX.Element {
         throw new Error('No response from transcription service');
       }
 
-      // Handle cancellation gracefully
       if (result.cancelled) {
         setProgress({ percent: 0, status: 'Cancelled' });
         return;
@@ -182,7 +142,6 @@ function App(): React.JSX.Element {
       setTranscription(result.text);
       setProgress({ percent: 100, status: 'Complete!' });
 
-      // Add to history
       const historyItem: HistoryItem = {
         id: Date.now(),
         fileName: selectedFile.name,
@@ -206,9 +165,6 @@ function App(): React.JSX.Element {
     }
   }, [selectedFile, settings, history]);
 
-  // -------------------------------------------------------------------------
-  // Cancel Handler
-  // -------------------------------------------------------------------------
   const handleCancel = useCallback(async (): Promise<void> => {
     await window.electronAPI?.cancelTranscription();
     setIsTranscribing(false);
@@ -216,19 +172,14 @@ function App(): React.JSX.Element {
     setTranscriptionStartTime(null);
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Save Handler
-  // -------------------------------------------------------------------------
   const handleSave = useCallback(
     async (format: OutputFormat = 'vtt'): Promise<void> => {
       if (!transcription) return;
 
       const fileName = selectedFile?.name?.replace(/\.[^/.]+$/, '') || 'transcription';
 
-      // Convert VTT to other formats if needed
       let content = transcription;
       if (format === 'txt') {
-        // Strip VTT timestamps and convert to plain text
         content = transcription
           .split('\n')
           .filter((line) => !line.startsWith('WEBVTT') && !line.match(/^\d{2}:\d{2}/))
@@ -236,7 +187,6 @@ function App(): React.JSX.Element {
           .replace(/\n{3,}/g, '\n\n')
           .trim();
       } else if (format === 'srt') {
-        // Convert VTT to SRT format
         const lines = transcription.split('\n').filter((l) => l.trim());
         const srtLines: string[] = [];
         let index = 1;
@@ -244,7 +194,6 @@ function App(): React.JSX.Element {
           const line = lines[i];
           if (line && line.includes('-->')) {
             srtLines.push(String(index++));
-            // Convert VTT timestamp (00:00:00.000) to SRT (00:00:00,000)
             srtLines.push(line.replace(/\./g, ','));
           } else if (line && !line.startsWith('WEBVTT')) {
             srtLines.push(line);
@@ -272,9 +221,6 @@ function App(): React.JSX.Element {
     [transcription, selectedFile]
   );
 
-  // -------------------------------------------------------------------------
-  // Copy Handler
-  // -------------------------------------------------------------------------
   const handleCopy = useCallback(async (): Promise<void> => {
     if (!transcription) return;
 
@@ -287,21 +233,14 @@ function App(): React.JSX.Element {
     }
   }, [transcription]);
 
-  // -------------------------------------------------------------------------
-  // Clear History Handler
-  // -------------------------------------------------------------------------
   const clearHistory = useCallback((): void => {
     setHistory([]);
     localStorage.removeItem('whisperdesk_history');
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Menu Event Listeners
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const unsubscribers: (Unsubscribe | undefined)[] = [];
 
-    // Cmd+O: Open file
     unsubscribers.push(
       window.electronAPI?.onMenuOpenFile(() => {
         if (!isTranscribing) {
@@ -310,7 +249,6 @@ function App(): React.JSX.Element {
       })
     );
 
-    // Cmd+S: Save file
     unsubscribers.push(
       window.electronAPI?.onMenuSaveFile(() => {
         if (transcription && !isTranscribing) {
@@ -319,7 +257,6 @@ function App(): React.JSX.Element {
       })
     );
 
-    // Cmd+C: Copy transcription
     unsubscribers.push(
       window.electronAPI?.onMenuCopyTranscription(() => {
         if (transcription) {
@@ -328,7 +265,6 @@ function App(): React.JSX.Element {
       })
     );
 
-    // Cmd+Return: Start transcription
     unsubscribers.push(
       window.electronAPI?.onMenuStartTranscription(() => {
         if (selectedFile && !isTranscribing) {
@@ -337,7 +273,6 @@ function App(): React.JSX.Element {
       })
     );
 
-    // Escape: Cancel transcription
     unsubscribers.push(
       window.electronAPI?.onMenuCancelTranscription(() => {
         if (isTranscribing) {
@@ -346,7 +281,6 @@ function App(): React.JSX.Element {
       })
     );
 
-    // Cmd+H: Toggle history
     unsubscribers.push(
       window.electronAPI?.onMenuToggleHistory(() => {
         setShowHistory((prev) => !prev);
@@ -367,25 +301,16 @@ function App(): React.JSX.Element {
     handleCancel,
   ]);
 
-  // -------------------------------------------------------------------------
-  // Settings Change Handler
-  // -------------------------------------------------------------------------
   const handleSettingsChange = useCallback((newSettings: TranscriptionSettings): void => {
     setSettings(newSettings);
   }, []);
 
-  // -------------------------------------------------------------------------
-  // History Item Selection Handler
-  // -------------------------------------------------------------------------
   const handleHistorySelect = useCallback((item: HistoryItem): void => {
     setTranscription(item.fullText);
     setSelectedFile({ name: item.fileName, path: item.filePath });
     setShowHistory(false);
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div className="app">
       <header className="app-header">

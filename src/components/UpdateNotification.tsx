@@ -3,23 +3,13 @@ import './UpdateNotification.css';
 
 import type { UpdateState, UpdateInfo, UpdateDownloadProgress, Unsubscribe } from '../types';
 
-// =============================================================================
-// Component
-// =============================================================================
-
 function UpdateNotification(): React.JSX.Element | null {
-  // -------------------------------------------------------------------------
-  // State
-  // -------------------------------------------------------------------------
   const [updateState, setUpdateState] = useState<UpdateState>('idle');
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<boolean>(false);
 
-  // -------------------------------------------------------------------------
-  // Update Event Listeners
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const unsubscribers: (Unsubscribe | undefined)[] = [];
 
@@ -70,9 +60,6 @@ function UpdateNotification(): React.JSX.Element | null {
     };
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
   const handleDownload = async (): Promise<void> => {
     setUpdateState('downloading');
     setDownloadProgress(0);
@@ -91,15 +78,9 @@ function UpdateNotification(): React.JSX.Element | null {
     setUpdateState('idle');
   };
 
-  // -------------------------------------------------------------------------
-  // Early Return If Nothing to Show
-  // -------------------------------------------------------------------------
   if (dismissed && updateState !== 'ready') return null;
   if (updateState === 'idle') return null;
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div className={`update-notification ${updateState}`}>
       {updateState === 'checking' && (

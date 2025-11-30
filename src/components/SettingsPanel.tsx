@@ -11,24 +11,12 @@ import type {
 } from '../types';
 import { LANGUAGES, QUALITY_STARS } from '../types';
 
-// =============================================================================
-// Props Interface
-// =============================================================================
-
 interface SettingsPanelProps {
-  /** Current settings */
   settings: TranscriptionSettings;
-  /** Callback when settings change */
   onChange: (settings: TranscriptionSettings) => void;
-  /** Whether the panel is disabled */
   disabled: boolean;
-  /** Callback when model download status changes */
   onModelStatusChange?: (downloaded: boolean) => void;
 }
-
-// =============================================================================
-// Default Models (fallback if API fails)
-// =============================================================================
 
 const DEFAULT_MODELS: ModelInfo[] = [
   { name: 'tiny', size: '39 MB', speed: '~32x', quality: 1, downloaded: false },
@@ -38,27 +26,17 @@ const DEFAULT_MODELS: ModelInfo[] = [
   { name: 'large', size: '1.5 GB', speed: '~1x', quality: 5, downloaded: false },
 ];
 
-// =============================================================================
-// Component
-// =============================================================================
-
 function SettingsPanel({
   settings,
   onChange,
   disabled,
   onModelStatusChange,
 }: SettingsPanelProps): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // State
-  // -------------------------------------------------------------------------
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [gpuInfo, setGpuInfo] = useState<GpuInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [downloading, setDownloading] = useState<string | null>(null);
 
-  // -------------------------------------------------------------------------
-  // Load Model Info
-  // -------------------------------------------------------------------------
   const loadModelInfo = async (): Promise<void> => {
     try {
       setLoading(true);
@@ -84,7 +62,6 @@ function SettingsPanel({
   useEffect(() => {
     loadModelInfo();
 
-    // Listen for download progress
     const unsubscribe = window.electronAPI?.onModelDownloadProgress?.(
       (data: ModelDownloadProgress) => {
         if (data.status === 'complete') {
@@ -99,9 +76,6 @@ function SettingsPanel({
     };
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Notify Parent of Model Status
-  // -------------------------------------------------------------------------
   useEffect(() => {
     if (models.length > 0 && onModelStatusChange) {
       const selectedModel = models.find((m) => m.name === settings.model);
@@ -109,24 +83,16 @@ function SettingsPanel({
     }
   }, [models, settings.model, onModelStatusChange]);
 
-  // -------------------------------------------------------------------------
-  // Load Last Used Model on Mount
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const lastModel = localStorage.getItem('whisperdesk_lastModel');
     if (lastModel && lastModel !== settings.model) {
-      // Validate that it's a valid model name
       const validModels = models.map((m) => m.name);
       if (validModels.includes(lastModel)) {
         onChange({ ...settings, model: lastModel as WhisperModelName });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [models]); // Only run when models are loaded
+  }, [models, onChange, settings]);
 
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
   const handleChange = (key: keyof TranscriptionSettings, value: string): void => {
     if (key === 'model') {
       onChange({ ...settings, model: value as WhisperModelName });
@@ -156,14 +122,8 @@ function SettingsPanel({
     handleChange('language', e.target.value);
   };
 
-  // -------------------------------------------------------------------------
-  // Derived State
-  // -------------------------------------------------------------------------
   const selectedModel = models.find((m) => m.name === settings.model);
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div className={`settings-panel ${disabled ? 'disabled' : ''}`}>
       <h3>Settings</h3>

@@ -4,33 +4,17 @@ import './OutputDisplay.css';
 import type { OutputFormat } from '../types';
 import { OUTPUT_FORMATS } from '../types';
 
-// =============================================================================
-// Props Interface
-// =============================================================================
-
 interface OutputDisplayProps {
-  /** The transcription text to display */
   text: string;
-  /** Callback to save the transcription */
   onSave: (format: OutputFormat) => void;
-  /** Callback to copy the transcription */
   onCopy: () => void;
-  /** Whether the copy was successful (for feedback) */
   copySuccess: boolean;
 }
-
-// =============================================================================
-// Types
-// =============================================================================
 
 interface SearchMatch {
   start: number;
   end: number;
 }
-
-// =============================================================================
-// Component
-// =============================================================================
 
 function OutputDisplay({
   text,
@@ -38,35 +22,22 @@ function OutputDisplay({
   onCopy,
   copySuccess,
 }: OutputDisplayProps): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // State
-  // -------------------------------------------------------------------------
   const [showSaveMenu, setShowSaveMenu] = useState<boolean>(false);
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
 
-  // -------------------------------------------------------------------------
-  // Refs
-  // -------------------------------------------------------------------------
   const saveMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // -------------------------------------------------------------------------
-  // Derived Values
-  // -------------------------------------------------------------------------
   const hasText = text && text.length > 0;
   const wordCount = hasText ? text.trim().split(/\s+/).length : 0;
   const charCount = hasText ? text.length : 0;
 
-  // -------------------------------------------------------------------------
-  // Calculate Search Matches
-  // -------------------------------------------------------------------------
   const matches = useMemo((): SearchMatch[] => {
     if (!searchQuery || !text) return [];
 
-    // Escape special regex characters
     const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedQuery, 'gi');
     const results: SearchMatch[] = [];
@@ -79,38 +50,26 @@ function OutputDisplay({
     return results;
   }, [searchQuery, text]);
 
-  // -------------------------------------------------------------------------
-  // Reset Match Index When Query Changes
-  // -------------------------------------------------------------------------
   useEffect(() => {
     setCurrentMatchIndex(0);
   }, [searchQuery]);
 
-  // -------------------------------------------------------------------------
-  // Focus Search Input When Opened
-  // -------------------------------------------------------------------------
   useEffect(() => {
     if (showSearch && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [showSearch]);
 
-  // -------------------------------------------------------------------------
-  // Keyboard Shortcuts
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
-      // Cmd/Ctrl+F for search
       if ((e.metaKey || e.ctrlKey) && e.key === 'f' && hasText) {
         e.preventDefault();
         setShowSearch(true);
       }
-      // Escape to close search
       if (e.key === 'Escape' && showSearch) {
         setShowSearch(false);
         setSearchQuery('');
       }
-      // Navigate between matches with Enter/Shift+Enter
       if (e.key === 'Enter' && showSearch && matches.length > 0) {
         e.preventDefault();
         if (e.shiftKey) {
@@ -125,9 +84,6 @@ function OutputDisplay({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [hasText, showSearch, matches.length]);
 
-  // -------------------------------------------------------------------------
-  // Close Menu When Clicking Outside
-  // -------------------------------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent): void => {
       if (saveMenuRef.current && !saveMenuRef.current.contains(e.target as Node)) {
@@ -141,9 +97,6 @@ function OutputDisplay({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSaveMenu]);
 
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
   const handleSaveFormat = (format: OutputFormat): void => {
     setShowSaveMenu(false);
     onSave(format);
@@ -173,9 +126,6 @@ function OutputDisplay({
     setCurrentMatchIndex((prev) => (prev >= matches.length - 1 ? 0 : prev + 1));
   };
 
-  // -------------------------------------------------------------------------
-  // Highlight Text With Search Matches
-  // -------------------------------------------------------------------------
   const highlightedText = useMemo((): React.JSX.Element[] | null => {
     if (!searchQuery || !text || matches.length === 0) return null;
 
@@ -183,11 +133,9 @@ function OutputDisplay({
     let lastIndex = 0;
 
     matches.forEach((match, index) => {
-      // Add text before match
       if (match.start > lastIndex) {
         parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex, match.start)}</span>);
       }
-      // Add highlighted match
       parts.push(
         <mark
           key={`match-${index}`}
@@ -200,7 +148,6 @@ function OutputDisplay({
       lastIndex = match.end;
     });
 
-    // Add remaining text
     if (lastIndex < text.length) {
       parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>);
     }
@@ -208,9 +155,6 @@ function OutputDisplay({
     return parts;
   }, [text, searchQuery, matches, currentMatchIndex]);
 
-  // -------------------------------------------------------------------------
-  // Scroll to Current Match
-  // -------------------------------------------------------------------------
   useEffect(() => {
     if (matches.length > 0 && contentRef.current) {
       const currentMark = contentRef.current.querySelector('.search-highlight.current');
@@ -220,9 +164,6 @@ function OutputDisplay({
     }
   }, [currentMatchIndex, matches.length]);
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div className="output-container">
       <div className="output-header">

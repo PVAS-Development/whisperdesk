@@ -3,28 +3,13 @@ import './TranscriptionHistory.css';
 
 import type { HistoryItem } from '../types';
 
-// =============================================================================
-// Props Interface
-// =============================================================================
-
 interface TranscriptionHistoryProps {
-  /** List of history items */
   history: HistoryItem[];
-  /** Callback to clear all history */
   onClear: () => void;
-  /** Callback to close the history panel */
   onClose: () => void;
-  /** Callback when a history item is selected */
   onSelect: (item: HistoryItem) => void;
 }
 
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Format date for display
- */
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return (
@@ -34,9 +19,6 @@ const formatDate = (dateString: string): string => {
   );
 };
 
-/**
- * Format duration for display
- */
 const formatDuration = (seconds: number): string => {
   if (seconds < 60) return `${seconds}s`;
   const mins = Math.floor(seconds / 60);
@@ -44,28 +26,18 @@ const formatDuration = (seconds: number): string => {
   return `${mins}m ${secs}s`;
 };
 
-// =============================================================================
-// Component
-// =============================================================================
-
 function TranscriptionHistory({
   history,
   onClear,
   onClose,
   onSelect,
 }: TranscriptionHistoryProps): React.JSX.Element {
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
   const handleItemKeyDown = (e: KeyboardEvent<HTMLDivElement>, item: HistoryItem): void => {
     if (e.key === 'Enter') {
       onSelect(item);
     }
   };
 
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
   return (
     <div className="history-container">
       <div className="history-header">
