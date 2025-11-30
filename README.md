@@ -176,7 +176,7 @@ This project uses a **release branch workflow** with **automated releases**.
 
 #### CI/CD Flow
 
-- **PRs to any branch**: Lint, typecheck, format checks
+- **PRs to main**: Lint, typecheck, format checks
 - **Merge to release branch**: Creates prerelease (e.g., `v1.2.0-landing-page.1`)
 - **Merge to main**: Creates full release (e.g., `v1.2.0`)
 
