@@ -229,10 +229,6 @@ After setting up this workflow, configure these GitHub settings for the complete
 3. Add required reviewers (yourself or team)
 4. Deploy workflow will pause for approval before building
 
-#### 3. Code Ownership (Optional)
-
-The `.github/CODEOWNERS` file restricts code changes to specific people. You can customize it or use GitHub's auto-review feature.
-
 ### Project Structure
 
 ```

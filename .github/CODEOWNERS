@@ -1,5 +1,0 @@
-# Default code owners for all files
-# Copilot will be automatically requested for review on all PRs
-
-# Request review from repository owner for all changes
-* @pedrovsiqueira
