@@ -141,9 +141,11 @@ npm run electron:build:dir
 
 ### Contributing
 
-This project uses a **feature branch workflow** with **automated releases**.
+This project uses a **release branch workflow** with **automated releases**.
 
 #### Development Flow
+
+**For small features** (direct to main):
 
 1. **Create a feature branch** from `main`:
 
@@ -151,34 +153,50 @@ This project uses a **feature branch workflow** with **automated releases**.
    git checkout -b feat/my-feature
    ```
 
-2. **Make changes** with conventional commits:
+2. **Make changes** with conventional commits and create PR to `main`
+
+**For large features** (via release branch):
+
+1. **Create release branch** from `main`:
 
    ```bash
-   git commit -m "feat: add new transcription format"
-   git commit -m "fix: handle empty file gracefully"
+   git checkout -b release/landing-page
+   git push -u origin release/landing-page
    ```
 
-3. **Push and create a Pull Request** to `main`
+2. **Create feature branches** from the release branch:
 
-4. **CI runs automatically** on your PR:
-   - ESLint check
-   - TypeScript check
-   - Prettier format check
-   - Build verification
+   ```bash
+   git checkout -b feat/hero-section release/landing-page
+   ```
 
-5. **After PR is merged to `main`** (Automatic):
-   - [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
-   - Automatically determines version bump
-   - Updates `package.json` and `CHANGELOG.md`
-   - Creates GitHub Release with tag
-   - *(Release is created automatically; deployment requires manual approval in the next step)*
+3. **Open PRs to merge features into the release branch**
 
-6. **Deploy Release** (Manual - You control when):
-   - Go to **Actions → Deploy Release** in the GitHub Actions tab
-   - Click **Run workflow** (top right)
-   - Enter the version number (e.g., `1.1.0`) when prompted
-   - **Requires your approval** before building
-   - Once approved: builds macOS app and uploads to release
+4. **When ready, open final PR** from `release/landing-page` to `main`
+
+#### CI/CD Flow
+
+- **PRs to any branch**: Lint, typecheck, format checks
+- **Merge to release branch**: Creates prerelease (e.g., `v1.2.0-landing-page.1`)
+- **Merge to main**: Creates full release (e.g., `v1.2.0`)
+
+#### Release & Deployment
+
+**After PR is merged** (Automatic):
+
+- [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
+- Automatically determines version bump
+- Creates GitHub Release with tag
+- **Prerelease** for release branches (e.g., `v1.2.0-landing-page.1`)
+- **Full release** for main branch (e.g., `v1.2.0`)
+
+**Deploy Release** (Manual - You control when):
+
+- Go to **Actions → Deploy Release** in the GitHub Actions tab
+- Click **Run workflow** (top right)
+- Enter the version number (e.g., `1.1.0` or `1.2.0-landing-page.1`)
+- **Requires your approval** before building
+- Once approved: builds macOS app and uploads to release
 
 #### Commit Message Convention
 
@@ -186,17 +204,17 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 
 | Commit Type | Example                 | Version Bump          |
 | ----------- | ----------------------- | --------------------- |
-| `feat:`      | `feat: add PDF export`      | Minor (1.0.0 → 1.1.0) |
-| `feat!:`     | `feat!: redesign API`       | Major (1.0.0 → 2.0.0) |
-| `fix:`       | `fix: crash on startup`     | Patch (1.0.0 → 1.0.1) |
-| `perf:`      | `perf: faster loading`      | Patch                 |
-| `refactor:`  | -                          | No release            |
-| `docs:`      | -                          | No release            |
-| `chore:`     | -                          | No release            |
-| `style:`     | -                          | No release            |
-| `test:`      | -                          | No release            |
-| `ci:`        | -                          | No release            |
-| `build:`     | -                          | No release            |
+| `feat:`     | `feat: add PDF export`  | Minor (1.0.0 → 1.1.0) |
+| `feat!:`    | `feat!: redesign API`   | Major (1.0.0 → 2.0.0) |
+| `fix:`      | `fix: crash on startup` | Patch (1.0.0 → 1.0.1) |
+| `perf:`     | `perf: faster loading`  | Patch                 |
+| `refactor:` | -                       | No release            |
+| `docs:`     | -                       | No release            |
+| `chore:`    | -                       | No release            |
+| `style:`    | -                       | No release            |
+| `test:`     | -                       | No release            |
+| `ci:`       | -                       | No release            |
+| `build:`    | -                       | No release            |
 
 ### Available Scripts
 
