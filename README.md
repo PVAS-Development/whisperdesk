@@ -174,11 +174,11 @@ This project uses a **feature branch workflow** with **automated releases**.
    - **Pauses and waits for approval**
 
 6. **Deploy Release** (Manual - You control when):
-   - Go to **Actions → Deploy Release**
-   - Click **Run workflow**
-   - Enter the version number (e.g., `1.1.0`)
-   - **Requires your approval** before building
-   - Once approved: builds macOS app and uploads to release
+   - Go to [Actions → Deploy Release](https://github.com/<owner>/<repo>/actions/workflows/deploy-release.yml) in the GitHub Actions tab.
+   - Click **Run workflow** (top right).
+   - Enter the version number (e.g., `1.1.0`) when prompted.
+   - **Requires your approval** before building.
+   - Once approved: builds macOS app and uploads to release.
 
 #### Commit Message Convention
 
