@@ -10,22 +10,6 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Add Copilot as Reviewer
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Request Copilot review
-            await github.rest.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              reviewers: ['copilot']
-            });
-            
-            // Also add a comment to trigger review response
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: '@copilot review'
-            });
+      # The previous steps attempted to request a Copilot review, but this is not supported.
+      # To enable automated code review, consider using GitHub's CodeQL analysis or a third-party tool.
+      # Example: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-code-for-vulnerabilities-and-errors
