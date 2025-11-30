@@ -10,11 +10,19 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Request Copilot Review
+      - name: Add Copilot as Reviewer
         uses: actions/github-script@v7
         with:
           script: |
-            // Add a comment to trigger Copilot review
+            // Request Copilot review
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers: ['copilot']
+            });
+            
+            // Also add a comment to trigger review response
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
