@@ -166,25 +166,31 @@ This project uses a **feature branch workflow** with **automated releases**.
    - Prettier format check
    - Build verification
 
-5. **After PR is merged to `main`**:
+5. **After PR is merged to `main`** (Automatic):
    - [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
    - Automatically determines version bump
    - Updates `package.json` and `CHANGELOG.md`
    - Creates GitHub Release with tag
-   - Builds macOS app and attaches DMG to release
+   - **Pauses and waits for approval**
+
+6. **Deploy Release** (Manual - You control when):
+   - Go to **Actions → Deploy Release**
+   - Click **Run workflow**
+   - Enter the version number (e.g., `1.1.0`)
+   - **Requires your approval** before building
+   - Once approved: builds macOS app and uploads to release
 
 #### Commit Message Convention
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic versioning:
 
-| Commit Type                                 | Example                 | Version Bump          |
-| ------------------------------------------- | ----------------------- | --------------------- |
-| `feat:`                                     | `feat: add PDF export`  | Minor (1.0.0 → 1.1.0) |
-| `feat!:`                                    | `feat!: redesign API`   | Major (1.0.0 → 2.0.0) |
-| `fix:`                                      | `fix: crash on startup` | Patch (1.0.0 → 1.0.1) |
-| `perf:`                                     | `perf: faster loading`  | Patch                 |
-| `refactor:`                                 | `refactor: clean code`  | Patch                 |
-| `docs:`, `chore:`, `style:`, `test:`, `ci:` | -                       | No release            |
+| Commit Type                                                        | Example                 | Version Bump          |
+| ------------------------------------------------------------------ | ----------------------- | --------------------- |
+| `feat:`                                                            | `feat: add PDF export`  | Minor (1.0.0 → 1.1.0) |
+| `feat!:`                                                           | `feat!: redesign API`   | Major (1.0.0 → 2.0.0) |
+| `fix:`                                                             | `fix: crash on startup` | Patch (1.0.0 → 1.0.1) |
+| `perf:`                                                            | `perf: faster loading`  | Patch                 |
+| `refactor:`, `docs:`, `chore:`, `style:`, `test:`, `ci:`, `build:` | -                       | No release            |
 
 ### Available Scripts
 
@@ -201,6 +207,31 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `npm run typecheck`          | Run TypeScript type checking              |
 | `npm run format`             | Format code with Prettier                 |
 | `npm run format:check`       | Check code formatting                     |
+
+### GitHub Setup (Branch Protection & Deployments)
+
+After setting up this workflow, configure these GitHub settings for the complete automation:
+
+#### 1. Branch Protection Rules
+
+1. Go to **Settings → Branches → Add rule**
+2. Pattern: `main`
+3. Enable:
+   - ✅ Require a pull request before merging
+   - ✅ Require status checks to pass (select: `ci`)
+   - ✅ Require branches to be up to date before merging
+   - ✅ Include administrators
+
+#### 2. Production Environment Approval
+
+1. Go to **Settings → Environments → New environment**
+2. Name: `production`
+3. Add required reviewers (yourself or team)
+4. Deploy workflow will pause for approval before building
+
+#### 3. Code Ownership (Optional)
+
+The `.github/CODEOWNERS` file restricts code changes to specific people. You can customize it or use GitHub's auto-review feature.
 
 ### Project Structure
 
