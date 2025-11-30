@@ -4,10 +4,14 @@
  * Usage: node scripts/generate-icons.js
  */
 
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const BUILD_DIR = path.join(__dirname, '../build');
 const ICONSET_DIR = path.join(BUILD_DIR, 'icon.iconset');
