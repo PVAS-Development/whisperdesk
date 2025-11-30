@@ -16,16 +16,11 @@ jobs:
   deploy-mac:
     name: Build & Deploy macOS
     runs-on: macos-latest
-    outputs:
-      release_url: ${{ steps.set_release_url.outputs.release_url }}
     environment:
       name: production
-      url: ${{ jobs.deploy-mac.outputs.release_url }}
+      url: https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}
 
     steps:
-      - name: Set release URL
-        id: set_release_url
-        run: echo "release_url=https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v4
         with:

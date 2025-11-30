@@ -44,16 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
-      - name: Create deployment notification
+      - name: Post release summary
         if: steps.semantic.outputs.new_release_published == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `🚀 Release Prepared: v${{ steps.semantic.outputs.new_release_version }}`,
-              body: `A new release has been prepared!\n\n` +
-                    `Ready for deployment! Go to [Actions → Deploy Release](${github.server_url}/${context.repo.owner}/${context.repo.repo}/actions/workflows/deploy-release.yml) to trigger the build.\n\n` +
-                    `**Changes**:\n${{ steps.semantic.outputs.new_release_notes }}`
-            });
+        run: |
+          echo "## 🚀 Release Prepared: v${{ steps.semantic.outputs.new_release_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Ready for deployment! [Deploy Release →](https://github.com/${{ github.repository }}/actions/workflows/deploy-release.yml)" >> $GITHUB_STEP_SUMMARY
