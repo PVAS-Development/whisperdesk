@@ -209,13 +209,7 @@ export interface HistoryItem {
 /**
  * State of the auto-updater
  */
-export type UpdateState =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'downloading'
-  | 'ready'
-  | 'error';
+export type UpdateState = 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'error';
 
 /**
  * Information about an available update

@@ -57,10 +57,7 @@ function TranscriptionHistory({
   // -------------------------------------------------------------------------
   // Handlers
   // -------------------------------------------------------------------------
-  const handleItemKeyDown = (
-    e: KeyboardEvent<HTMLDivElement>,
-    item: HistoryItem
-  ): void => {
+  const handleItemKeyDown = (e: KeyboardEvent<HTMLDivElement>, item: HistoryItem): void => {
     if (e.key === 'Enter') {
       onSelect(item);
     }
@@ -90,9 +87,7 @@ function TranscriptionHistory({
           <div className="history-empty">
             <span className="empty-icon">📭</span>
             <span>No transcriptions yet</span>
-            <span className="empty-hint">
-              Your transcription history will appear here
-            </span>
+            <span className="empty-hint">Your transcription history will appear here</span>
           </div>
         ) : (
           <div className="history-list">
@@ -114,12 +109,8 @@ function TranscriptionHistory({
                   <span className="history-tag">
                     {item.language === 'auto' ? 'Auto' : item.language}
                   </span>
-                  {item.format && (
-                    <span className="history-tag">.{item.format}</span>
-                  )}
-                  <span className="history-duration">
-                    ⏱️ {formatDuration(item.duration)}
-                  </span>
+                  {item.format && <span className="history-tag">.{item.format}</span>}
+                  <span className="history-duration">⏱️ {formatDuration(item.duration)}</span>
                 </div>
                 <p className="history-preview">{item.preview}</p>
               </div>

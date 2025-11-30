@@ -236,7 +236,8 @@ button:disabled {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -289,10 +290,9 @@ select:focus-visible {
   .app-main {
     grid-template-columns: 1fr;
   }
-  
+
   .left-panel {
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 }
-

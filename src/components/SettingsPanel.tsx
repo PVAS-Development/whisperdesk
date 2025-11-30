@@ -235,9 +235,7 @@ function SettingsPanel({
               </div>
             )}
 
-            {selectedModel.downloaded && (
-              <span className="model-ready">✓ Ready to use</span>
-            )}
+            {selectedModel.downloaded && <span className="model-ready">✓ Ready to use</span>}
           </div>
         )}
       </div>

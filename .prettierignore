@@ -1,0 +1,6 @@
+dist
+release
+whisper.cpp
+node_modules
+*.min.js
+*.min.css

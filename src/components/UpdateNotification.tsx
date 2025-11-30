@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './UpdateNotification.css';
 
-import type {
-  UpdateState,
-  UpdateInfo,
-  UpdateDownloadProgress,
-  Unsubscribe,
-} from '../types';
+import type { UpdateState, UpdateInfo, UpdateDownloadProgress, Unsubscribe } from '../types';
 
 // =============================================================================
 // Component
@@ -137,10 +132,7 @@ function UpdateNotification(): React.JSX.Element | null {
           <div className="update-text">
             <strong>Downloading update...</strong>
             <div className="update-progress-bar">
-              <div
-                className="update-progress-fill"
-                style={{ width: `${downloadProgress}%` }}
-              />
+              <div className="update-progress-fill" style={{ width: `${downloadProgress}%` }} />
             </div>
             <span>{Math.round(downloadProgress)}%</span>
           </div>

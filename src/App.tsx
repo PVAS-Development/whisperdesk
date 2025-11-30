@@ -191,8 +191,7 @@ function App(): React.JSX.Element {
         language: settings.language,
         date: new Date().toISOString(),
         duration: Math.round((Date.now() - startTime) / 1000),
-        preview:
-          result.text.substring(0, 100) + (result.text.length > 100 ? '...' : ''),
+        preview: result.text.substring(0, 100) + (result.text.length > 100 ? '...' : ''),
         fullText: result.text,
       };
       const newHistory = [historyItem, ...history];
@@ -224,8 +223,7 @@ function App(): React.JSX.Element {
     async (format: OutputFormat = 'vtt'): Promise<void> => {
       if (!transcription) return;
 
-      const fileName =
-        selectedFile?.name?.replace(/\.[^/.]+$/, '') || 'transcription';
+      const fileName = selectedFile?.name?.replace(/\.[^/.]+$/, '') || 'transcription';
 
       // Convert VTT to other formats if needed
       let content = transcription;
@@ -233,9 +231,7 @@ function App(): React.JSX.Element {
         // Strip VTT timestamps and convert to plain text
         content = transcription
           .split('\n')
-          .filter(
-            (line) => !line.startsWith('WEBVTT') && !line.match(/^\d{2}:\d{2}/)
-          )
+          .filter((line) => !line.startsWith('WEBVTT') && !line.match(/^\d{2}:\d{2}/))
           .join('\n')
           .replace(/\n{3,}/g, '\n\n')
           .trim();
@@ -374,12 +370,9 @@ function App(): React.JSX.Element {
   // -------------------------------------------------------------------------
   // Settings Change Handler
   // -------------------------------------------------------------------------
-  const handleSettingsChange = useCallback(
-    (newSettings: TranscriptionSettings): void => {
-      setSettings(newSettings);
-    },
-    []
-  );
+  const handleSettingsChange = useCallback((newSettings: TranscriptionSettings): void => {
+    setSettings(newSettings);
+  }, []);
 
   // -------------------------------------------------------------------------
   // History Item Selection Handler
@@ -448,11 +441,7 @@ function App(): React.JSX.Element {
                 onClick={handleTranscribe}
                 disabled={!selectedFile || !modelDownloaded}
                 aria-label="Start transcription"
-                title={
-                  !modelDownloaded
-                    ? 'Please download the selected model first'
-                    : ''
-                }
+                title={!modelDownloaded ? 'Please download the selected model first' : ''}
               >
                 🚀 Transcribe
               </button>
@@ -462,8 +451,7 @@ function App(): React.JSX.Element {
                 onClick={handleCancel}
                 aria-label="Cancel ongoing transcription"
               >
-                <span className="loading-spinner" aria-hidden="true"></span>{' '}
-                Cancel
+                <span className="loading-spinner" aria-hidden="true"></span> Cancel
               </button>
             )}
           </div>

@@ -114,13 +114,9 @@ function OutputDisplay({
       if (e.key === 'Enter' && showSearch && matches.length > 0) {
         e.preventDefault();
         if (e.shiftKey) {
-          setCurrentMatchIndex((prev) =>
-            prev <= 0 ? matches.length - 1 : prev - 1
-          );
+          setCurrentMatchIndex((prev) => (prev <= 0 ? matches.length - 1 : prev - 1));
         } else {
-          setCurrentMatchIndex((prev) =>
-            prev >= matches.length - 1 ? 0 : prev + 1
-          );
+          setCurrentMatchIndex((prev) => (prev >= matches.length - 1 ? 0 : prev + 1));
         }
       }
     };
@@ -134,10 +130,7 @@ function OutputDisplay({
   // -------------------------------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent): void => {
-      if (
-        saveMenuRef.current &&
-        !saveMenuRef.current.contains(e.target as Node)
-      ) {
+      if (saveMenuRef.current && !saveMenuRef.current.contains(e.target as Node)) {
         setShowSaveMenu(false);
       }
     };
@@ -173,15 +166,11 @@ function OutputDisplay({
   };
 
   const handlePrevMatch = (): void => {
-    setCurrentMatchIndex((prev) =>
-      prev <= 0 ? matches.length - 1 : prev - 1
-    );
+    setCurrentMatchIndex((prev) => (prev <= 0 ? matches.length - 1 : prev - 1));
   };
 
   const handleNextMatch = (): void => {
-    setCurrentMatchIndex((prev) =>
-      prev >= matches.length - 1 ? 0 : prev + 1
-    );
+    setCurrentMatchIndex((prev) => (prev >= matches.length - 1 ? 0 : prev + 1));
   };
 
   // -------------------------------------------------------------------------
@@ -196,11 +185,7 @@ function OutputDisplay({
     matches.forEach((match, index) => {
       // Add text before match
       if (match.start > lastIndex) {
-        parts.push(
-          <span key={`text-${lastIndex}`}>
-            {text.substring(lastIndex, match.start)}
-          </span>
-        );
+        parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex, match.start)}</span>);
       }
       // Add highlighted match
       parts.push(
@@ -217,9 +202,7 @@ function OutputDisplay({
 
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push(
-        <span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>
-      );
+      parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>);
     }
 
     return parts;
@@ -230,9 +213,7 @@ function OutputDisplay({
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (matches.length > 0 && contentRef.current) {
-      const currentMark = contentRef.current.querySelector(
-        '.search-highlight.current'
-      );
+      const currentMark = contentRef.current.querySelector('.search-highlight.current');
       if (currentMark) {
         currentMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -289,8 +270,7 @@ function OutputDisplay({
                       className="save-menu-item"
                       onClick={() => handleSaveFormat(format.value)}
                     >
-                      {format.label}{' '}
-                      <span className="format-ext">{format.ext}</span>
+                      {format.label} <span className="format-ext">{format.ext}</span>
                     </button>
                   ))}
                 </div>
@@ -363,9 +343,7 @@ function OutputDisplay({
           <div className="output-placeholder" role="status" aria-live="polite">
             <span className="placeholder-icon">📝</span>
             <span>Transcription will appear here</span>
-            <span className="placeholder-hint">
-              Select a file and click Transcribe to start
-            </span>
+            <span className="placeholder-hint">Select a file and click Transcribe to start</span>
           </div>
         )}
       </div>

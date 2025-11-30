@@ -91,10 +91,7 @@ function ProgressBar({
       aria-label={`Transcription progress: ${percent}%`}
     >
       <div className={`progress-bar ${isIndeterminate ? 'indeterminate' : ''}`}>
-        <div
-          className="progress-fill"
-          style={{ width: isIndeterminate ? '30%' : `${percent}%` }}
-        />
+        <div className="progress-fill" style={{ width: isIndeterminate ? '30%' : `${percent}%` }} />
       </div>
       <div className="progress-info">
         {status && (
@@ -102,9 +99,7 @@ function ProgressBar({
             {status}
           </span>
         )}
-        {isActive && elapsed > 0 && (
-          <span className="progress-elapsed">{formatTime(elapsed)}</span>
-        )}
+        {isActive && elapsed > 0 && <span className="progress-elapsed">{formatTime(elapsed)}</span>}
       </div>
     </div>
   );
