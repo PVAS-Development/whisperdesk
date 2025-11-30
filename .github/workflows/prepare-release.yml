@@ -54,6 +54,6 @@ jobs:
               repo: context.repo.repo,
               title: `🚀 Release Prepared: v${{ steps.semantic.outputs.new_release_version }}`,
               body: `A new release has been prepared!\n\n` +
-                    `Ready for deployment! Go to [Actions → Deploy Release](${context.payload.repository.html_url}/actions/workflows/deploy-release.yml) to trigger the build.\n\n` +
+                    `Ready for deployment! Go to [Actions → Deploy Release](${github.server_url}/${context.repo.owner}/${context.repo.repo}/actions/workflows/deploy-release.yml) to trigger the build.\n\n` +
                     `**Changes**:\n${{ steps.semantic.outputs.new_release_notes }}`
             });
