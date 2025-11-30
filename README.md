@@ -200,7 +200,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `npm run electron:dev`       | Start app in development mode             |
 | `npm run setup:whisper`      | Build whisper.cpp and download base model |
 | `npm run electron:build`     | Builds macOS DMG                          |
-| `npm run electron:build:mac` | Build macOS DMG                           |
+| `npm run electron:build:mac` | Builds macOS DMG                          |
 | `npm run icons`              | Generate app icons from SVG               |
 | `npm run lint`               | Run ESLint                                |
 | `npm run lint:fix`           | Run ESLint with auto-fix                  |
