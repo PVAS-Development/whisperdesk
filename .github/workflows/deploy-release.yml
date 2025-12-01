@@ -53,8 +53,8 @@ jobs:
           npm version "${VERSION}" --no-git-tag-version --allow-same-version
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
-          if git diff --quiet; then
+          git add package.json package-lock.json
+          if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ Version already matches insights release, no commit created"
           else
