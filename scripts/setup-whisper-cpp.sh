@@ -46,10 +46,16 @@ build_whisper() {
     mkdir -p build
     cd build
     
-    cmake .. \
-        -DWHISPER_METAL=ON \
-        -DCMAKE_BUILD_TYPE=Release \
-        $extra_cmake_args
+    if [ -n "$extra_cmake_args" ]; then
+        cmake .. \
+            -DWHISPER_METAL=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+    else
+        cmake .. \
+            -DWHISPER_METAL=ON \
+            -DCMAKE_BUILD_TYPE=Release
+    fi
     
     cmake --build . --config Release -j$(sysctl -n hw.ncpu)
     
@@ -69,7 +75,7 @@ build_whisper() {
 # For development, build for current arch only
 if [ "$1" = "--universal" ]; then
     echo "   → Building universal binary (arm64 + x86_64)..."
-    build_whisper '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"'
+    build_whisper "universal"
     echo "   ✅ Universal binary created!"
     lipo -info "$BIN_DIR/whisper-cli" || echo "   (lipo info unavailable)"
 else
