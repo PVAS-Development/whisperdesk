@@ -152,11 +152,9 @@ npm run electron:build:dir
 
 ### Contributing
 
-This project uses a **release branch workflow** with **automated releases**.
+This project uses **automated releases** via semantic-release.
 
 #### Development Flow
-
-**For small features** (direct to main):
 
 1. **Create a feature branch** from `main`:
 
@@ -166,29 +164,9 @@ This project uses a **release branch workflow** with **automated releases**.
 
 2. **Make changes** with conventional commits and create PR to `main`
 
-**For large features** (via release branch):
-
-1. **Create release branch** from `main`:
-
-   ```bash
-   git checkout -b release/landing-page
-   git push -u origin release/landing-page
-   ```
-
-2. **Create feature branches** from the release branch:
-
-   ```bash
-   git checkout -b feat/hero-section release/landing-page
-   ```
-
-3. **Open PRs to merge features into the release branch**
-
-4. **When ready, open final PR** from `release/landing-page` to `main`
-
 #### CI/CD Flow
 
 - **PRs to main**: Lint, typecheck, format checks
-- **Merge to release branch**: Creates prerelease (e.g., `v1.2.0-landing-page.1`)
 - **Merge to main**: Creates full release (e.g., `v1.2.0`)
 
 #### Release & Deployment
@@ -197,15 +175,13 @@ This project uses a **release branch workflow** with **automated releases**.
 
 - [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
 - Automatically determines version bump
-- Creates GitHub Release with tag
-- **Prerelease** for release branches (e.g., `v1.2.0-landing-page.1`)
-- **Full release** for main branch (e.g., `v1.2.0`)
+- Creates GitHub Release with tag (e.g., `v1.2.0`)
 
 **Deploy Release** (Manual - You control when):
 
 - Go to **Actions → Deploy Release** in the GitHub Actions tab
 - Click **Run workflow** (top right)
-- Enter the version number (e.g., `1.1.0` or `1.2.0-landing-page.1`)
+- Enter the version number (e.g., `1.1.0`)
 - **Requires your approval** before building
 - Once approved: builds macOS app and uploads to release
 
