@@ -85,7 +85,7 @@ npm run electron:build
 1. **Open a File** - Drag and drop an audio/video file into the app, or click to browse
 2. **Configure Settings** - Choose your preferred model, language, and output format
 3. **Transcribe** - Click "Transcribe" and wait for the magic to happen
-4. **Save/Copy** - Save the transcription from the save dialog (choose `.txt`, `.docx`, `.pdf`, or `.md`) or copy to clipboard
+4. **Save/Copy** - Save the transcription from the save dialog (choose from `.txt`, `.docx`, `.pdf`, `.md`, `.srt`, or `.vtt` formats) or copy to clipboard
 
 ### Keyboard Shortcuts
 
