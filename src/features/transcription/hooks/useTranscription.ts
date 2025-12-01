@@ -53,7 +53,26 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   const [error, setError] = useState<string | null>(null);
   const [modelDownloaded, setModelDownloaded] = useState<boolean>(true);
 
-  const saveMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const progressMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearProgressMessageTimeout = useCallback((): void => {
+    if (progressMessageTimeoutRef.current) {
+      clearTimeout(progressMessageTimeoutRef.current);
+      progressMessageTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleProgressReset = useCallback(
+    (delay: number): void => {
+      clearProgressMessageTimeout();
+      progressMessageTimeoutRef.current = setTimeout(() => {
+        setProgress({ percent: 0, status: '' });
+        setTranscriptionStartTime(null);
+        progressMessageTimeoutRef.current = null;
+      }, delay);
+    },
+    [clearProgressMessageTimeout]
+  );
 
   useEffect(() => {
     const unsubscribe = window.electronAPI?.onTranscriptionProgress(
@@ -68,18 +87,21 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
   useEffect(() => {
     return () => {
-      if (saveMessageTimeoutRef.current) {
-        clearTimeout(saveMessageTimeoutRef.current);
-      }
+      clearProgressMessageTimeout();
     };
-  }, []);
+  }, [clearProgressMessageTimeout]);
 
-  const handleFileSelect = useCallback((file: SelectedFile): void => {
-    setSelectedFile(file);
-    setTranscription('');
-    setError(null);
-    setProgress({ percent: 0, status: '' });
-  }, []);
+  const handleFileSelect = useCallback(
+    (file: SelectedFile): void => {
+      clearProgressMessageTimeout();
+      setSelectedFile(file);
+      setTranscription('');
+      setError(null);
+      setProgress({ percent: 0, status: '' });
+      setTranscriptionStartTime(null);
+    },
+    [clearProgressMessageTimeout]
+  );
 
   const handleFileSelectFromMenu = useCallback(async (): Promise<void> => {
     const filePath = await window.electronAPI?.openFile();
@@ -94,6 +116,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   const handleTranscribe = useCallback(async (): Promise<void> => {
     if (!selectedFile) return;
 
+    clearProgressMessageTimeout();
     setIsTranscribing(true);
     setError(null);
     setProgress({ percent: 0, status: 'Starting transcription...' });
@@ -137,21 +160,26 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
         fullText: result.text,
       };
       onHistoryAdd?.(historyItem);
+      scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       setProgress({ percent: 0, status: '' });
+      setTranscriptionStartTime(null);
+      clearProgressMessageTimeout();
     } finally {
       setIsTranscribing(false);
     }
-  }, [selectedFile, settings, onHistoryAdd]);
+  }, [selectedFile, settings, onHistoryAdd, scheduleProgressReset, clearProgressMessageTimeout]);
 
   const handleCancel = useCallback(async (): Promise<void> => {
     await window.electronAPI?.cancelTranscription();
+    clearProgressMessageTimeout();
     setIsTranscribing(false);
     setProgress({ percent: 0, status: 'Cancelled' });
     setTranscriptionStartTime(null);
-  }, []);
+    scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
+  }, [clearProgressMessageTimeout, scheduleProgressReset]);
 
   const handleSave = useCallback(
     async (format: OutputFormat = 'vtt'): Promise<void> => {
@@ -198,18 +226,12 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       if (result?.success && result.filePath) {
         setProgress({ percent: 100, status: `Saved to ${result.filePath}` });
-        if (saveMessageTimeoutRef.current) {
-          clearTimeout(saveMessageTimeoutRef.current);
-        }
-        saveMessageTimeoutRef.current = setTimeout(() => {
-          setProgress({ percent: 0, status: '' });
-          saveMessageTimeoutRef.current = null;
-        }, APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION);
+        scheduleProgressReset(APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION);
       } else if (result?.error) {
         setError(`Failed to save: ${result.error}`);
       }
     },
-    [transcription, selectedFile]
+    [transcription, selectedFile, scheduleProgressReset]
   );
 
   const handleCopy = useCallback(
