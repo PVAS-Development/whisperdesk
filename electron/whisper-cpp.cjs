@@ -134,6 +134,15 @@ function getModelsDir() {
  * Get the path to a model file
  */
 function getModelPath(modelName) {
+  // Validate model name to prevent path traversal
+  if (!MODELS[modelName] && !MODEL_ALIASES[modelName]) {
+    throw new Error(`Invalid model name: ${modelName}`);
+  }
+
+  if (modelName.includes('/') || modelName.includes('\\') || modelName.includes('..')) {
+    throw new Error(`Invalid model name: ${modelName}`);
+  }
+
   // Handle aliases
   const actualModel = MODEL_ALIASES[modelName] || modelName;
   const modelsDir = getModelsDir();
@@ -144,8 +153,12 @@ function getModelPath(modelName) {
  * Check if a model is downloaded
  */
 function isModelDownloaded(modelName) {
-  const modelPath = getModelPath(modelName);
-  return fs.existsSync(modelPath);
+  try {
+    const modelPath = getModelPath(modelName);
+    return fs.existsSync(modelPath);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -162,12 +175,16 @@ function formatFileSize(bytes) {
  * Get actual file size of downloaded model
  */
 function getActualModelSize(modelName) {
-  const modelPath = getModelPath(modelName);
-  if (fs.existsSync(modelPath)) {
-    const stats = fs.statSync(modelPath);
-    return formatFileSize(stats.size);
+  try {
+    const modelPath = getModelPath(modelName);
+    if (fs.existsSync(modelPath)) {
+      const stats = fs.statSync(modelPath);
+      return formatFileSize(stats.size);
+    }
+    return null;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 /**
@@ -244,32 +261,47 @@ function downloadModel(modelName, onProgress) {
           const totalSize = parseInt(response.headers['content-length'], 10);
           let downloadedSize = 0;
           const startTime = Date.now();
+          let lastUpdateTime = 0;
+          const updateThrottle = 1000;
 
           response.on('data', (chunk) => {
             downloadedSize += chunk.length;
             file.write(chunk);
 
             if (onProgress && totalSize) {
-              const percent = Math.round((downloadedSize / totalSize) * 100);
+              // Only call Date.now() if enough time has passed since last update
+              if (lastUpdateTime === 0 || Date.now() - lastUpdateTime >= updateThrottle) {
+                lastUpdateTime = Date.now();
+                const percent = Math.round((downloadedSize / totalSize) * 100);
 
-              const elapsedTime = (Date.now() - startTime) / 1000; // seconds
-              const speed = downloadedSize / elapsedTime; // bytes per second
-              const remainingBytes = totalSize - downloadedSize;
-              const remainingSeconds = remainingBytes / speed;
+                const elapsedTime = (lastUpdateTime - startTime) / 1000;
+                const speed = downloadedSize / elapsedTime;
+                const remainingBytes = totalSize - downloadedSize;
+                const remainingSeconds = remainingBytes / speed;
 
-              let remainingTime = '';
-              if (remainingSeconds < 60) {
-                remainingTime = `${Math.round(remainingSeconds)}s`;
-              } else {
-                remainingTime = `${Math.round(remainingSeconds / 60)}m`;
+                let remainingTime = '';
+                if (
+                  speed > 0 &&
+                  Number.isFinite(speed) &&
+                  Number.isFinite(remainingSeconds) &&
+                  remainingSeconds > 0
+                ) {
+                  if (remainingSeconds < 60) {
+                    remainingTime = `${Math.round(remainingSeconds)}s`;
+                  } else {
+                    remainingTime = `${Math.round(remainingSeconds / 60)}m`;
+                  }
+                } else {
+                  remainingTime = '';
+                }
+
+                onProgress({
+                  percent,
+                  downloaded: formatFileSize(downloadedSize),
+                  total: formatFileSize(totalSize),
+                  remainingTime,
+                });
               }
-
-              onProgress({
-                percent,
-                downloaded: formatFileSize(downloadedSize),
-                total: formatFileSize(totalSize),
-                remainingTime,
-              });
             }
           });
 
@@ -295,16 +327,26 @@ function downloadModel(modelName, onProgress) {
   });
 }
 
-/**
- * Delete a downloaded model
- */
 function deleteModel(modelName) {
-  const modelPath = getModelPath(modelName);
-  if (fs.existsSync(modelPath)) {
-    fs.unlinkSync(modelPath);
-    return { success: true };
+  try {
+    const modelPath = getModelPath(modelName);
+    const modelsDir = getModelsDir();
+
+    const resolvedPath = path.resolve(modelPath);
+    const resolvedModelsDir = path.resolve(modelsDir);
+
+    if (!resolvedPath.startsWith(resolvedModelsDir)) {
+      return { success: false, error: 'Invalid model path' };
+    }
+
+    if (fs.existsSync(modelPath)) {
+      fs.unlinkSync(modelPath);
+      return { success: true };
+    }
+    return { success: false, error: 'Model not found' };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
-  return { success: false, error: 'Model not found' };
 }
 
 /**
@@ -422,7 +464,13 @@ function transcribe(options, onProgress) {
 
     // Get model path
     const actualModel = MODEL_ALIASES[model] || model || 'base';
-    const modelPath = getModelPath(actualModel);
+    let modelPath;
+    try {
+      modelPath = getModelPath(actualModel);
+    } catch (err) {
+      reject(new Error(`Invalid model: ${err.message}`));
+      return;
+    }
 
     // Check if model is downloaded
     if (!fs.existsSync(modelPath)) {

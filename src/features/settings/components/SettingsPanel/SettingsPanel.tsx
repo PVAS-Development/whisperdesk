@@ -70,6 +70,9 @@ function SettingsPanel({
           setDownloading(null);
           setDownloadProgress(null);
           loadModelInfo();
+        } else if (data.status === 'error') {
+          setDownloading(null);
+          setDownloadProgress(null);
         }
       }
     );
@@ -123,10 +126,17 @@ function SettingsPanel({
     }
     try {
       setLoading(true);
-      await window.electronAPI?.deleteModel(modelName);
+      const result = await window.electronAPI?.deleteModel(modelName);
+      if (!result?.success) {
+        window.alert(`Failed to delete model: ${result?.error || 'Unknown error'}`);
+        return;
+      }
       await loadModelInfo();
     } catch (err) {
       console.error('Failed to delete model:', err);
+      window.alert(
+        `Failed to delete model: ${err && typeof err === 'object' && 'message' in err ? err.message : String(err)}`
+      );
     } finally {
       setLoading(false);
     }

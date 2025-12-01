@@ -179,6 +179,7 @@
   align-items: center;
   gap: 4px;
 }
+
 .download-progress {
   display: flex;
   flex-direction: column;
@@ -190,11 +191,12 @@
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
 .model-ready-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .btn-delete-model {

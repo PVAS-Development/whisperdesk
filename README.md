@@ -220,6 +220,42 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `ci:`       | -                       | No release            |
 | `build:`    | -                       | No release            |
 
+### Testing
+
+WhisperDesk has a comprehensive test suite with **111+ tests** covering utilities, hooks, and React components.
+
+#### Run Tests
+
+```bash
+# Run all tests once (CI mode)
+npm run test:run
+
+# Run tests with watch mode
+npm run test
+
+# Run tests with UI dashboard
+npm run test:ui
+```
+
+#### Test Coverage
+
+- **Unit Tests** (77 tests) - Utilities, formatters, validators, storage, and custom hooks
+- **Component Tests** (34 tests) - SettingsPanel, FileDropZone, OutputDisplay
+- Test Framework: [Vitest](https://vitest.dev/) with jsdom
+- Component Testing: [@testing-library/react](https://testing-library.com/react)
+- **Pre-commit Hooks** - Tests run automatically before every commit (via husky + lint-staged)
+
+#### CI/CD Pipeline
+
+Tests run automatically in GitHub Actions on every PR and push:
+
+- ✅ Linting & formatting checks
+- ✅ TypeScript type checking
+- ✅ Unit & component tests (111+ tests)
+- ✅ Production build validation
+
+See [testing.md](TESTING.md) for detailed testing strategy and architecture.
+
 ### Available Scripts
 
 | Script                            | Description                              |
@@ -236,6 +272,9 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `npm run typecheck`               | Run TypeScript type checking             |
 | `npm run format`                  | Format code with Prettier                |
 | `npm run format:check`            | Check code formatting                    |
+| `npm run test`                    | Run tests with watch mode                |
+| `npm run test:ui`                 | Run tests with dashboard UI              |
+| `npm run test:run`                | Run tests once (CI mode)                 |
 
 ### GitHub Setup (Branch Protection & Deployments)
 

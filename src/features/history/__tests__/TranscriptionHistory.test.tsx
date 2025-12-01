@@ -1,0 +1,89 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { TranscriptionHistory } from '@/features/history';
+import { createMockHistoryItem } from '@/test/fixtures';
+
+describe('TranscriptionHistory component', () => {
+  it('renders empty state when no history', () => {
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TranscriptionHistory history={[]} onClear={onClear} onClose={onClose} onSelect={onSelect} />
+    );
+
+    expect(screen.getByText(/No transcriptions yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Clear All/i)).not.toBeInTheDocument();
+  });
+
+  it('renders history items and calls onSelect on click', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+      />
+    );
+
+    expect(screen.getByText(/Transcription History/i)).toBeInTheDocument();
+    expect(screen.getByText('test.mp3')).toBeInTheDocument();
+
+    const item = screen.getByText('test.mp3').closest('.history-item') as HTMLElement;
+    fireEvent.click(item);
+
+    expect(onSelect).toHaveBeenCalledWith(mockHistoryItem);
+  });
+
+  it('calls onSelect on Enter key press', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+      />
+    );
+
+    const item = screen.getByText('test.mp3').closest('.history-item') as HTMLElement;
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Enter', code: 'Enter' });
+
+    expect(onSelect).toHaveBeenCalledWith(mockHistoryItem);
+  });
+
+  it('shows clear button only when history is not empty and handles actions', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+      />
+    );
+
+    const clearButton = screen.getByText(/Clear All/i);
+    fireEvent.click(clearButton);
+    expect(onClear).toHaveBeenCalled();
+
+    const closeButton = screen.getByText(/Close/i);
+    fireEvent.click(closeButton);
+    expect(onClose).toHaveBeenCalled();
+  });
+});
