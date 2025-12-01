@@ -77,6 +77,9 @@ jobs:
           npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
           echo "✅ Updated package.json to version ${{ inputs.version }}"
 
+      - name: Build whisper.cpp (universal binary)
+        run: npm run setup:whisper:universal
+
       - name: Generate icons
         run: npm run icons
 
