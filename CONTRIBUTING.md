@@ -86,3 +86,9 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) t
 3.  Ensure the test suite passes (`npm test`).
 4.  Make sure your code lints (`npm run lint`).
 5.  Issue that Pull Request!
+
+## Reporting & Feedback
+
+- **Bugs:** open a GitHub issue (use the bug report template) so we have macOS and WhisperDesk version info plus reproduction steps ready to go.
+- **Feature ideas:** start a conversation in [Discussions](https://github.com/pedrovsiqueira/whisperdesk/discussions); we keep idea validation there and only convert posts into issues once the scope is clear.
+- **Search first:** browse existing issues + discussions before posting to avoid duplicates.

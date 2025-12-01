@@ -220,6 +220,12 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `ci:`       | -                       | No release            |
 | `build:`    | -                       | No release            |
 
+#### Issues & Discussions
+
+- **Bug report?** Open an issue via the built-in [bug report template](https://github.com/pedrovsiqueira/whisperdesk/issues/new/choose) so we collect macOS version, WhisperDesk version, reproduction steps, and relevant logs automatically.
+- **Feature idea?** Start a thread in [Discussions](https://github.com/pedrovsiqueira/whisperdesk/discussions). We prefer to explore new ideas there and will only create an issue once we understand the scope.
+- **Before you post**: search the existing issues and discussions to avoid duplicates and help us respond faster.
+
 ### Testing
 
 WhisperDesk has a comprehensive test suite with **111+ tests** covering utilities, hooks, and React components.
