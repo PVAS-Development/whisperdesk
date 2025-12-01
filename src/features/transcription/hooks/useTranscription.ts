@@ -67,10 +67,9 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   }, []);
 
   useEffect(() => {
-    const timeoutRef = saveMessageTimeoutRef.current;
     return () => {
-      if (timeoutRef) {
-        clearTimeout(timeoutRef);
+      if (saveMessageTimeoutRef.current) {
+        clearTimeout(saveMessageTimeoutRef.current);
       }
     };
   }, []);

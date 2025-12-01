@@ -274,7 +274,7 @@ async function generatePdfDocument(text, options = {}) {
 }
 
 function escapeMarkdown(text) {
-  return text.replace(/([\\`*_{}[\]()#+\-.!|])/g, '\\$1');
+  return text.replace(/([\\`*_{}[\]()#+.!|-])/g, '\\$1');
 }
 
 /**
@@ -287,8 +287,8 @@ async function generateMarkdownDocument(text, options = {}) {
 
   const { title = 'Transcription', fileName = 'transcription' } = options;
 
-  let markdown = `# ${title}\n\n`;
-  markdown += `**File:** ${fileName}  \n`;
+  let markdown = `# ${escapeMarkdown(title)}\n\n`;
+  markdown += `**File:** ${escapeMarkdown(fileName)}  \n`;
   markdown += `**Generated:** ${new Date().toLocaleString()}\n\n`;
   markdown += `---\n\n`;
 
