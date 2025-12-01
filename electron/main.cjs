@@ -335,41 +335,55 @@ ipcMain.handle('dialog:saveFile', async (event, { defaultName, content, format }
     const fileName = path.basename(result.filePath, path.extname(result.filePath));
 
     // Generate document content in main process for formats that need Node.js libraries
-    if (format === 'docx') {
-      finalContent = await generateWordDocument(content, {
-        title: 'Transcription',
-        fileName,
-      });
-    } else if (format === 'pdf') {
-      finalContent = generatePdfDocument(content, {
-        title: 'Transcription',
-        fileName,
-      });
-    } else if (format === 'md') {
-      finalContent = generateMarkdownDocument(content, {
-        title: 'Transcription',
-        fileName,
-      });
-    }
+    try {
+      if (format === 'docx') {
+        try {
+          finalContent = await generateWordDocument(content, {
+            title: 'Transcription',
+            fileName,
+          });
+        } catch (docErr) {
+          throw new Error(`Failed to generate Word document: ${docErr.message}`);
+        }
+      } else if (format === 'pdf') {
+        try {
+          finalContent = await generatePdfDocument(content, {
+            title: 'Transcription',
+            fileName,
+          });
+        } catch (pdfErr) {
+          throw new Error(`Failed to generate PDF document: ${pdfErr.message}`);
+        }
+      } else if (format === 'md') {
+        try {
+          finalContent = await generateMarkdownDocument(content, {
+            title: 'Transcription',
+            fileName,
+          });
+        } catch (mdErr) {
+          throw new Error(`Failed to generate Markdown document: ${mdErr.message}`);
+        }
+      }
 
-    // Handle binary content (Buffer) or text content
-    if (Buffer.isBuffer(finalContent)) {
-      fs.writeFileSync(result.filePath, finalContent);
-    } else if (finalContent instanceof Uint8Array || ArrayBuffer.isView(finalContent)) {
-      fs.writeFileSync(result.filePath, Buffer.from(finalContent));
-    } else {
-      fs.writeFileSync(result.filePath, finalContent, 'utf-8');
-    }
+      // Handle binary content (Buffer) or text content
+      if (Buffer.isBuffer(finalContent)) {
+        fs.writeFileSync(result.filePath, finalContent);
+      } else {
+        fs.writeFileSync(result.filePath, finalContent, 'utf-8');
+      }
 
-    return { success: true, filePath: result.filePath };
+      return { success: true, filePath: result.filePath };
+    } catch (err) {
+      let errorMessage = err.message;
+      if (err.code === 'ENOSPC') {
+        errorMessage = 'Insufficient disk space';
+      } else if (err.code === 'EACCES' || err.code === 'EPERM') {
+        errorMessage = 'Permission denied. Cannot write to this location.';
+      }
+      return { success: false, error: errorMessage };
+    }
   } catch (err) {
-    let errorMessage = err.message;
-    if (err.code === 'ENOSPC') {
-      errorMessage = 'Insufficient disk space';
-    } else if (err.code === 'EACCES' || err.code === 'EPERM') {
-      errorMessage = 'Permission denied. Cannot write to this location.';
-    }
-    return { success: false, error: errorMessage };
+    return { success: false, error: err.message };
   }
 });
 

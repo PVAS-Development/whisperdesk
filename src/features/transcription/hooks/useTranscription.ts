@@ -6,6 +6,7 @@ import type {
   HistoryItem,
   OutputFormat,
 } from '../../../types';
+import { APP_CONFIG } from '../../../config';
 
 interface UseTranscriptionOptions {
   onHistoryAdd?: (item: HistoryItem) => void;
@@ -189,7 +190,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
         setProgress({ percent: 100, status: `Saved to ${result.filePath}` });
         setTimeout(() => {
           setProgress({ percent: 0, status: '' });
-        }, 3000);
+        }, APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION);
       } else if (result?.error) {
         setError(`Failed to save: ${result.error}`);
       }

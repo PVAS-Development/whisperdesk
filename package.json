@@ -48,7 +48,9 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "docx": "^8.5.0",
     "electron-updater": "^6.6.2",
+    "jspdf": "^2.5.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

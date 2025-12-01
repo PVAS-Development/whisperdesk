@@ -2,9 +2,19 @@ const { Document, Paragraph, TextRun, AlignmentType, Packer } = require('docx');
 const { jsPDF } = require('jspdf');
 
 /**
+ * Regex pattern to match VTT/SRT timestamps
+ * Matches format: HH:MM:SS.mmm --> HH:MM:SS.mmm
+ */
+const TIMESTAMP_REGEX = /^\d{2}:\d{2}:\d{2}.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}.\d{3}/;
+
+/**
  * Generate Word document buffer from transcription text
  */
 async function generateWordDocument(text, options = {}) {
+  if (!text || typeof text !== 'string') {
+    throw new Error('Invalid text parameter: expected non-empty string');
+  }
+
   const { title = 'Transcription', fileName = 'transcription' } = options;
 
   const lines = text.split('\n').filter((line) => line.trim());
@@ -55,14 +65,16 @@ async function generateWordDocument(text, options = {}) {
   // Process transcription content
   let currentTimestamp = '';
   let currentText = '';
+  let hasStructuredContent = false;
 
   for (const line of lines) {
     if (line.startsWith('WEBVTT')) continue;
 
-    const timestampMatch = line.match(/^\d{2}:\d{2}:\d{2}.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}.\d{3}/);
+    const timestampMatch = line.match(TIMESTAMP_REGEX);
 
     if (timestampMatch) {
       if (currentText.trim()) {
+        hasStructuredContent = true;
         paragraphs.push(
           new Paragraph({
             children: [
@@ -97,6 +109,7 @@ async function generateWordDocument(text, options = {}) {
 
   // Add any remaining text
   if (currentText.trim()) {
+    hasStructuredContent = true;
     paragraphs.push(
       new Paragraph({
         children: [
@@ -124,7 +137,7 @@ async function generateWordDocument(text, options = {}) {
   }
 
   // If no structured content was found, add as plain text
-  if (paragraphs.length <= 3) {
+  if (!hasStructuredContent) {
     paragraphs.push(
       new Paragraph({
         children: [
@@ -152,7 +165,11 @@ async function generateWordDocument(text, options = {}) {
 /**
  * Generate PDF document buffer from transcription text
  */
-function generatePdfDocument(text, options = {}) {
+async function generatePdfDocument(text, options = {}) {
+  if (!text || typeof text !== 'string') {
+    throw new Error('Invalid text parameter: expected non-empty string');
+  }
+
   const { title = 'Transcription', fileName = 'transcription' } = options;
 
   const doc = new jsPDF({
@@ -189,9 +206,12 @@ function generatePdfDocument(text, options = {}) {
   const lines = text.split('\n').filter((line) => line.trim());
   let currentTimestamp = '';
   let currentText = '';
+  let hasContentAdded = false;
 
   const addTextBlock = (timestamp, content) => {
     if (!content.trim()) return;
+
+    hasContentAdded = true;
 
     if (y > pageHeight - margin - 20) {
       doc.addPage();
@@ -224,7 +244,7 @@ function generatePdfDocument(text, options = {}) {
   for (const line of lines) {
     if (line.startsWith('WEBVTT')) continue;
 
-    const timestampMatch = line.match(/^\d{2}:\d{2}:\d{2}.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}.\d{3}/);
+    const timestampMatch = line.match(TIMESTAMP_REGEX);
 
     if (timestampMatch) {
       if (currentText.trim()) {
@@ -241,7 +261,8 @@ function generatePdfDocument(text, options = {}) {
     addTextBlock(currentTimestamp, currentText);
   }
 
-  if (y === margin + 21) {
+  // If no structured content was found, add plain text fallback
+  if (!hasContentAdded) {
     const wrappedText = doc.splitTextToSize(text, maxWidth);
     for (const line of wrappedText) {
       if (y > pageHeight - margin - 10) {
@@ -259,7 +280,11 @@ function generatePdfDocument(text, options = {}) {
 /**
  * Generate Markdown document from transcription text
  */
-function generateMarkdownDocument(text, options = {}) {
+async function generateMarkdownDocument(text, options = {}) {
+  if (!text || typeof text !== 'string') {
+    throw new Error('Invalid text parameter: expected non-empty string');
+  }
+
   const { title = 'Transcription', fileName = 'transcription' } = options;
 
   let markdown = `# ${title}\n\n`;
@@ -270,10 +295,12 @@ function generateMarkdownDocument(text, options = {}) {
   const lines = text.split('\n').filter((line) => line.trim());
   let currentTimestamp = '';
   let currentText = '';
+  let hasContentAdded = false;
 
   const addMarkdownBlock = (timestamp, content) => {
     if (!content.trim()) return;
 
+    hasContentAdded = true;
     if (timestamp) {
       markdown += `**${timestamp}**\n\n`;
     }
@@ -283,7 +310,7 @@ function generateMarkdownDocument(text, options = {}) {
   for (const line of lines) {
     if (line.startsWith('WEBVTT')) continue;
 
-    const timestampMatch = line.match(/^\d{2}:\d{2}:\d{2}.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}.\d{3}/);
+    const timestampMatch = line.match(TIMESTAMP_REGEX);
 
     if (timestampMatch) {
       if (currentText.trim()) {
@@ -300,7 +327,8 @@ function generateMarkdownDocument(text, options = {}) {
     addMarkdownBlock(currentTimestamp, currentText);
   }
 
-  if (markdown.endsWith('---\n\n')) {
+  // If no structured content was found, add plain text fallback
+  if (!hasContentAdded) {
     markdown += text;
   }
 
