@@ -210,8 +210,10 @@ button:disabled {
   font-size: 0.9rem;
   animation: slideIn 0.3s ease-out;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Animations */
@@ -220,6 +222,7 @@ button:disabled {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -230,6 +233,7 @@ button:disabled {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -240,6 +244,7 @@ button:disabled {
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -249,6 +254,7 @@ button:disabled {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

@@ -47,6 +47,7 @@ export interface ElectronAPI {
   saveFile: (options: SaveFileOptions) => Promise<SaveFileResult>;
   getFileInfo: (filePath: string) => Promise<SelectedFile | null>;
   listModels: () => Promise<ModelsListResponse>;
+  deleteModel: (modelName: string) => Promise<{ success: boolean; error?: string }>;
   getGpuStatus: () => Promise<GpuInfo>;
   downloadModel: (modelName: string) => Promise<{ success: boolean; model: string; path: string }>;
   onModelDownloadProgress: (callback: (data: ModelDownloadProgress) => void) => Unsubscribe;

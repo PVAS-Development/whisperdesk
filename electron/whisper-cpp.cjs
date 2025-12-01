@@ -243,6 +243,7 @@ function downloadModel(modelName, onProgress) {
 
           const totalSize = parseInt(response.headers['content-length'], 10);
           let downloadedSize = 0;
+          const startTime = Date.now();
 
           response.on('data', (chunk) => {
             downloadedSize += chunk.length;
@@ -250,10 +251,24 @@ function downloadModel(modelName, onProgress) {
 
             if (onProgress && totalSize) {
               const percent = Math.round((downloadedSize / totalSize) * 100);
+
+              const elapsedTime = (Date.now() - startTime) / 1000; // seconds
+              const speed = downloadedSize / elapsedTime; // bytes per second
+              const remainingBytes = totalSize - downloadedSize;
+              const remainingSeconds = remainingBytes / speed;
+
+              let remainingTime = '';
+              if (remainingSeconds < 60) {
+                remainingTime = `${Math.round(remainingSeconds)}s`;
+              } else {
+                remainingTime = `${Math.round(remainingSeconds / 60)}m`;
+              }
+
               onProgress({
                 percent,
                 downloaded: formatFileSize(downloadedSize),
                 total: formatFileSize(totalSize),
+                remainingTime,
               });
             }
           });

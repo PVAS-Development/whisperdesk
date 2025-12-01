@@ -179,3 +179,41 @@
   align-items: center;
   gap: 4px;
 }
+.download-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.model-ready-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.btn-delete-model {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.btn-delete-model:hover {
+  background: var(--bg-tertiary);
+  opacity: 1;
+}
+
+.btn-delete-model:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

@@ -36,6 +36,7 @@ function SettingsPanel({
   const [gpuInfo, setGpuInfo] = useState<GpuInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<ModelDownloadProgress | null>(null);
 
   const loadModelInfo = async (): Promise<void> => {
     try {
@@ -64,8 +65,10 @@ function SettingsPanel({
 
     const unsubscribe = window.electronAPI?.onModelDownloadProgress?.(
       (data: ModelDownloadProgress) => {
+        setDownloadProgress(data);
         if (data.status === 'complete') {
           setDownloading(null);
+          setDownloadProgress(null);
           loadModelInfo();
         }
       }
@@ -111,6 +114,21 @@ function SettingsPanel({
       console.error('Failed to download model:', err);
     } finally {
       setDownloading(null);
+    }
+  };
+
+  const handleDeleteModel = async (modelName: string): Promise<void> => {
+    if (!window.confirm(`Are you sure you want to delete the ${modelName} model?`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await window.electronAPI?.deleteModel(modelName);
+      await loadModelInfo();
+    } catch (err) {
+      console.error('Failed to delete model:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,9 +196,18 @@ function SettingsPanel({
             {!selectedModel.downloaded && (
               <div className="model-download">
                 {downloading === selectedModel.name ? (
-                  <span className="downloading">
-                    <span className="spinner"></span> Downloading...
-                  </span>
+                  <div className="download-progress">
+                    <span className="downloading">
+                      <span className="spinner"></span> Downloading...
+                    </span>
+                    {downloadProgress && downloadProgress.percent !== undefined && (
+                      <span className="progress-text">
+                        {downloadProgress.percent}%
+                        {downloadProgress.remainingTime &&
+                          ` (${downloadProgress.remainingTime} left)`}
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   <button
                     className="btn-download"
@@ -194,7 +221,20 @@ function SettingsPanel({
               </div>
             )}
 
-            {selectedModel.downloaded && <span className="model-ready">✓ Ready to use</span>}
+            {selectedModel.downloaded && (
+              <div className="model-ready-container">
+                <span className="model-ready">✓ Ready to use</span>
+                <button
+                  className="btn-delete-model"
+                  onClick={() => handleDeleteModel(selectedModel.name)}
+                  disabled={disabled || loading}
+                  title="Delete model"
+                  aria-label={`Delete ${selectedModel.name} model`}
+                >
+                  🗑️
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

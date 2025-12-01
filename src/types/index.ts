@@ -61,6 +61,7 @@ export interface ModelDownloadProgress {
   percent?: number;
   downloaded?: string;
   total?: string;
+  remainingTime?: string;
   error?: string;
 }
 
