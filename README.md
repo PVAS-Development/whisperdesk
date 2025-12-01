@@ -7,14 +7,15 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 ## ✨ Features
 
 - **Drag & Drop** - Simply drag audio/video files into the app
-- **Multiple Formats** - Supports MP4, MP3, WAV, M4A, WebM, MOV, AVI, FLAC, OGG, MKV
-- **Multiple Models** - Choose from tiny, base, small, medium, or large Whisper models
-- **Output Formats** - Export as plain text, Word (`.docx`), PDF, Markdown, SRT subtitles, VTT subtitles, or JSON with timestamps
-- **Language Support** - Auto-detect or select from 90+ languages
+- **Multiple Formats** - Supports MP3, WAV, M4A, FLAC, OGG, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
+- **Multiple Models** - Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
+- **Output Formats** - Export as VTT subtitles, SRT subtitles, plain text, Word (`.docx`), PDF, or Markdown
+- **Language Support** - Auto-detect or select from 12+ languages
 - **Apple Silicon Optimized** - Native Metal GPU acceleration on M1/M2/M3/M4 Macs
 - **Dark Mode** - Beautiful dark theme that respects your system preference
 - **Keyboard Shortcuts** - Full keyboard navigation support
 - **Transcription History** - Keep track of your recent transcriptions
+- **Auto-Updates** - Automatic updates via GitHub releases
 - **Native Performance** - Uses whisper.cpp for fast, efficient transcription
 - **TypeScript** - Fully typed codebase for better maintainability
 - **Feature-Driven Architecture** - Modular codebase organized by feature domains
@@ -100,15 +101,21 @@ npm run electron:build
 
 ## 🧠 Whisper Models
 
-| Model    | Size   | Speed | Quality | Best For               |
-| -------- | ------ | ----- | ------- | ---------------------- |
-| `tiny`   | 39 MB  | ~32x  | ★☆☆☆☆   | Quick drafts, testing  |
-| `base`   | 74 MB  | ~16x  | ★★☆☆☆   | Fast transcription     |
-| `small`  | 244 MB | ~6x   | ★★★☆☆   | Balanced speed/quality |
-| `medium` | 769 MB | ~2x   | ★★★★☆   | High quality           |
-| `large`  | 1.5 GB | ~1x   | ★★★★★   | Best quality           |
+| Model            | Size   | Speed | Quality | Best For               |
+| ---------------- | ------ | ----- | ------- | ---------------------- |
+| `tiny`           | 75 MB  | ~10x  | ★☆☆☆☆   | Quick drafts, testing  |
+| `base`           | 142 MB | ~7x   | ★★☆☆☆   | Fast transcription     |
+| `small`          | 466 MB | ~4x   | ★★★☆☆   | Balanced speed/quality |
+| `medium`         | 1.5 GB | ~2x   | ★★★★☆   | High quality           |
+| `large-v3`       | 3.1 GB | ~1x   | ★★★★★   | Best quality           |
+| `large-v3-turbo` | 1.6 GB | ~2x   | ★★★★★   | Fast + quality         |
 
-Models are downloaded automatically on first use and cached in `~/.cache/whisper/`.
+English-only variants (`.en`) are available for tiny, base, small, and medium models.
+
+Models are downloaded automatically on first use and cached in:
+
+- **Development**: `PROJECT_ROOT/models/`
+- **Production**: `~/Library/Application Support/WhisperDesk/models/`
 
 ## 🔧 Development
 
@@ -228,7 +235,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 
 ### Testing
 
-WhisperDesk has a comprehensive test suite with **111+ tests** covering utilities, hooks, and React components.
+WhisperDesk has a comprehensive test suite with **257 tests** covering utilities, services, hooks, and React components.
 
 #### Run Tests
 
@@ -241,15 +248,19 @@ npm run test
 
 # Run tests with UI dashboard
 npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
 #### Test Coverage
 
-- **Unit Tests** (77 tests) - Utilities, formatters, validators, storage, and custom hooks
-- **Component Tests** (34 tests) - SettingsPanel, FileDropZone, OutputDisplay
+- **Unit Tests** - Utilities, formatters, validators, storage, and services
+- **Component Tests** - SettingsPanel, FileDropZone, OutputDisplay
+- **Service Tests** - Electron API, transcription service, model service, history storage
 - Test Framework: [Vitest](https://vitest.dev/) with jsdom
 - Component Testing: [@testing-library/react](https://testing-library.com/react)
-- **Pre-commit Hooks** - Tests run automatically before every commit (via husky + lint-staged)
+- **Pre-commit Hooks** - Lint and format checks run automatically before every commit (via husky + lint-staged)
 
 #### CI/CD Pipeline
 
@@ -257,10 +268,8 @@ Tests run automatically in GitHub Actions on every PR and push:
 
 - ✅ Linting & formatting checks
 - ✅ TypeScript type checking
-- ✅ Unit & component tests (111+ tests)
+- ✅ Unit & component tests (257 tests)
 - ✅ Production build validation
-
-See [testing.md](TESTING.md) for detailed testing strategy and architecture.
 
 ### Available Scripts
 
@@ -272,6 +281,7 @@ See [testing.md](TESTING.md) for detailed testing strategy and architecture.
 | `npm run setup:whisper:universal` | Build whisper.cpp (universal binary)     |
 | `npm run electron:build`          | Builds macOS DMG (with universal binary) |
 | `npm run electron:build:mac`      | Builds macOS DMG (with universal binary) |
+| `npm run electron:build:dir`      | Build directory only (faster, testing)   |
 | `npm run icons`                   | Generate app icons from SVG              |
 | `npm run lint`                    | Run ESLint                               |
 | `npm run lint:fix`                | Run ESLint with auto-fix                 |
@@ -281,15 +291,17 @@ See [testing.md](TESTING.md) for detailed testing strategy and architecture.
 | `npm run test`                    | Run tests with watch mode                |
 | `npm run test:ui`                 | Run tests with dashboard UI              |
 | `npm run test:run`                | Run tests once (CI mode)                 |
+| `npm run test:coverage`           | Run tests with coverage report           |
 
 ### Project Structure
 
 ```
 whisperdesk/
-├── electron/                # Electron main process
-│   ├── main.cjs             # Main process entry
-│   ├── preload.cjs          # Preload scripts for IPC
-│   └── whisper-cpp.cjs      # whisper.cpp integration
+├── electron/                # Electron main process (CommonJS)
+│   ├── main.cjs             # Main process entry, IPC handlers
+│   ├── preload.cjs          # Preload scripts for secure IPC
+│   ├── whisper-cpp.cjs      # whisper.cpp integration
+│   └── export-helper.cjs    # Document export helpers
 ├── src/                     # React frontend (TypeScript)
 │   ├── App.tsx              # Main app component
 │   ├── main.tsx             # React entry point
@@ -311,13 +323,13 @@ whisperdesk/
 │   ├── config/              # App configuration & constants
 │   ├── types/               # Shared TypeScript types
 │   ├── utils/               # Utility functions
-│   └── styles/              # Global styles
+│   └── test/                # Test utilities and fixtures
 ├── scripts/                 # Build and setup scripts
-│   ├── setup-whisper-cpp.sh # Builds whisper.cpp
+│   ├── setup-whisper-cpp.sh # Builds whisper.cpp with Metal
 │   └── generate-icons.js    # Generates app icons
 ├── bin/                     # whisper-cli binary (built)
-├── models/                  # Downloaded GGML models
-└── build/                   # Build resources (icons, etc.)
+├── models/                  # Downloaded GGML models (dev)
+└── build/                   # Build resources (icons, entitlements)
 ```
 
 ## 🐛 Troubleshooting
@@ -354,12 +366,13 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - High-performance C++ port of OpenAI Whisper
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) - High-performance C++ port of OpenAI Whisper
 - [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
 - [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
 - [React](https://react.dev/) - UI framework
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - [Vite](https://vitejs.dev/) - Build tool
+- [Vitest](https://vitest.dev/) - Fast unit testing framework
 
 ---
 
