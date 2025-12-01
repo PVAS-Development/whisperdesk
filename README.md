@@ -9,7 +9,7 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 - **Drag & Drop** - Simply drag audio/video files into the app
 - **Multiple Formats** - Supports MP4, MP3, WAV, M4A, WebM, MOV, AVI, FLAC, OGG, MKV
 - **Multiple Models** - Choose from tiny, base, small, medium, or large Whisper models
-- **Output Formats** - Export as plain text, SRT subtitles, VTT subtitles, or JSON with timestamps
+- **Output Formats** - Export as plain text, Word (`.docx`), PDF, Markdown, SRT subtitles, VTT subtitles, or JSON with timestamps
 - **Language Support** - Auto-detect or select from 90+ languages
 - **Apple Silicon Optimized** - Native Metal GPU acceleration on M1/M2/M3/M4 Macs
 - **Dark Mode** - Beautiful dark theme that respects your system preference
@@ -85,7 +85,7 @@ npm run electron:build
 1. **Open a File** - Drag and drop an audio/video file into the app, or click to browse
 2. **Configure Settings** - Choose your preferred model, language, and output format
 3. **Transcribe** - Click "Transcribe" and wait for the magic to happen
-4. **Save/Copy** - Save the transcription to a file or copy to clipboard
+4. **Save/Copy** - Save the transcription from the save dialog (choose `.txt`, `.docx`, `.pdf`, or `.md`) or copy to clipboard
 
 ### Keyboard Shortcuts
 
