@@ -269,9 +269,9 @@ function downloadModel(modelName, onProgress) {
             file.write(chunk);
 
             if (onProgress && totalSize) {
-              // Only call Date.now() if enough time has passed since last update
-              if (lastUpdateTime === 0 || Date.now() - lastUpdateTime >= updateThrottle) {
-                lastUpdateTime = Date.now();
+              const now = Date.now();
+              if (lastUpdateTime === 0 || now - lastUpdateTime >= updateThrottle) {
+                lastUpdateTime = now;
                 const percent = Math.round((downloadedSize / totalSize) * 100);
 
                 const elapsedTime = (lastUpdateTime - startTime) / 1000;
@@ -280,12 +280,7 @@ function downloadModel(modelName, onProgress) {
                 const remainingSeconds = remainingBytes / speed;
 
                 let remainingTime = '';
-                if (
-                  speed > 0 &&
-                  Number.isFinite(speed) &&
-                  Number.isFinite(remainingSeconds) &&
-                  remainingSeconds > 0
-                ) {
+                if (speed > 0 && Number.isFinite(remainingSeconds) && remainingSeconds > 0) {
                   if (remainingSeconds < 60) {
                     remainingTime = `${Math.round(remainingSeconds)}s`;
                   } else {

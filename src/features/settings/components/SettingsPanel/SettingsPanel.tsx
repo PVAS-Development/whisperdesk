@@ -151,6 +151,7 @@ function SettingsPanel({
   };
 
   const selectedModel = models.find((m) => m.name === settings.model);
+  const trimmedRemainingTime = downloadProgress?.remainingTime?.trim() ?? '';
 
   return (
     <div className={`settings-panel ${disabled ? 'disabled' : ''}`}>
@@ -213,8 +214,7 @@ function SettingsPanel({
                     {downloadProgress && downloadProgress.percent !== undefined && (
                       <span className="progress-text">
                         {downloadProgress.percent}%
-                        {downloadProgress.remainingTime &&
-                          ` (${downloadProgress.remainingTime} left)`}
+                        {trimmedRemainingTime && ` (${trimmedRemainingTime} left)`}
                       </span>
                     )}
                   </div>

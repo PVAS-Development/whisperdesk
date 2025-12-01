@@ -1,5 +1,13 @@
 # 🎙️ WhisperDesk
 
+[![CI](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml)
+[![Release Version](https://img.shields.io/github/v/release/pedrovsiqueira/whisperdesk?label=release&logo=github)](https://github.com/pedrovsiqueira/whisperdesk/releases)
+[![Lint](https://img.shields.io/badge/lint-passing-brightgreen.svg?logo=eslint&logoColor=white)](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/pedrovsiqueira/whisperdesk?style=social)](https://github.com/pedrovsiqueira/whisperdesk/stargazers)
+[![Forks](https://img.shields.io/github/forks/pedrovsiqueira/whisperdesk?style=social)](https://github.com/pedrovsiqueira/whisperdesk/network/members)
+[![Good First Issue](https://img.shields.io/github/issues-raw/pedrovsiqueira/whisperdesk/good%20first%20issue)](https://github.com/pedrovsiqueira/whisperdesk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg?logo=github)](https://github.com/pedrovsiqueira/whisperdesk/blob/main/CONTRIBUTING.md)
+
 A beautiful, native macOS desktop application for transcribing audio and video files using [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
 ![WhisperDesk Screenshot](docs/screenshot.png)
