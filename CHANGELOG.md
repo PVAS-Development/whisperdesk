@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.0.1...v1.0.2) (2025-12-01)
+
+### 🐛 Bug Fixes
+
+- enforce required version input for deployment and update package.json versioning ([7ae3db0](https://github.com/pedrovsiqueira/whisperdesk/commit/7ae3db0c203c4d44d598406fa22efba74b980bd8))
+
 ## [1.0.1](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.0.0...v1.0.1) (2025-12-01)
 
 ### 🐛 Bug Fixes
