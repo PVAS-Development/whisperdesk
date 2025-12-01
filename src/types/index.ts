@@ -31,7 +31,7 @@ export type LanguageCode =
   | 'ar'
   | 'hi';
 
-export type OutputFormat = 'vtt' | 'srt' | 'txt' | 'json';
+export type OutputFormat = 'vtt' | 'srt' | 'txt' | 'json' | 'docx' | 'pdf' | 'md';
 
 export interface TranscriptionSettings {
   model: WhisperModelName;

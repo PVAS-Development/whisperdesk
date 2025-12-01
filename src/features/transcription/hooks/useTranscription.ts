@@ -148,7 +148,8 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       const fileName = selectedFile?.name?.replace(/\.[^/.]+$/, '') || 'transcription';
 
-      let content = transcription;
+      let content: string = transcription;
+
       if (format === 'txt') {
         content = transcription
           .split('\n')
@@ -176,6 +177,8 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
         content = srtLines.join('\n');
       }
 
+      // For docx, pdf, md formats, the main process will handle the conversion
+
       const result = await window.electronAPI?.saveFile({
         defaultName: `${fileName}.${format}`,
         content,
@@ -184,6 +187,9 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       if (result?.success && result.filePath) {
         setProgress({ percent: 100, status: `Saved to ${result.filePath}` });
+        setTimeout(() => {
+          setProgress({ percent: 0, status: '' });
+        }, 3000);
       } else if (result?.error) {
         setError(`Failed to save: ${result.error}`);
       }

@@ -54,6 +54,9 @@ export const OUTPUT_FORMATS: readonly OutputFormatOption[] = [
   { value: 'vtt', label: 'VTT Subtitles', ext: '.vtt' },
   { value: 'srt', label: 'SRT Subtitles', ext: '.srt' },
   { value: 'txt', label: 'Plain Text', ext: '.txt' },
+  { value: 'docx', label: 'Word', ext: '.docx' },
+  { value: 'pdf', label: 'PDF', ext: '.pdf' },
+  { value: 'md', label: 'Markdown', ext: '.md' },
 ] as const;
 
 export const QUALITY_STARS: readonly string[] = [

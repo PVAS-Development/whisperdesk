@@ -6,6 +6,11 @@ const { autoUpdater } = require('electron-updater');
 
 // Import whisper.cpp module
 const whisperCpp = require('./whisper-cpp.cjs');
+const {
+  generateWordDocument,
+  generatePdfDocument,
+  generateMarkdownDocument,
+} = require('./export-helper.cjs');
 
 let mainWindow;
 let whisperProcess = null;
@@ -296,6 +301,15 @@ ipcMain.handle('dialog:saveFile', async (event, { defaultName, content, format }
     case 'json':
       filters.push({ name: 'JSON', extensions: ['json'] });
       break;
+    case 'docx':
+      filters.push({ name: 'Word', extensions: ['docx'] });
+      break;
+    case 'pdf':
+      filters.push({ name: 'PDF', extensions: ['pdf'] });
+      break;
+    case 'md':
+      filters.push({ name: 'Markdown', extensions: ['md'] });
+      break;
     default:
       filters.push({ name: 'Text Files', extensions: ['txt'] });
   }
@@ -317,7 +331,36 @@ ipcMain.handle('dialog:saveFile', async (event, { defaultName, content, format }
       throw new Error('Directory does not exist');
     }
 
-    fs.writeFileSync(result.filePath, content, 'utf-8');
+    let finalContent = content;
+    const fileName = path.basename(result.filePath, path.extname(result.filePath));
+
+    // Generate document content in main process for formats that need Node.js libraries
+    if (format === 'docx') {
+      finalContent = await generateWordDocument(content, {
+        title: 'Transcription',
+        fileName,
+      });
+    } else if (format === 'pdf') {
+      finalContent = generatePdfDocument(content, {
+        title: 'Transcription',
+        fileName,
+      });
+    } else if (format === 'md') {
+      finalContent = generateMarkdownDocument(content, {
+        title: 'Transcription',
+        fileName,
+      });
+    }
+
+    // Handle binary content (Buffer) or text content
+    if (Buffer.isBuffer(finalContent)) {
+      fs.writeFileSync(result.filePath, finalContent);
+    } else if (finalContent instanceof Uint8Array || ArrayBuffer.isView(finalContent)) {
+      fs.writeFileSync(result.filePath, Buffer.from(finalContent));
+    } else {
+      fs.writeFileSync(result.filePath, finalContent, 'utf-8');
+    }
+
     return { success: true, filePath: result.filePath };
   } catch (err) {
     let errorMessage = err.message;
