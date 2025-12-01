@@ -9,6 +9,17 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 WHISPER_CPP_DIR="$PROJECT_DIR/whisper.cpp"
 BIN_DIR="$PROJECT_DIR/bin"
 
+# Parse arguments
+UNIVERSAL=false
+for arg in "$@"; do
+    case $arg in
+        --universal)
+            UNIVERSAL=true
+            shift
+            ;;
+    esac
+done
+
 echo "🔧 Setting up whisper.cpp for WhisperDesk..."
 
 # Check for required tools
@@ -33,26 +44,86 @@ else
     cd "$WHISPER_CPP_DIR"
 fi
 
-# Build with Metal support (for Apple Silicon/macOS)
-echo "🔨 Building whisper.cpp with Metal support..."
-mkdir -p build
-cd build
-
-# Configure with Metal support
-cmake .. \
-    -DWHISPER_METAL=ON \
-    -DCMAKE_BUILD_TYPE=Release
-
-# Build
-cmake --build . --config Release -j$(sysctl -n hw.ncpu)
-
-# Create bin directory and copy binary
+# Create bin directory
 mkdir -p "$BIN_DIR"
-cp bin/whisper-cli "$BIN_DIR/whisper-cli"
+
+# Function to build for a specific architecture
+build_arch() {
+    local arch=$1
+    local build_dir="build-$arch"
+    
+    echo "🔨 Building whisper.cpp for $arch with Metal support..."
+    mkdir -p "$build_dir"
+    cd "$build_dir"
+    
+    # Configure with Metal support and STATIC linking
+    # BUILD_SHARED_LIBS=OFF ensures static linking of whisper/ggml libraries
+    # GGML_NATIVE=OFF disables -march=native which causes issues cross-compiling
+    cmake .. \
+        -DWHISPER_METAL=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DGGML_NATIVE=OFF \
+        -DCMAKE_OSX_ARCHITECTURES="$arch"
+    
+    # Build
+    cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+    
+    cd ..
+}
+
+if [ "$UNIVERSAL" = true ]; then
+    echo "🍎 Building universal binary (arm64 + x86_64)..."
+    
+    # Build for both architectures
+    cd "$WHISPER_CPP_DIR"
+    build_arch "arm64"
+    cd "$WHISPER_CPP_DIR"
+    build_arch "x86_64"
+    
+    # Create universal binary using lipo
+    echo "🔗 Creating universal binary..."
+    lipo -create \
+        "$WHISPER_CPP_DIR/build-arm64/bin/whisper-cli" \
+        "$WHISPER_CPP_DIR/build-x86_64/bin/whisper-cli" \
+        -output "$BIN_DIR/whisper-cli"
+    
+    # Verify the universal binary
+    echo "📋 Universal binary architectures:"
+    lipo -info "$BIN_DIR/whisper-cli"
+else
+    # Single architecture build
+    echo "🔨 Building whisper.cpp with Metal support..."
+    cd "$WHISPER_CPP_DIR"
+    mkdir -p build
+    cd build
+    
+    # Configure with Metal support and STATIC linking
+    # GGML_NATIVE=OFF for consistent builds
+    cmake .. \
+        -DWHISPER_METAL=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DGGML_NATIVE=OFF
+    
+    # Build
+    cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+    
+    # Copy binary
+    cp bin/whisper-cli "$BIN_DIR/whisper-cli"
+fi
+
+# Make binary executable
+chmod +x "$BIN_DIR/whisper-cli"
 
 echo ""
 echo "✅ whisper.cpp built successfully!"
 echo "   Binary: $BIN_DIR/whisper-cli"
+
+# Verify the binary has no problematic dylib dependencies
+echo ""
+echo "📋 Checking binary dependencies..."
+otool -L "$BIN_DIR/whisper-cli" | head -20
 echo ""
 
 # Download base model if not present
