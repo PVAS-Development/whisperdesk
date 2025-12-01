@@ -38,6 +38,12 @@ export async function downloadModel(
   return electronAPI.downloadModel(modelName);
 }
 
+export async function deleteModel(
+  modelName: string
+): Promise<{ success: boolean; error?: string }> {
+  return electronAPI.deleteModel(modelName);
+}
+
 export function onDownloadProgress(
   callback: (progress: ModelDownloadProgress) => void
 ): () => void {

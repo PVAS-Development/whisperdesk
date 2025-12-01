@@ -1,5 +1,13 @@
 # 🎙️ WhisperDesk
 
+[![CI](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml)
+[![Release Version](https://img.shields.io/github/v/release/pedrovsiqueira/whisperdesk?label=release&logo=github)](https://github.com/pedrovsiqueira/whisperdesk/releases)
+[![Lint](https://img.shields.io/badge/lint-passing-brightgreen.svg?logo=eslint&logoColor=white)](https://github.com/pedrovsiqueira/whisperdesk/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/pedrovsiqueira/whisperdesk?style=social)](https://github.com/pedrovsiqueira/whisperdesk/stargazers)
+[![Forks](https://img.shields.io/github/forks/pedrovsiqueira/whisperdesk?style=social)](https://github.com/pedrovsiqueira/whisperdesk/network/members)
+[![Good First Issue](https://img.shields.io/github/issues-raw/pedrovsiqueira/whisperdesk/good%20first%20issue)](https://github.com/pedrovsiqueira/whisperdesk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg?logo=github)](https://github.com/pedrovsiqueira/whisperdesk/blob/main/CONTRIBUTING.md)
+
 A beautiful, native macOS desktop application for transcribing audio and video files using [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
 ![WhisperDesk Screenshot](docs/screenshot.png)
@@ -7,14 +15,15 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 ## ✨ Features
 
 - **Drag & Drop** - Simply drag audio/video files into the app
-- **Multiple Formats** - Supports MP4, MP3, WAV, M4A, WebM, MOV, AVI, FLAC, OGG, MKV
-- **Multiple Models** - Choose from tiny, base, small, medium, or large Whisper models
-- **Output Formats** - Export as plain text, Word (`.docx`), PDF, Markdown, SRT subtitles, VTT subtitles, or JSON with timestamps
-- **Language Support** - Auto-detect or select from 90+ languages
+- **Multiple Formats** - Supports MP3, WAV, M4A, FLAC, OGG, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
+- **Multiple Models** - Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
+- **Output Formats** - Export as VTT subtitles, SRT subtitles, plain text, Word (`.docx`), PDF, or Markdown
+- **Language Support** - Auto-detect or select from 12+ languages
 - **Apple Silicon Optimized** - Native Metal GPU acceleration on M1/M2/M3/M4 Macs
 - **Dark Mode** - Beautiful dark theme that respects your system preference
 - **Keyboard Shortcuts** - Full keyboard navigation support
 - **Transcription History** - Keep track of your recent transcriptions
+- **Auto-Updates** - Automatic updates via GitHub releases
 - **Native Performance** - Uses whisper.cpp for fast, efficient transcription
 - **TypeScript** - Fully typed codebase for better maintainability
 - **Feature-Driven Architecture** - Modular codebase organized by feature domains
@@ -100,15 +109,21 @@ npm run electron:build
 
 ## 🧠 Whisper Models
 
-| Model    | Size   | Speed | Quality | Best For               |
-| -------- | ------ | ----- | ------- | ---------------------- |
-| `tiny`   | 39 MB  | ~32x  | ★☆☆☆☆   | Quick drafts, testing  |
-| `base`   | 74 MB  | ~16x  | ★★☆☆☆   | Fast transcription     |
-| `small`  | 244 MB | ~6x   | ★★★☆☆   | Balanced speed/quality |
-| `medium` | 769 MB | ~2x   | ★★★★☆   | High quality           |
-| `large`  | 1.5 GB | ~1x   | ★★★★★   | Best quality           |
+| Model            | Size   | Speed | Quality | Best For               |
+| ---------------- | ------ | ----- | ------- | ---------------------- |
+| `tiny`           | 75 MB  | ~10x  | ★☆☆☆☆   | Quick drafts, testing  |
+| `base`           | 142 MB | ~7x   | ★★☆☆☆   | Fast transcription     |
+| `small`          | 466 MB | ~4x   | ★★★☆☆   | Balanced speed/quality |
+| `medium`         | 1.5 GB | ~2x   | ★★★★☆   | High quality           |
+| `large-v3`       | 3.1 GB | ~1x   | ★★★★★   | Best quality           |
+| `large-v3-turbo` | 1.6 GB | ~2x   | ★★★★★   | Fast + quality         |
 
-Models are downloaded automatically on first use and cached in `~/.cache/whisper/`.
+English-only variants (`.en`) are available for tiny, base, small, and medium models.
+
+Models are downloaded automatically on first use and cached in:
+
+- **Development**: `PROJECT_ROOT/models/`
+- **Production**: `~/Library/Application Support/WhisperDesk/models/`
 
 ## 🔧 Development
 
@@ -145,11 +160,9 @@ npm run electron:build:dir
 
 ### Contributing
 
-This project uses a **release branch workflow** with **automated releases**.
+This project uses **automated releases** via semantic-release.
 
 #### Development Flow
-
-**For small features** (direct to main):
 
 1. **Create a feature branch** from `main`:
 
@@ -159,29 +172,9 @@ This project uses a **release branch workflow** with **automated releases**.
 
 2. **Make changes** with conventional commits and create PR to `main`
 
-**For large features** (via release branch):
-
-1. **Create release branch** from `main`:
-
-   ```bash
-   git checkout -b release/landing-page
-   git push -u origin release/landing-page
-   ```
-
-2. **Create feature branches** from the release branch:
-
-   ```bash
-   git checkout -b feat/hero-section release/landing-page
-   ```
-
-3. **Open PRs to merge features into the release branch**
-
-4. **When ready, open final PR** from `release/landing-page` to `main`
-
 #### CI/CD Flow
 
 - **PRs to main**: Lint, typecheck, format checks
-- **Merge to release branch**: Creates prerelease (e.g., `v1.2.0-landing-page.1`)
 - **Merge to main**: Creates full release (e.g., `v1.2.0`)
 
 #### Release & Deployment
@@ -190,15 +183,13 @@ This project uses a **release branch workflow** with **automated releases**.
 
 - [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
 - Automatically determines version bump
-- Creates GitHub Release with tag
-- **Prerelease** for release branches (e.g., `v1.2.0-landing-page.1`)
-- **Full release** for main branch (e.g., `v1.2.0`)
+- Creates GitHub Release with tag (e.g., `v1.2.0`)
 
 **Deploy Release** (Manual - You control when):
 
 - Go to **Actions → Deploy Release** in the GitHub Actions tab
 - Click **Run workflow** (top right)
-- Enter the version number (e.g., `1.1.0` or `1.2.0-landing-page.1`)
+- Enter the version number (e.g., `1.1.0`)
 - **Requires your approval** before building
 - Once approved: builds macOS app and uploads to release
 
@@ -220,6 +211,50 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `ci:`       | -                       | No release            |
 | `build:`    | -                       | No release            |
 
+#### Issues & Discussions
+
+- **Bug report?** Open an issue via the built-in [bug report template](https://github.com/pedrovsiqueira/whisperdesk/issues/new/choose) so we collect macOS version, WhisperDesk version, reproduction steps, and relevant logs automatically.
+- **Feature idea?** Start a thread in [Discussions](https://github.com/pedrovsiqueira/whisperdesk/discussions). We prefer to explore new ideas there and will only create an issue once we understand the scope.
+- **Before you post**: search the existing issues and discussions to avoid duplicates and help us respond faster.
+
+### Testing
+
+WhisperDesk has a comprehensive test suite with **257 tests** covering utilities, services, hooks, and React components.
+
+#### Run Tests
+
+```bash
+# Run all tests once (CI mode)
+npm run test:run
+
+# Run tests with watch mode
+npm run test
+
+# Run tests with UI dashboard
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+#### Test Coverage
+
+- **Unit Tests** - Utilities, formatters, validators, storage, and services
+- **Component Tests** - SettingsPanel, FileDropZone, OutputDisplay
+- **Service Tests** - Electron API, transcription service, model service, history storage
+- Test Framework: [Vitest](https://vitest.dev/) with jsdom
+- Component Testing: [@testing-library/react](https://testing-library.com/react)
+- **Pre-commit Hooks** - Lint and format checks run automatically before every commit (via husky + lint-staged)
+
+#### CI/CD Pipeline
+
+Tests run automatically in GitHub Actions on every PR and push:
+
+- ✅ Linting & formatting checks
+- ✅ TypeScript type checking
+- ✅ Unit & component tests (257 tests)
+- ✅ Production build validation
+
 ### Available Scripts
 
 | Script                            | Description                              |
@@ -230,42 +265,27 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 | `npm run setup:whisper:universal` | Build whisper.cpp (universal binary)     |
 | `npm run electron:build`          | Builds macOS DMG (with universal binary) |
 | `npm run electron:build:mac`      | Builds macOS DMG (with universal binary) |
+| `npm run electron:build:dir`      | Build directory only (faster, testing)   |
 | `npm run icons`                   | Generate app icons from SVG              |
 | `npm run lint`                    | Run ESLint                               |
 | `npm run lint:fix`                | Run ESLint with auto-fix                 |
 | `npm run typecheck`               | Run TypeScript type checking             |
 | `npm run format`                  | Format code with Prettier                |
 | `npm run format:check`            | Check code formatting                    |
-
-### GitHub Setup (Branch Protection & Deployments)
-
-After setting up this workflow, configure these GitHub settings for the complete automation:
-
-#### 1. Branch Protection Rules
-
-1. Go to **Settings → Branches → Add rule**
-2. Pattern: `main`
-3. Enable:
-   - ✅ Require a pull request before merging
-   - ✅ Require status checks to pass (select: `ci`)
-   - ✅ Require branches to be up to date before merging
-   - ✅ Include administrators
-
-#### 2. Production Environment Approval
-
-1. Go to **Settings → Environments → New environment**
-2. Name: `production`
-3. Add required reviewers (yourself or team)
-4. Deploy workflow will pause for approval before building
+| `npm run test`                    | Run tests with watch mode                |
+| `npm run test:ui`                 | Run tests with dashboard UI              |
+| `npm run test:run`                | Run tests once (CI mode)                 |
+| `npm run test:coverage`           | Run tests with coverage report           |
 
 ### Project Structure
 
 ```
 whisperdesk/
-├── electron/                # Electron main process
-│   ├── main.cjs             # Main process entry
-│   ├── preload.cjs          # Preload scripts for IPC
-│   └── whisper-cpp.cjs      # whisper.cpp integration
+├── electron/                # Electron main process (CommonJS)
+│   ├── main.cjs             # Main process entry, IPC handlers
+│   ├── preload.cjs          # Preload scripts for secure IPC
+│   ├── whisper-cpp.cjs      # whisper.cpp integration
+│   └── export-helper.cjs    # Document export helpers
 ├── src/                     # React frontend (TypeScript)
 │   ├── App.tsx              # Main app component
 │   ├── main.tsx             # React entry point
@@ -287,13 +307,13 @@ whisperdesk/
 │   ├── config/              # App configuration & constants
 │   ├── types/               # Shared TypeScript types
 │   ├── utils/               # Utility functions
-│   └── styles/              # Global styles
+│   └── test/                # Test utilities and fixtures
 ├── scripts/                 # Build and setup scripts
-│   ├── setup-whisper-cpp.sh # Builds whisper.cpp
+│   ├── setup-whisper-cpp.sh # Builds whisper.cpp with Metal
 │   └── generate-icons.js    # Generates app icons
 ├── bin/                     # whisper-cli binary (built)
-├── models/                  # Downloaded GGML models
-└── build/                   # Build resources (icons, etc.)
+├── models/                  # Downloaded GGML models (dev)
+└── build/                   # Build resources (icons, entitlements)
 ```
 
 ## 🐛 Troubleshooting
@@ -330,12 +350,13 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - High-performance C++ port of OpenAI Whisper
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) - High-performance C++ port of OpenAI Whisper
 - [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
 - [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
 - [React](https://react.dev/) - UI framework
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - [Vite](https://vitejs.dev/) - Build tool
+- [Vitest](https://vitest.dev/) - Fast unit testing framework
 
 ---
 

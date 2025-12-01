@@ -64,6 +64,13 @@ export async function downloadModel(
   return result ?? { success: false, model: modelName, path: '' };
 }
 
+export async function deleteModel(
+  modelName: string
+): Promise<{ success: boolean; error?: string }> {
+  const result = await window.electronAPI?.deleteModel(modelName);
+  return result ?? { success: false, error: 'Electron API not available' };
+}
+
 export function onModelDownloadProgress(
   callback: (progress: ModelDownloadProgress) => void
 ): Unsubscribe {

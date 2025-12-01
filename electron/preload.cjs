@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   listModels: () => ipcRenderer.invoke('models:list'),
   getGpuStatus: () => ipcRenderer.invoke('models:gpuStatus'),
   downloadModel: (modelName) => ipcRenderer.invoke('models:download', modelName),
+  deleteModel: (modelName) => ipcRenderer.invoke('models:delete', modelName),
   onModelDownloadProgress: (callback) => {
     ipcRenderer.on('models:downloadProgress', (event, data) => callback(data));
     return () => ipcRenderer.removeAllListeners('models:downloadProgress');

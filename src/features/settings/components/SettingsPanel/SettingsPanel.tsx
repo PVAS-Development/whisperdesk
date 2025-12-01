@@ -36,6 +36,7 @@ function SettingsPanel({
   const [gpuInfo, setGpuInfo] = useState<GpuInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<ModelDownloadProgress | null>(null);
 
   const loadModelInfo = async (): Promise<void> => {
     try {
@@ -64,9 +65,14 @@ function SettingsPanel({
 
     const unsubscribe = window.electronAPI?.onModelDownloadProgress?.(
       (data: ModelDownloadProgress) => {
+        setDownloadProgress(data);
         if (data.status === 'complete') {
           setDownloading(null);
+          setDownloadProgress(null);
           loadModelInfo();
+        } else if (data.status === 'error') {
+          setDownloading(null);
+          setDownloadProgress(null);
         }
       }
     );
@@ -114,6 +120,28 @@ function SettingsPanel({
     }
   };
 
+  const handleDeleteModel = async (modelName: string): Promise<void> => {
+    if (!window.confirm(`Are you sure you want to delete the ${modelName} model?`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const result = await window.electronAPI?.deleteModel(modelName);
+      if (!result?.success) {
+        window.alert(`Failed to delete model: ${result?.error || 'Unknown error'}`);
+        return;
+      }
+      await loadModelInfo();
+    } catch (err) {
+      console.error('Failed to delete model:', err);
+      window.alert(
+        `Failed to delete model: ${err && typeof err === 'object' && 'message' in err ? err.message : String(err)}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleModelChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     handleChange('model', e.target.value);
   };
@@ -123,6 +151,7 @@ function SettingsPanel({
   };
 
   const selectedModel = models.find((m) => m.name === settings.model);
+  const trimmedRemainingTime = downloadProgress?.remainingTime?.trim() ?? '';
 
   return (
     <div className={`settings-panel ${disabled ? 'disabled' : ''}`}>
@@ -178,9 +207,17 @@ function SettingsPanel({
             {!selectedModel.downloaded && (
               <div className="model-download">
                 {downloading === selectedModel.name ? (
-                  <span className="downloading">
-                    <span className="spinner"></span> Downloading...
-                  </span>
+                  <div className="download-progress">
+                    <span className="downloading">
+                      <span className="spinner"></span> Downloading...
+                    </span>
+                    {downloadProgress && downloadProgress.percent !== undefined && (
+                      <span className="progress-text">
+                        {downloadProgress.percent}%
+                        {trimmedRemainingTime && ` (${trimmedRemainingTime} left)`}
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   <button
                     className="btn-download"
@@ -194,7 +231,20 @@ function SettingsPanel({
               </div>
             )}
 
-            {selectedModel.downloaded && <span className="model-ready">✓ Ready to use</span>}
+            {selectedModel.downloaded && (
+              <div className="model-ready-container">
+                <span className="model-ready">✓ Ready to use</span>
+                <button
+                  className="btn-delete-model"
+                  onClick={() => handleDeleteModel(selectedModel.name)}
+                  disabled={disabled || loading}
+                  title="Delete model"
+                  aria-label={`Delete ${selectedModel.name} model`}
+                >
+                  🗑️
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
