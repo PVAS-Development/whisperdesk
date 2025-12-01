@@ -3,8 +3,8 @@ import type {
   TranscriptionOptions,
   TranscriptionResult,
   ModelDownloadProgress,
-  UpdateInfo,
-  UpdateDownloadProgress,
+  // UpdateInfo,
+  // UpdateDownloadProgress,
   SaveFileOptions,
   SaveFileResult,
   GpuInfo,
@@ -55,15 +55,15 @@ export interface ElectronAPI {
   onTranscriptionProgress: (callback: (data: TranscriptionProgress) => void) => Unsubscribe;
   getAppInfo: () => Promise<AppInfo>;
   getMemoryUsage: () => Promise<MemoryUsage>;
-  checkForUpdates: () => Promise<UpdateCheckResult>;
-  downloadUpdate: () => Promise<DownloadUpdateResult>;
-  installUpdate: () => void;
-  onUpdateChecking: (callback: () => void) => Unsubscribe;
-  onUpdateAvailable: (callback: (info: UpdateInfo) => void) => Unsubscribe;
-  onUpdateNotAvailable: (callback: () => void) => Unsubscribe;
-  onUpdateProgress: (callback: (progress: UpdateDownloadProgress) => void) => Unsubscribe;
-  onUpdateDownloaded: (callback: (info: UpdateInfo) => void) => Unsubscribe;
-  onUpdateError: (callback: (message: string) => void) => Unsubscribe;
+  // checkForUpdates: () => Promise<UpdateCheckResult>;
+  // downloadUpdate: () => Promise<DownloadUpdateResult>;
+  // installUpdate: () => void;
+  // onUpdateChecking: (callback: () => void) => Unsubscribe;
+  // onUpdateAvailable: (callback: (info: UpdateInfo) => void) => Unsubscribe;
+  // onUpdateNotAvailable: (callback: () => void) => Unsubscribe;
+  // onUpdateProgress: (callback: (progress: UpdateDownloadProgress) => void) => Unsubscribe;
+  // onUpdateDownloaded: (callback: (info: UpdateInfo) => void) => Unsubscribe;
+  // onUpdateError: (callback: (message: string) => void) => Unsubscribe;
   onMenuOpenFile: (callback: () => void) => Unsubscribe;
   onMenuSaveFile: (callback: () => void) => Unsubscribe;
   onMenuCopyTranscription: (callback: () => void) => Unsubscribe;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppProvider } from './contexts';
 import { AppHeader, LeftPanel, RightPanel } from './components';
-import { UpdateNotification } from './features/updates';
+// import { UpdateNotification } from './features/updates';
 import './App.css';
 
 function App(): React.JSX.Element {
@@ -15,7 +15,7 @@ function App(): React.JSX.Element {
           <RightPanel />
         </main>
 
-        <UpdateNotification />
+        {/* <UpdateNotification /> */}
       </div>
     </AppProvider>
   );

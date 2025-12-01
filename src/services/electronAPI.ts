@@ -8,8 +8,8 @@ import type {
   ModelInfo,
   SelectedFile,
   ModelDownloadProgress,
-  UpdateInfo,
-  UpdateDownloadProgress,
+  // UpdateInfo,
+  // UpdateDownloadProgress,
   AppInfo,
   MemoryUsage,
   Unsubscribe,
@@ -85,42 +85,42 @@ export async function getMemoryUsage(): Promise<MemoryUsage> {
   return result ?? { heapUsed: 0, heapTotal: 0, rss: 0, external: 0, isTranscribing: false };
 }
 
-export async function checkForUpdates(): Promise<{ success?: boolean; error?: string }> {
-  const result = await window.electronAPI?.checkForUpdates();
-  return result ?? { error: 'Electron API not available' };
-}
+// export async function checkForUpdates(): Promise<{ success?: boolean; error?: string }> {
+//   const result = await window.electronAPI?.checkForUpdates();
+//   return result ?? { error: 'Electron API not available' };
+// }
 
-export async function downloadUpdate(): Promise<{ success?: boolean; error?: string }> {
-  const result = await window.electronAPI?.downloadUpdate();
-  return result ?? { error: 'Electron API not available' };
-}
+// export async function downloadUpdate(): Promise<{ success?: boolean; error?: string }> {
+//   const result = await window.electronAPI?.downloadUpdate();
+//   return result ?? { error: 'Electron API not available' };
+// }
 
-export function installUpdate(): void {
-  window.electronAPI?.installUpdate();
-}
+// export function installUpdate(): void {
+//   window.electronAPI?.installUpdate();
+// }
 
-export function onUpdateChecking(callback: () => void): Unsubscribe {
-  return window.electronAPI?.onUpdateChecking(callback) ?? (() => {});
-}
+// export function onUpdateChecking(callback: () => void): Unsubscribe {
+//   return window.electronAPI?.onUpdateChecking(callback) ?? (() => {});
+// }
 
-export function onUpdateAvailable(callback: (info: UpdateInfo) => void): Unsubscribe {
-  return window.electronAPI?.onUpdateAvailable(callback) ?? (() => {});
-}
+// export function onUpdateAvailable(callback: (info: UpdateInfo) => void): Unsubscribe {
+//   return window.electronAPI?.onUpdateAvailable(callback) ?? (() => {});
+// }
 
-export function onUpdateNotAvailable(callback: () => void): Unsubscribe {
-  return window.electronAPI?.onUpdateNotAvailable(callback) ?? (() => {});
-}
+// export function onUpdateNotAvailable(callback: () => void): Unsubscribe {
+//   return window.electronAPI?.onUpdateNotAvailable(callback) ?? (() => {});
+// }
 
-export function onUpdateProgress(
-  callback: (progress: UpdateDownloadProgress) => void
-): Unsubscribe {
-  return window.electronAPI?.onUpdateProgress(callback) ?? (() => {});
-}
+// export function onUpdateProgress(
+//   callback: (progress: UpdateDownloadProgress) => void
+// ): Unsubscribe {
+//   return window.electronAPI?.onUpdateProgress(callback) ?? (() => {});
+// }
 
-export function onUpdateDownloaded(callback: (info: UpdateInfo) => void): Unsubscribe {
-  return window.electronAPI?.onUpdateDownloaded(callback) ?? (() => {});
-}
+// export function onUpdateDownloaded(callback: (info: UpdateInfo) => void): Unsubscribe {
+//   return window.electronAPI?.onUpdateDownloaded(callback) ?? (() => {});
+// }
 
-export function onUpdateError(callback: (message: string) => void): Unsubscribe {
-  return window.electronAPI?.onUpdateError(callback) ?? (() => {});
-}
+// export function onUpdateError(callback: (message: string) => void): Unsubscribe {
+//   return window.electronAPI?.onUpdateError(callback) ?? (() => {});
+// }
