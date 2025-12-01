@@ -13,12 +13,13 @@
     "build": "tsc -b && vite build",
     "electron": "electron .",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run icons && npm run build && electron-builder",
-    "electron:build:mac": "npm run icons && npm run build && electron-builder --mac",
-    "electron:build:dir": "npm run icons && npm run build && electron-builder --dir",
+    "electron:build": "npm run setup:whisper:universal && npm run icons && npm run build && electron-builder",
+    "electron:build:mac": "npm run setup:whisper:universal && npm run icons && npm run build && electron-builder --mac",
+    "electron:build:dir": "npm run setup:whisper:universal && npm run icons && npm run build && electron-builder --dir",
     "icons": "node scripts/generate-icons.js",
     "preview": "vite preview",
     "setup:whisper": "bash scripts/setup-whisper-cpp.sh",
+    "setup:whisper:universal": "bash scripts/setup-whisper-cpp.sh --universal",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
@@ -91,10 +92,12 @@
       "dist/**/*",
       "electron/**/*",
       "bin/**/*",
-      "models/**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
       "!**/node_modules/.bin"
+    ],
+    "asarUnpack": [
+      "bin/**/*"
     ],
     "mac": {
       "category": "public.app-category.productivity",

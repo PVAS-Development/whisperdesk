@@ -67,12 +67,16 @@ cd whisperdesk
 npm install
 
 # Build whisper.cpp with Metal support (downloads base model)
+# For development (current architecture only):
 npm run setup:whisper
+
+# For production (universal binary - Intel + Apple Silicon):
+npm run setup:whisper:universal
 
 # Run in development mode
 npm run electron:dev
 
-# Or build for production
+# Or build for production (automatically builds universal binary)
 npm run electron:build
 ```
 
@@ -218,19 +222,20 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 
 ### Available Scripts
 
-| Script                       | Description                               |
-| ---------------------------- | ----------------------------------------- |
-| `npm run dev`                | Start Vite dev server                     |
-| `npm run electron:dev`       | Start app in development mode             |
-| `npm run setup:whisper`      | Build whisper.cpp and download base model |
-| `npm run electron:build`     | Builds macOS DMG                          |
-| `npm run electron:build:mac` | Builds macOS DMG                          |
-| `npm run icons`              | Generate app icons from SVG               |
-| `npm run lint`               | Run ESLint                                |
-| `npm run lint:fix`           | Run ESLint with auto-fix                  |
-| `npm run typecheck`          | Run TypeScript type checking              |
-| `npm run format`             | Format code with Prettier                 |
-| `npm run format:check`       | Check code formatting                     |
+| Script                            | Description                              |
+| --------------------------------- | ---------------------------------------- |
+| `npm run dev`                     | Start Vite dev server                    |
+| `npm run electron:dev`            | Start app in development mode            |
+| `npm run setup:whisper`           | Build whisper.cpp (current architecture) |
+| `npm run setup:whisper:universal` | Build whisper.cpp (universal binary)     |
+| `npm run electron:build`          | Builds macOS DMG (with universal binary) |
+| `npm run electron:build:mac`      | Builds macOS DMG (with universal binary) |
+| `npm run icons`                   | Generate app icons from SVG              |
+| `npm run lint`                    | Run ESLint                               |
+| `npm run lint:fix`                | Run ESLint with auto-fix                 |
+| `npm run typecheck`               | Run TypeScript type checking             |
+| `npm run format`                  | Format code with Prettier                |
+| `npm run format:check`            | Check code formatting                    |
 
 ### GitHub Setup (Branch Protection & Deployments)
 

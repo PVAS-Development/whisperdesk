@@ -35,20 +35,65 @@ fi
 
 # Build with Metal support (for Apple Silicon/macOS)
 echo "🔨 Building whisper.cpp with Metal support..."
-mkdir -p build
-cd build
 
-# Configure with Metal support
-cmake .. \
-    -DWHISPER_METAL=ON \
-    -DCMAKE_BUILD_TYPE=Release
+# Detect macOS architecture
+ARCH=$(uname -m)
+echo "   Detected architecture: $ARCH"
 
-# Build
-cmake --build . --config Release -j$(sysctl -n hw.ncpu)
-
-# Create bin directory and copy binary
-mkdir -p "$BIN_DIR"
-cp bin/whisper-cli "$BIN_DIR/whisper-cli"
+# For distribution builds, create universal binary (both Intel and Apple Silicon)
+# For development, build for current arch only
+if [ "$1" == "--universal" ]; then
+    echo "   Building universal binary (Intel + Apple Silicon)..."
+    
+    # Use electron-builder's approach: build for current arch,
+    # electron-builder will handle universal binary at packaging time
+    echo "   → Building for current architecture ($ARCH)..."
+    mkdir -p build
+    cd build
+    
+    cmake .. \
+        -DWHISPER_METAL=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+    
+    cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+    
+    # Create bin directory and copy binary
+    mkdir -p "$BIN_DIR"
+    cp bin/whisper-cli "$BIN_DIR/whisper-cli"
+    
+    # Copy Metal library if it exists
+    if [ -f bin/ggml-metal.metal ]; then
+        cp bin/ggml-metal.metal "$BIN_DIR/"
+    fi
+    
+    cd ..
+    
+    echo "   ✅ Universal binary created!"
+    lipo -info "$BIN_DIR/whisper-cli" || echo "   (lipo info unavailable)"
+else
+    # Development build - current architecture only
+    echo "   Building for current architecture ($ARCH)..."
+    mkdir -p build
+    cd build
+    
+    cmake .. \
+        -DWHISPER_METAL=ON \
+        -DCMAKE_BUILD_TYPE=Release
+    
+    cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+    
+    # Create bin directory and copy binary
+    mkdir -p "$BIN_DIR"
+    cp bin/whisper-cli "$BIN_DIR/whisper-cli"
+    
+    # Copy Metal library if it exists
+    if [ -f bin/ggml-metal.metal ]; then
+        cp bin/ggml-metal.metal "$BIN_DIR/"
+    fi
+    
+    cd ..
+fi
 
 echo ""
 echo "✅ whisper.cpp built successfully!"
