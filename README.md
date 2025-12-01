@@ -276,27 +276,6 @@ See [testing.md](TESTING.md) for detailed testing strategy and architecture.
 | `npm run test:ui`                 | Run tests with dashboard UI              |
 | `npm run test:run`                | Run tests once (CI mode)                 |
 
-### GitHub Setup (Branch Protection & Deployments)
-
-After setting up this workflow, configure these GitHub settings for the complete automation:
-
-#### 1. Branch Protection Rules
-
-1. Go to **Settings → Branches → Add rule**
-2. Pattern: `main`
-3. Enable:
-   - ✅ Require a pull request before merging
-   - ✅ Require status checks to pass (select: `ci`)
-   - ✅ Require branches to be up to date before merging
-   - ✅ Include administrators
-
-#### 2. Production Environment Approval
-
-1. Go to **Settings → Environments → New environment**
-2. Name: `production`
-3. Add required reviewers (yourself or team)
-4. Deploy workflow will pause for approval before building
-
 ### Project Structure
 
 ```

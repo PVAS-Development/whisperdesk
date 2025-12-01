@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Desktop transcription app powered by whisper.cpp",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pedrovsiqueira/whisperdesk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pedrovsiqueira/whisperdesk/issues"
+  },
+  "homepage": "https://github.com/pedrovsiqueira/whisperdesk#readme",
   "main": "electron/main.cjs",
   "author": {
     "name": "Pedro Siqueira",
@@ -51,7 +60,6 @@
     "audio",
     "video"
   ],
-  "license": "MIT",
   "dependencies": {
     "docx": "^8.5.0",
     "electron-updater": "^6.6.2",
