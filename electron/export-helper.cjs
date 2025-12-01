@@ -1,11 +1,7 @@
 const { Document, Paragraph, TextRun, AlignmentType, Packer } = require('docx');
 const { jsPDF } = require('jspdf');
 
-/**
- * Regex pattern to match VTT/SRT timestamps
- * Matches format: HH:MM:SS.mmm --> HH:MM:SS.mmm
- */
-const TIMESTAMP_REGEX = /^\d{2}:\d{2}:\d{2}.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}.\d{3}/;
+const TIMESTAMP_REGEX = /^\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}/;
 
 /**
  * Generate Word document buffer from transcription text
@@ -277,6 +273,10 @@ async function generatePdfDocument(text, options = {}) {
   return Buffer.from(doc.output('arraybuffer'));
 }
 
+function escapeMarkdown(text) {
+  return text.replace(/([\\`*_{}[\]()#+\-.!|])/g, '\\$1');
+}
+
 /**
  * Generate Markdown document from transcription text
  */
@@ -302,9 +302,9 @@ async function generateMarkdownDocument(text, options = {}) {
 
     hasContentAdded = true;
     if (timestamp) {
-      markdown += `**${timestamp}**\n\n`;
+      markdown += `**${escapeMarkdown(timestamp)}**\n\n`;
     }
-    markdown += `${content.trim()}\n\n`;
+    markdown += `${escapeMarkdown(content.trim())}\n\n`;
   };
 
   for (const line of lines) {
@@ -329,7 +329,7 @@ async function generateMarkdownDocument(text, options = {}) {
 
   // If no structured content was found, add plain text fallback
   if (!hasContentAdded) {
-    markdown += text;
+    markdown += escapeMarkdown(text);
   }
 
   return markdown;
