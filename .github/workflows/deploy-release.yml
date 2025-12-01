@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy (leave empty to use latest)'
-        required: false
+        description: 'Version to deploy (e.g., 1.1.0)'
+        required: true
         type: string
 
 permissions:
@@ -18,55 +18,49 @@ jobs:
     runs-on: macos-latest
     environment:
       name: production
-      url: https://github.com/${{ github.repository }}/releases
+      url: https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}
 
     steps:
-      - name: Resolve version
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ inputs.version }}" != "" ]; then
-            echo "DEPLOY_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "TARGET_REF=v${{ inputs.version }}" >> $GITHUB_ENV
-          else
-            # Fetch latest release tag by semantic version from GitHub API
-            LATEST_TAG=$(gh release list --repo ${{ github.repository }} --limit 100 --json tagName,isPrerelease --jq '[.[] | select(.isPrerelease == false) | .tagName | select(test("^v?[0-9]+\\.[0-9]+\\.[0-9]+$"))] | sort | last')
-            if [ -z "$LATEST_TAG" ]; then
-              echo "❌ No releases found."
-              exit 1
-            fi
-            # Strip 'v' prefix for DEPLOY_VERSION
-            VERSION=${LATEST_TAG#v}
-            echo "DEPLOY_VERSION=$VERSION" >> $GITHUB_ENV
-            echo "TARGET_REF=$LATEST_TAG" >> $GITHUB_ENV
-            echo "ℹ️  Resolved latest version: $VERSION (tag: $LATEST_TAG)"
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.TARGET_REF }}
+          ref: v${{ inputs.version }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release tag exists
         run: |
-          if ! git rev-parse "v${{ env.DEPLOY_VERSION }}" >/dev/null 2>&1; then
-            echo "❌ Release tag v${{ env.DEPLOY_VERSION }} not found!"
+          if ! git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Release tag v${{ inputs.version }} not found!"
             echo "Available tags:"
             git tag | grep "^v" | sort -V | tail -10
             exit 1
           fi
-          echo "✅ Release tag verified: v${{ env.DEPLOY_VERSION }}"
+          echo "✅ Release tag verified: v${{ inputs.version }}"
 
-      - name: Verify package.json version matches release
+      - name: Checkout main for version bump
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: repo-version
+
+      - name: Update package.json version on main
+        id: bump-version
+        working-directory: repo-version
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          if [ "$PACKAGE_VERSION" != "${{ env.DEPLOY_VERSION }}" ]; then
-            echo "⚠️  Warning: package.json version ($PACKAGE_VERSION) doesn't match release tag (${{ env.DEPLOY_VERSION }})"
-            echo "This might indicate the prepare-release workflow didn't commit the version change."
+          npm version "${VERSION}" --no-git-tag-version --allow-same-version
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Version already matches insights release, no commit created"
           else
-            echo "✅ Package version matches release tag: v${{ env.DEPLOY_VERSION }}"
+            git commit -m "chore: bump version to v${VERSION}"
+            git push origin main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup Node.js
@@ -77,6 +71,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Update package.json version
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+          echo "✅ Updated package.json to version ${{ inputs.version }}"
 
       - name: Build whisper.cpp (universal binary)
         run: npm run setup:whisper:universal
@@ -97,7 +96,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v${{ env.DEPLOY_VERSION }} \
+          gh release upload v${{ inputs.version }} \
             release/*.dmg \
             release/*.zip \
             release/*.blockmap \
@@ -108,7 +107,7 @@ jobs:
         if: success()
         uses: actions/github-script@v7
         env:
-          VERSION: ${{ env.DEPLOY_VERSION }}
+          VERSION: ${{ inputs.version }}
         with:
           script: |
             const version = process.env.VERSION;
