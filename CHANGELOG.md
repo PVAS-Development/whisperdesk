@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.1.0...v1.1.1) (2025-12-02)
+
+### 🐛 Bug Fixes
+
+- add security section to README highlighting local processing and code signing ([169579d](https://github.com/pedrovsiqueira/whisperdesk/commit/169579d2687e72be55c396d11c710a01af430207))
+
 ## [1.1.0](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.0.2...v1.1.0) (2025-12-02)
 
 ### ✨ Features
