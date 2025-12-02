@@ -172,6 +172,7 @@ jobs:
 
       - name: Build Electron app for macOS
         id: electron-build
+        timeout-minutes: 60
         run: |
           echo "🏗️ Starting electron-builder..."
           echo "📅 Start time: $(date)"
