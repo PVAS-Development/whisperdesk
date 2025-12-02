@@ -159,7 +159,7 @@ npm run electron:build:dir
 
 ### Contributing
 
-This project uses **automated releases** via semantic-release.
+This project uses **conventional commits** for consistent commit messages.
 
 #### Development Flow
 
@@ -171,44 +171,22 @@ This project uses **automated releases** via semantic-release.
 
 2. **Make changes** with conventional commits and create PR to `main`
 
-#### CI/CD Flow
-
-- **PRs to main**: Lint, typecheck, format checks
-- **Merge to main**: Creates full release (e.g., `v1.2.0`)
-
-#### Release & Deployment
-
-**After PR is merged** (Automatic):
-
-- [semantic-release](https://semantic-release.gitbook.io/) analyzes commits
-- Automatically determines version bump
-- Creates GitHub Release with tag (e.g., `v1.2.0`)
-
-**Deploy Release** (Manual - You control when):
-
-- Go to **Actions → Deploy Release** in the GitHub Actions tab
-- Click **Run workflow** (top right)
-- Enter the version number (e.g., `1.1.0`)
-- **Requires your approval** before building
-- Once approved: builds macOS app and uploads to release
-
 #### Commit Message Convention
 
-Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic versioning:
+Use [Conventional Commits](https://www.conventionalcommits.org/) for clear history:
 
-| Commit Type | Example                 | Version Bump          |
-| ----------- | ----------------------- | --------------------- |
-| `feat:`     | `feat: add PDF export`  | Minor (1.0.0 → 1.1.0) |
-| `feat!:`    | `feat!: redesign API`   | Major (1.0.0 → 2.0.0) |
-| `fix:`      | `fix: crash on startup` | Patch (1.0.0 → 1.0.1) |
-| `perf:`     | `perf: faster loading`  | Patch                 |
-| `refactor:` | -                       | No release            |
-| `docs:`     | -                       | No release            |
-| `chore:`    | -                       | No release            |
-| `style:`    | -                       | No release            |
-| `test:`     | -                       | No release            |
-| `ci:`       | -                       | No release            |
-| `build:`    | -                       | No release            |
+| Commit Type | Example                    | Description             |
+| ----------- | -------------------------- | ----------------------- |
+| `feat:`     | `feat: add PDF export`     | New feature             |
+| `fix:`      | `fix: crash on startup`    | Bug fix                 |
+| `perf:`     | `perf: faster loading`     | Performance improvement |
+| `refactor:` | `refactor: simplify logic` | Code refactoring        |
+| `docs:`     | `docs: update README`      | Documentation           |
+| `chore:`    | `chore: update deps`       | Maintenance             |
+| `style:`    | `style: format code`       | Code style              |
+| `test:`     | `test: add unit tests`     | Tests                   |
+| `ci:`       | `ci: fix workflow`         | CI/CD changes           |
+| `build:`    | `build: update config`     | Build changes           |
 
 #### Issues & Discussions
 
