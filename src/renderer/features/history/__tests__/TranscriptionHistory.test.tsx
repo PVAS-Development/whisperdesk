@@ -8,9 +8,16 @@ describe('TranscriptionHistory component', () => {
     const onClear = vi.fn();
     const onClose = vi.fn();
     const onSelect = vi.fn();
+    const onDelete = vi.fn();
 
     render(
-      <TranscriptionHistory history={[]} onClear={onClear} onClose={onClose} onSelect={onSelect} />
+      <TranscriptionHistory
+        history={[]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
     );
 
     expect(screen.getByText(/No transcriptions yet/i)).toBeInTheDocument();
@@ -22,6 +29,7 @@ describe('TranscriptionHistory component', () => {
     const onClear = vi.fn();
     const onClose = vi.fn();
     const onSelect = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <TranscriptionHistory
@@ -29,6 +37,7 @@ describe('TranscriptionHistory component', () => {
         onClear={onClear}
         onClose={onClose}
         onSelect={onSelect}
+        onDelete={onDelete}
       />
     );
 
@@ -46,6 +55,7 @@ describe('TranscriptionHistory component', () => {
     const onClear = vi.fn();
     const onClose = vi.fn();
     const onSelect = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <TranscriptionHistory
@@ -53,6 +63,7 @@ describe('TranscriptionHistory component', () => {
         onClear={onClear}
         onClose={onClose}
         onSelect={onSelect}
+        onDelete={onDelete}
       />
     );
 
@@ -68,6 +79,7 @@ describe('TranscriptionHistory component', () => {
     const onClear = vi.fn();
     const onClose = vi.fn();
     const onSelect = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <TranscriptionHistory
@@ -75,6 +87,7 @@ describe('TranscriptionHistory component', () => {
         onClear={onClear}
         onClose={onClose}
         onSelect={onSelect}
+        onDelete={onDelete}
       />
     );
 
