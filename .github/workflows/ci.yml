@@ -31,10 +31,19 @@ jobs:
       - name: Run ESLint, TypeScript check & Format check
         run: |
           npm run lint &
+          PID1=$!
           npm run typecheck &
+          PID2=$!
           npm run format:check &
-          wait
+          PID3=$!
 
+          # Wait for all and capture failures
+          EXIT_CODE=0
+          wait $PID1 || EXIT_CODE=1
+          wait $PID2 || EXIT_CODE=1
+          wait $PID3 || EXIT_CODE=1
+
+          exit $EXIT_CODE
   test:
     name: Unit & Component Tests
     runs-on: ubuntu-latest

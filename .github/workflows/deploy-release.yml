@@ -12,10 +12,6 @@ permissions:
   contents: write
   actions: read
 
-env:
-  ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-  ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
-
 jobs:
   deploy-mac:
     name: Build & Deploy macOS
@@ -75,6 +71,9 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Cache whisper.cpp build artifacts
+      # Note: Cache key includes script hash. To force rebuild after whisper.cpp upstream changes,
+      # either modify setup-whisper-cpp.sh or delete the cache manually in GitHub Actions settings.
       - name: Cache whisper.cpp build
         id: cache-whisper
         uses: actions/cache@v4
@@ -87,12 +86,11 @@ jobs:
           restore-keys: |
             whisper-cpp-universal-${{ runner.os }}-
 
+      # Cache electron-builder's default cache location on macOS
       - name: Cache Electron
         uses: actions/cache@v4
         with:
           path: |
-            .cache/electron
-            .cache/electron-builder
             ~/Library/Caches/electron
             ~/Library/Caches/electron-builder
           key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -113,11 +111,23 @@ jobs:
 
       - name: Verify whisper-cli exists
         run: |
-          if [ ! -f "bin/whisper-cli" ]; then
-            echo "❌ whisper-cli not found, rebuilding..."
-            npm run setup:whisper:universal
+          CACHE_HIT="${{ steps.cache-whisper.outputs.cache-hit }}"
+
+          if [ "$CACHE_HIT" = "true" ]; then
+            # Cache was hit - binary MUST exist
+            if [ ! -f "bin/whisper-cli" ]; then
+              echo "❌ Cache hit but whisper-cli not found - cache may be corrupt or paths misconfigured!"
+              exit 1
+            fi
+            echo "✅ whisper-cli restored from cache"
+            lipo -info bin/whisper-cli
           else
-            echo "✅ whisper-cli found"
+            # Cache miss - binary should have been built, verify it exists
+            if [ ! -f "bin/whisper-cli" ]; then
+              echo "❌ whisper-cli not found after build, rebuilding..."
+              npm run setup:whisper:universal
+            fi
+            echo "✅ whisper-cli built successfully"
             lipo -info bin/whisper-cli
           fi
 
@@ -136,7 +146,6 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          USE_HARD_LINKS: false
 
       - name: Upload macOS artifacts to release
         if: success()
