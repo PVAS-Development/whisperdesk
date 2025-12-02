@@ -38,7 +38,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:quick": "vitest run --reporter=basic",
+    "test:quick": "vitest run --reporter=default",
     "test:coverage": "vitest run --coverage",
     "lint-staged": "lint-staged",
     "prepare": "husky",
