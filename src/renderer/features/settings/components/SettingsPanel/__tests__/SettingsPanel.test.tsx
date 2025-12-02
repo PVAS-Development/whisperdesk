@@ -419,7 +419,9 @@ describe('SettingsPanel', () => {
     const modelSelect = screen.getByLabelText('Select Whisper model') as HTMLSelectElement;
     fireEvent.change(modelSelect, { target: { value: 'small' } });
 
-    expect(localStorage.getItem('whisperdesk_lastModel')).toBe('small');
+    await waitFor(() => {
+      expect(localStorage.getItem('whisperdesk_lastModel')).toBe('small');
+    });
   });
 
   it('disables controls when disabled prop is true', async () => {
