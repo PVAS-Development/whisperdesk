@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.0.2...v1.1.0) (2025-12-02)
+
+### ✨ Features
+
+- refactor electron architecture ([#19](https://github.com/pedrovsiqueira/whisperdesk/issues/19)) ([1c9d7eb](https://github.com/pedrovsiqueira/whisperdesk/commit/1c9d7eb5dc1060419c85f83b6d9117c9ab898cfa))
+
 ## [1.0.2](https://github.com/pedrovsiqueira/whisperdesk/compare/v1.0.1...v1.0.2) (2025-12-01)
 
 ### 🐛 Bug Fixes
