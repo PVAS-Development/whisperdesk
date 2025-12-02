@@ -19,6 +19,7 @@ export interface HistoryContextValue {
   setShowHistory: (show: boolean) => void;
   toggleHistory: () => void;
   clearHistory: () => void;
+  removeHistoryItem: (itemId: number) => void;
   selectHistoryItem: (item: HistoryItem) => void;
 }
 

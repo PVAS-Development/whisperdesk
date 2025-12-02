@@ -35,6 +35,7 @@ interface UseHistoryReturn {
   addHistoryItem: (item: HistoryItem) => void;
   clearHistory: () => void;
   selectHistoryItem: (item: HistoryItem, onSelect: (item: HistoryItem) => void) => void;
+  removeHistoryItem: (itemId: number) => void;
 }
 
 export function useHistory(): UseHistoryReturn {
@@ -58,6 +59,14 @@ export function useHistory(): UseHistoryReturn {
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  const removeHistoryItem = useCallback((itemId: number): void => {
+    setHistory((prev) => {
+      const updated = prev.filter((item) => item.id !== itemId);
+      saveHistoryToStorage(updated);
+      return updated;
+    });
+  }, []);
+
   const selectHistoryItem = useCallback(
     (item: HistoryItem, onSelect: (item: HistoryItem) => void): void => {
       onSelect(item);
@@ -73,6 +82,7 @@ export function useHistory(): UseHistoryReturn {
     toggleHistory,
     addHistoryItem,
     clearHistory,
+    removeHistoryItem,
     selectHistoryItem,
   };
 }

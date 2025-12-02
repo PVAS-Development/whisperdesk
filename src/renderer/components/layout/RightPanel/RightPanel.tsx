@@ -4,7 +4,14 @@ import { TranscriptionHistory } from '../../../features/history';
 import { useAppHistory, useAppTranscription } from '../../../contexts';
 
 function RightPanel(): React.JSX.Element {
-  const { history, showHistory, setShowHistory, clearHistory, selectHistoryItem } = useAppHistory();
+  const {
+    history,
+    showHistory,
+    setShowHistory,
+    clearHistory,
+    selectHistoryItem,
+    removeHistoryItem,
+  } = useAppHistory();
   const { transcription, copySuccess, handleSave, handleCopy } = useAppTranscription();
 
   if (showHistory) {
@@ -15,6 +22,7 @@ function RightPanel(): React.JSX.Element {
           onClear={clearHistory}
           onClose={() => setShowHistory(false)}
           onSelect={selectHistoryItem}
+          onDelete={removeHistoryItem}
         />
       </div>
     );

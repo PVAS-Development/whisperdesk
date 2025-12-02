@@ -113,6 +113,30 @@ describe('useHistory', () => {
     expect(localStorage.getItem('whisperdesk_history')).toBeNull();
   });
 
+  it('should remove a history item and persist the change', () => {
+    const { result } = renderHook(() => useHistory());
+    const firstItem = createMockHistoryItem({ id: 10, fileName: 'keep.mp3' });
+    const secondItem = createMockHistoryItem({ id: 11, fileName: 'remove.mp3' });
+
+    act(() => {
+      result.current.addHistoryItem(firstItem);
+      result.current.addHistoryItem(secondItem);
+    });
+
+    expect(result.current.history).toHaveLength(2);
+
+    act(() => {
+      result.current.removeHistoryItem(secondItem.id);
+    });
+
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0]!.id).toBe(firstItem.id);
+
+    const saved = JSON.parse(localStorage.getItem('whisperdesk_history') || '[]');
+    expect(saved).toHaveLength(1);
+    expect(saved[0].id).toBe(firstItem.id);
+  });
+
   it('should handle corrupted localStorage data gracefully', () => {
     localStorage.setItem('whisperdesk_history', 'invalid json');
 

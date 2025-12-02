@@ -15,8 +15,15 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
 
   const { copySuccess, copyToClipboard } = useCopyToClipboard();
 
-  const { history, showHistory, setShowHistory, toggleHistory, addHistoryItem, clearHistory } =
-    useHistory();
+  const {
+    history,
+    showHistory,
+    setShowHistory,
+    toggleHistory,
+    addHistoryItem,
+    clearHistory,
+    removeHistoryItem,
+  } = useHistory();
 
   const {
     selectedFile,
@@ -95,9 +102,18 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
       setShowHistory,
       toggleHistory,
       clearHistory,
+      removeHistoryItem,
       selectHistoryItem,
     }),
-    [history, showHistory, setShowHistory, toggleHistory, clearHistory, selectHistoryItem]
+    [
+      history,
+      showHistory,
+      setShowHistory,
+      toggleHistory,
+      clearHistory,
+      removeHistoryItem,
+      selectHistoryItem,
+    ]
   );
 
   const transcriptionContextValue = useMemo<TranscriptionContextValue>(

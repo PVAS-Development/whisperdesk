@@ -10,6 +10,7 @@ interface TranscriptionHistoryProps {
   onClear: () => void;
   onClose: () => void;
   onSelect: (item: HistoryItem) => void;
+  onDelete: (itemId: number) => void;
 }
 
 function TranscriptionHistory({
@@ -17,6 +18,7 @@ function TranscriptionHistory({
   onClear,
   onClose,
   onSelect,
+  onDelete,
 }: TranscriptionHistoryProps): React.JSX.Element {
   const handleItemKeyDown = (e: KeyboardEvent<HTMLDivElement>, item: HistoryItem): void => {
     if (e.key === 'Enter') {
@@ -60,7 +62,20 @@ function TranscriptionHistory({
               >
                 <div className="history-item-header">
                   <span className="history-filename">{item.fileName}</span>
-                  <span className="history-date">{formatDate(item.date)}</span>
+                  <div className="history-item-header-actions">
+                    <span className="history-date">{formatDate(item.date)}</span>
+                    <button
+                      className="history-item-delete"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDelete(item.id);
+                      }}
+                      title="Delete transcription"
+                      aria-label={`Delete ${item.fileName}`}
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
                 <div className="history-item-meta">
                   <span className="history-tag">{item.model}</span>
