@@ -782,7 +782,7 @@ Another. line.`;
     });
 
     const callArgs = saveFileMock.mock.calls[0];
-    const savedArgs = callArgs?.[0] as any;
+    const savedArgs = callArgs?.[0] as { defaultName: string };
     expect(savedArgs?.defaultName).toBe('audiofile.txt');
   });
 
@@ -807,7 +807,7 @@ Another. line.`;
     });
 
     const callArgs = saveFileMock.mock.calls[0];
-    const savedArgs = callArgs?.[0] as any;
+    const savedArgs = callArgs?.[0] as { defaultName: string };
     expect(savedArgs?.defaultName).toBe('audio.backup.txt');
   });
 });
