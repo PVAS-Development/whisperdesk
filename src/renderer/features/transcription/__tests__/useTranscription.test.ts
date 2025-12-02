@@ -663,4 +663,151 @@ describe('useTranscription', () => {
 
     vi.useRealTimers();
   });
+
+  it('should handle save with result but no filePath', async () => {
+    const saveFileMock = vi.fn().mockResolvedValue({
+      success: false,
+    });
+    overrideElectronAPI({
+      saveFile: saveFileMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+      result.current.setTranscription('Test transcription');
+    });
+
+    await act(async () => {
+      await result.current.handleSave('txt');
+    });
+
+    expect(result.current.progress.percent).not.toBe(100);
+  });
+
+  it('should handle save as TXT format with complex formatting', async () => {
+    const saveFileMock = vi.fn().mockResolvedValue({
+      success: true,
+      filePath: '/path/to/saved.txt',
+    });
+    overrideElectronAPI({
+      saveFile: saveFileMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    const webvttContent = `WEBVTT
+
+00:00:00.000 --> 00:00:05.000
+First line
+
+00:00:05.000 --> 00:00:10.000
+Second line
+
+
+00:00:10.000 --> 00:00:15.000
+Third line`;
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+      result.current.setTranscription(webvttContent);
+    });
+
+    await act(async () => {
+      await result.current.handleSave('txt');
+    });
+
+    const callArgs = saveFileMock.mock.calls[0];
+    const savedContent = (callArgs?.[0] as { content: string }).content;
+    expect(savedContent).not.toContain('WEBVTT');
+    expect(savedContent).not.toContain('-->');
+    expect(savedContent).toContain('First line');
+    expect(savedContent).toContain('Second line');
+  });
+
+  it('should handle SRT format with edge cases', async () => {
+    const saveFileMock = vi.fn().mockResolvedValue({
+      success: true,
+      filePath: '/path/to/saved.srt',
+    });
+    overrideElectronAPI({
+      saveFile: saveFileMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    const webvttContent = `WEBVTT
+
+00:00:00.000 --> 00:00:05.000
+Line with. dots.
+
+00:00:05.000 --> 00:00:10.000
+Another. line.`;
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+      result.current.setTranscription(webvttContent);
+    });
+
+    await act(async () => {
+      await result.current.handleSave('srt');
+    });
+
+    const callArgs = saveFileMock.mock.calls[0];
+    const savedContent = (callArgs?.[0] as { content: string }).content;
+    expect(savedContent).toContain('1\n');
+    expect(savedContent).toContain('2\n');
+    expect(savedContent).not.toContain('WEBVTT');
+  });
+
+  it('should handle file name with no extension', async () => {
+    const saveFileMock = vi.fn().mockResolvedValue({
+      success: true,
+      filePath: '/path/to/transcription.txt',
+    });
+    overrideElectronAPI({
+      saveFile: saveFileMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile({ path: '/path/audiofile', name: 'audiofile' });
+      result.current.setTranscription('Test transcription');
+    });
+
+    await act(async () => {
+      await result.current.handleSave('txt');
+    });
+
+    const callArgs = saveFileMock.mock.calls[0];
+    const savedArgs = callArgs?.[0] as any;
+    expect(savedArgs?.defaultName).toBe('audiofile.txt');
+  });
+
+  it('should handle file name with multiple dots', async () => {
+    const saveFileMock = vi.fn().mockResolvedValue({
+      success: true,
+      filePath: '/path/to/audio.backup.txt',
+    });
+    overrideElectronAPI({
+      saveFile: saveFileMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile({ path: '/path/audio.backup.mp3', name: 'audio.backup.mp3' });
+      result.current.setTranscription('Test transcription');
+    });
+
+    await act(async () => {
+      await result.current.handleSave('txt');
+    });
+
+    const callArgs = saveFileMock.mock.calls[0];
+    const savedArgs = callArgs?.[0] as any;
+    expect(savedArgs?.defaultName).toBe('audio.backup.txt');
+  });
 });

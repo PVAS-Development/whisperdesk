@@ -5,6 +5,7 @@ import {
   OUTPUT_FORMATS,
   QUALITY_STARS,
   getQualityStars,
+  getLanguageLabel,
   APP_CONFIG,
 } from '../../config/constants';
 
@@ -118,6 +119,22 @@ describe('config/constants', () => {
       expect(APP_CONFIG.MAX_HISTORY_ITEMS).toBeGreaterThan(0);
       expect(APP_CONFIG.COPY_SUCCESS_DURATION).toBeGreaterThan(0);
       expect(APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getLanguageLabel', () => {
+    it('returns label for known language code', () => {
+      expect(getLanguageLabel('en')).toBe('English');
+      expect(getLanguageLabel('es')).toBe('Spanish');
+      expect(getLanguageLabel('fr')).toBe('French');
+      expect(getLanguageLabel('auto')).toBe('Auto Detect');
+    });
+
+    it('handles all language codes in LANGUAGES', () => {
+      LANGUAGES.forEach((lang) => {
+        const label = getLanguageLabel(lang.value);
+        expect(label).toBe(lang.label);
+      });
     });
   });
 });

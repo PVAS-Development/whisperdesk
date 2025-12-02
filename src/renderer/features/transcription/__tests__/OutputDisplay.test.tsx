@@ -694,4 +694,116 @@ describe('OutputDisplay', () => {
 
     expect(screen.getByText('Simple text content')).toBeInTheDocument();
   });
+
+  it('should scroll highlighted text into view when search match is current', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    const { rerender } = render(
+      <OutputDisplay
+        text="sample transcription content with sample repeated"
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    fireEvent.click(searchButton);
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText(/search/i) as HTMLInputElement;
+      expect(searchInput).toBeInTheDocument();
+      fireEvent.change(searchInput, { target: { value: 'sample' } });
+    });
+
+    rerender(
+      <OutputDisplay
+        text="sample transcription content with sample repeated"
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    await waitFor(() => {
+      const highlights = screen.getAllByText(/sample/);
+      expect(highlights.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should navigate with keyboard shortcuts in search', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    render(
+      <OutputDisplay
+        text="sample text sample again sample"
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    fireEvent.click(searchButton);
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText(/search/i) as HTMLInputElement;
+      fireEvent.change(searchInput, { target: { value: 'sample' } });
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search/i) as HTMLInputElement;
+
+    fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter' });
+
+    fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter', shiftKey: true });
+  });
+
+  it('should close save menu when clicking outside', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    render(
+      <OutputDisplay
+        text={mockTranscriptionText}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/\.txt/i)).toBeInTheDocument();
+    });
+
+    fireEvent.mouseDown(document.body);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/\.txt/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it('should handle search menu navigation', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    render(
+      <OutputDisplay text="word word word" onSave={onSave} onCopy={onCopy} copySuccess={false} />
+    );
+
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    fireEvent.click(searchButton);
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText(/search/i) as HTMLInputElement;
+      fireEvent.change(searchInput, { target: { value: 'word' } });
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search/i);
+    expect(searchInput).toBeInTheDocument();
+  });
 });

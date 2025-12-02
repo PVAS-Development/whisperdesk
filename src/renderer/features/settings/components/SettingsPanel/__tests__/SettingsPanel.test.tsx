@@ -443,4 +443,199 @@ describe('SettingsPanel', () => {
       expect(screen.getByLabelText('Select Whisper model')).toBeInTheDocument();
     });
   });
+
+  it('restores model from localStorage when different from current settings', async () => {
+    const onChange = vi.fn();
+    localStorage.setItem('whisperdesk_lastModel', 'small');
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+    });
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ model: 'small' }));
+    });
+
+    localStorage.removeItem('whisperdesk_lastModel');
+  });
+
+  it('does not restore model from localStorage if it is invalid', async () => {
+    const onChange = vi.fn();
+    localStorage.setItem('whisperdesk_lastModel', 'nonexistent');
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+    });
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Select Whisper model')).toBeInTheDocument();
+    });
+
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ model: 'nonexistent' }));
+
+    localStorage.removeItem('whisperdesk_lastModel');
+  });
+
+  it('calls onModelStatusChange with false when model is not downloaded', async () => {
+    const onModelStatusChange = vi.fn();
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+    });
+
+    const settings: TranscriptionSettings = { ...mockSettings, model: 'tiny' as const };
+
+    render(
+      <SettingsPanel
+        settings={settings}
+        onChange={vi.fn()}
+        disabled={false}
+        onModelStatusChange={onModelStatusChange}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onModelStatusChange).toHaveBeenCalledWith(false);
+    });
+  });
+
+  it('handles download model failure gracefully', async () => {
+    const downloadModel = vi.fn().mockRejectedValue(new Error('Download failed'));
+    const listModels = vi.fn().mockResolvedValue({ models: mockModels });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    overrideElectronAPI({
+      listModels,
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+      downloadModel,
+    });
+
+    const settings: TranscriptionSettings = { ...mockSettings, model: 'tiny' as const };
+
+    render(<SettingsPanel settings={settings} onChange={vi.fn()} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Download/i })).toBeInTheDocument();
+    });
+
+    const downloadButton = screen.getByRole('button', { name: /Download/i });
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to download model:', expect.any(Error));
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('shows GPU status as unavailable when GPU is not available', async () => {
+    const unavailableGpuInfo = { ...mockGpuInfo, available: false };
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(unavailableGpuInfo),
+    });
+
+    render(<SettingsPanel settings={mockSettings} onChange={vi.fn()} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('💻')).toBeInTheDocument();
+    });
+  });
+
+  it('handles model info loading failure', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockRejectedValue(new Error('Failed to load')),
+      getGpuStatus: vi.fn().mockRejectedValue(new Error('Failed to get GPU')),
+    });
+
+    render(<SettingsPanel settings={mockSettings} onChange={vi.fn()} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Select Whisper model')).toBeInTheDocument();
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load model info:', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('displays download progress without remaining time', async () => {
+    const onModelDownloadProgress = vi.fn((callback) => {
+      setTimeout(() => {
+        callback({
+          status: 'progress',
+          percent: 50,
+          remainingTime: '',
+        });
+      }, 0);
+      return vi.fn();
+    });
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+      downloadModel: vi.fn().mockResolvedValue({ success: true }),
+      onModelDownloadProgress,
+    });
+
+    const settings: TranscriptionSettings = { ...mockSettings, model: 'tiny' as const };
+
+    render(<SettingsPanel settings={settings} onChange={vi.fn()} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Download/i })).toBeInTheDocument();
+    });
+
+    const downloadButton = screen.getByRole('button', { name: /Download/i });
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => {
+      expect(onModelDownloadProgress).toHaveBeenCalled();
+    });
+  });
+
+  it('displays download progress with remaining time', async () => {
+    const onModelDownloadProgress = vi.fn((callback) => {
+      setTimeout(() => {
+        callback({
+          status: 'progress',
+          percent: 75,
+          remainingTime: ' 5m remaining',
+        });
+      }, 0);
+      return vi.fn();
+    });
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: mockModels }),
+      getGpuStatus: vi.fn().mockResolvedValue(mockGpuInfo),
+      downloadModel: vi.fn().mockResolvedValue({ success: true }),
+      onModelDownloadProgress,
+    });
+
+    const settings: TranscriptionSettings = { ...mockSettings, model: 'tiny' as const };
+
+    render(<SettingsPanel settings={settings} onChange={vi.fn()} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Download/i })).toBeInTheDocument();
+    });
+
+    const downloadButton = screen.getByRole('button', { name: /Download/i });
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => {
+      expect(onModelDownloadProgress).toHaveBeenCalled();
+    });
+  });
 });

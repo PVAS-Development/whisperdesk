@@ -123,4 +123,56 @@ describe('TranscriptionHistory component', () => {
     expect(onDelete).toHaveBeenCalledWith(mockHistoryItem.id);
     expect(onSelect).not.toHaveBeenCalled();
   });
+
+  it('does not call onSelect on non-Enter key press', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+
+    const item = screen.getByText('test.mp3').closest('.history-item') as HTMLElement;
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Space', code: 'Space' });
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('displays all item metadata correctly', () => {
+    const mockHistoryItem = createMockHistoryItem({
+      model: 'base',
+      language: 'en',
+      format: 'vtt',
+      duration: 120,
+    });
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+
+    expect(screen.getByText('base')).toBeInTheDocument();
+    expect(screen.getByText('English')).toBeInTheDocument();
+    expect(screen.getByText('.vtt')).toBeInTheDocument();
+    expect(screen.getByText(/⏱️/)).toBeInTheDocument();
+  });
 });

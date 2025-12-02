@@ -58,6 +58,14 @@ describe('validators', () => {
       expect(getFileExtension('audiofile')).toBe('audiofile');
     });
 
+    it('should return empty string for empty filename', () => {
+      expect(getFileExtension('')).toBe('');
+    });
+
+    it('should handle filenames starting with dot', () => {
+      expect(getFileExtension('.bashrc')).toBe('bashrc');
+    });
+
     it('should be case-insensitive', () => {
       expect(getFileExtension('AUDIO.MP3')).toBe('mp3');
     });

@@ -278,4 +278,40 @@ describe('FileDropZone', () => {
 
     expect(onFileSelect).not.toHaveBeenCalled();
   });
+
+  it('should not call onFileSelect when file path has no name', async () => {
+    const onFileSelect = vi.fn();
+    overrideElectronAPI({
+      openFile: vi.fn().mockResolvedValue('/path/to/'),
+    });
+
+    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
+
+    const dropzone = screen.getByRole('button');
+    fireEvent.click(dropzone);
+
+    await waitFor(() => {
+      expect(window.electronAPI?.openFile).toHaveBeenCalled();
+    });
+
+    expect(onFileSelect).not.toHaveBeenCalled();
+  });
+
+  it('should handle when openFile returns null', async () => {
+    const onFileSelect = vi.fn();
+    overrideElectronAPI({
+      openFile: vi.fn().mockResolvedValue(null),
+    });
+
+    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
+
+    const dropzone = screen.getByRole('button');
+    fireEvent.click(dropzone);
+
+    await waitFor(() => {
+      expect(window.electronAPI?.openFile).toHaveBeenCalled();
+    });
+
+    expect(onFileSelect).not.toHaveBeenCalled();
+  });
 });
