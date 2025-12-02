@@ -1,0 +1,59 @@
+import { contextBridge, ipcRenderer } from 'electron';
+import type {
+  TranscriptionOptions,
+  SaveFileOptions,
+  ModelDownloadProgress,
+  TranscriptionProgress,
+} from '../shared/types';
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  openFile: () => ipcRenderer.invoke('dialog:openFile'),
+  saveFile: (options: SaveFileOptions) => ipcRenderer.invoke('dialog:saveFile', options),
+
+  getFileInfo: (filePath: string) => ipcRenderer.invoke('file:getInfo', filePath),
+
+  listModels: () => ipcRenderer.invoke('models:list'),
+  getGpuStatus: () => ipcRenderer.invoke('models:gpuStatus'),
+  downloadModel: (modelName: string) => ipcRenderer.invoke('models:download', modelName),
+  deleteModel: (modelName: string) => ipcRenderer.invoke('models:delete', modelName),
+  onModelDownloadProgress: (callback: (data: ModelDownloadProgress) => void) => {
+    ipcRenderer.on('models:downloadProgress', (_event, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('models:downloadProgress');
+  },
+
+  startTranscription: (options: TranscriptionOptions) =>
+    ipcRenderer.invoke('transcribe:start', options),
+  cancelTranscription: () => ipcRenderer.invoke('transcribe:cancel'),
+  onTranscriptionProgress: (callback: (data: TranscriptionProgress) => void) => {
+    ipcRenderer.on('transcribe:progress', (_event, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('transcribe:progress');
+  },
+
+  getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
+  getMemoryUsage: () => ipcRenderer.invoke('app:getMemoryUsage'),
+
+  onMenuOpenFile: (callback: () => void) => {
+    ipcRenderer.on('menu:openFile', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:openFile');
+  },
+  onMenuSaveFile: (callback: () => void) => {
+    ipcRenderer.on('menu:saveFile', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:saveFile');
+  },
+  onMenuCopyTranscription: (callback: () => void) => {
+    ipcRenderer.on('menu:copyTranscription', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:copyTranscription');
+  },
+  onMenuStartTranscription: (callback: () => void) => {
+    ipcRenderer.on('menu:startTranscription', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:startTranscription');
+  },
+  onMenuCancelTranscription: (callback: () => void) => {
+    ipcRenderer.on('menu:cancelTranscription', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:cancelTranscription');
+  },
+  onMenuToggleHistory: (callback: () => void) => {
+    ipcRenderer.on('menu:toggleHistory', () => callback());
+    return () => ipcRenderer.removeAllListeners('menu:toggleHistory');
+  },
+});

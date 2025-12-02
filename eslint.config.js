@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'release', 'whisper.cpp', 'node_modules', 'electron', 'coverage', '*.d.ts'],
+    ignores: [
+      'dist',
+      'dist-electron',
+      'release',
+      'whisper.cpp',
+      'node_modules',
+      'electron',
+      'coverage',
+      '*.d.ts',
+    ],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -28,6 +37,7 @@ export default tseslint.config(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',

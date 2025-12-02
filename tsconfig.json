@@ -40,13 +40,13 @@
     /* Module resolution */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/renderer/*"]
     },
 
     /* Type roots */
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist", "build", "electron", "whisper.cpp"],
+  "exclude": ["node_modules", "dist", "dist-electron", "build", "electron", "whisper.cpp"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

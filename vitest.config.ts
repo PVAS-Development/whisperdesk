@@ -10,7 +10,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
+    setupFiles: [path.resolve(__dirname, './src/renderer/test/setup.ts')],
     css: true,
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
@@ -28,7 +28,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src/renderer'),
     },
   },
 });
