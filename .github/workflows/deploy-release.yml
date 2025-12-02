@@ -141,8 +141,55 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Verify Apple credentials
+        run: |
+          echo "🔐 Verifying Apple notarization credentials..."
+          if [ -z "$APPLE_ID" ]; then
+            echo "⚠️ Warning: APPLE_ID is not set"
+          else
+            echo "✅ APPLE_ID is set: ${APPLE_ID:0:3}***"
+          fi
+          if [ -z "$APPLE_APP_SPECIFIC_PASSWORD" ]; then
+            echo "⚠️ Warning: APPLE_APP_SPECIFIC_PASSWORD is not set"
+          else
+            echo "✅ APPLE_APP_SPECIFIC_PASSWORD is set: ****-****-****-****"
+          fi
+          if [ -z "$APPLE_TEAM_ID" ]; then
+            echo "⚠️ Warning: APPLE_TEAM_ID is not set"
+          else
+            echo "✅ APPLE_TEAM_ID is set: $APPLE_TEAM_ID"
+          fi
+          if [ -z "$CSC_LINK" ]; then
+            echo "⚠️ Warning: CSC_LINK (signing certificate) is not set"
+          else
+            echo "✅ CSC_LINK is set"
+          fi
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+
       - name: Build Electron app for macOS
-        run: npx electron-builder --mac --publish never
+        id: electron-build
+        run: |
+          echo "🏗️ Starting electron-builder..."
+          echo "📅 Start time: $(date)"
+
+          # Run electron-builder with verbose output
+          npx electron-builder --mac --publish never 2>&1 | tee electron-builder.log
+          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+
+          echo "📅 End time: $(date)"
+
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "❌ electron-builder failed with exit code $BUILD_EXIT_CODE"
+            echo "📋 Last 100 lines of log:"
+            tail -100 electron-builder.log
+            exit $BUILD_EXIT_CODE
+          fi
+
+          echo "✅ electron-builder completed successfully"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -150,6 +197,16 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Enable verbose notarization logging
+          DEBUG: electron-notarize*
+
+      - name: Upload build log on failure
+        if: failure() && steps.electron-build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-builder-log
+          path: electron-builder.log
+          retention-days: 7
 
       - name: Upload macOS artifacts to release
         if: success()
