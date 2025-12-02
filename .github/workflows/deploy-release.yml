@@ -126,6 +126,10 @@ jobs:
             if [ ! -f "bin/whisper-cli" ]; then
               echo "❌ whisper-cli not found after build, rebuilding..."
               npm run setup:whisper:universal
+              if [ ! -f "bin/whisper-cli" ]; then
+                echo "❌ Failed to build whisper-cli even after rebuild!"
+                exit 1
+              fi
             fi
             echo "✅ whisper-cli built successfully"
             lipo -info bin/whisper-cli
