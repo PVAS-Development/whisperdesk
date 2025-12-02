@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+#!/usr/bin/env npx tsx
 /**
  * Script to generate macOS .icns icon from SVG
- * Usage: node scripts/generate-icons.js
+ * Usage: npx tsx scripts/generate-icons.ts
  */
 
 import sharp from 'sharp';
@@ -17,9 +17,9 @@ const BUILD_DIR = path.join(__dirname, '../build');
 const ICONSET_DIR = path.join(BUILD_DIR, 'icon.iconset');
 const SVG_PATH = path.join(BUILD_DIR, 'icon.svg');
 
-const SIZES = [16, 32, 64, 128, 256, 512, 1024];
+const SIZES = [16, 32, 64, 128, 256, 512, 1024] as const;
 
-async function generateIcons() {
+async function generateIcons(): Promise<void> {
   console.log('🎨 Generating app icons...\n');
 
   if (!fs.existsSync(ICONSET_DIR)) {
@@ -45,6 +45,7 @@ async function generateIcons() {
   console.log(`  ✓ Generated icon.png (1024x1024)`);
 
   await sharp(svgBuffer).resize(512, 512).png().toFile(path.join(BUILD_DIR, 'icon@2x.png'));
+  console.log('  ✓ Generated icon@2x.png (512x512)');
 
   console.log('\n📦 Creating .icns file...');
 
@@ -54,7 +55,8 @@ async function generateIcons() {
     });
     console.log('  ✓ Generated icon.icns\n');
   } catch (err) {
-    console.error('  ✗ Failed to generate .icns file:', err.message);
+    const error = err as Error;
+    console.error('  ✗ Failed to generate .icns file:', error.message);
     console.log('  ℹ You may need to manually create the .icns file on macOS\n');
   }
 
