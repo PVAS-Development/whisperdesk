@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { SettingsPanel } from '@/features/settings';
 import { overrideElectronAPI } from '@/test/utils';
 import { MOCK_SETTINGS, createMockModels } from '@/test/fixtures';
@@ -237,8 +237,11 @@ describe('SettingsPanel', () => {
       expect(screen.getByText(/Downloading/i)).toBeInTheDocument();
     });
 
-    if (progressCallback) {
-      progressCallback({ status: 'progress', percent: 50 });
+    const cb = progressCallback;
+    if (cb) {
+      act(() => {
+        cb({ status: 'progress', percent: 50 });
+      });
     }
 
     await waitFor(() => {

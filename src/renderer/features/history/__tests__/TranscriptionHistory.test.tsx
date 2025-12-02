@@ -99,4 +99,28 @@ describe('TranscriptionHistory component', () => {
     fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('calls onDelete when delete button is clicked without selecting item', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+
+    const deleteButton = screen.getByLabelText(`Delete ${mockHistoryItem.fileName}`);
+    fireEvent.click(deleteButton);
+
+    expect(onDelete).toHaveBeenCalledWith(mockHistoryItem.id);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });

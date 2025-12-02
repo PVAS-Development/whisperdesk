@@ -347,6 +347,7 @@ describe('SettingsPanel', () => {
       deleteModel,
     });
 
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     window.confirm = vi.fn().mockReturnValue(true);
     window.alert = vi.fn();
 
@@ -362,6 +363,8 @@ describe('SettingsPanel', () => {
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to delete model'));
     });
+
+    consoleSpy.mockRestore();
   });
 
   it('calls onModelStatusChange when model status changes', async () => {
