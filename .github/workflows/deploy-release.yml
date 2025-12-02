@@ -12,6 +12,10 @@ permissions:
   contents: write
   actions: read
 
+env:
+  ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+  ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
 jobs:
   deploy-mac:
     name: Build & Deploy macOS
@@ -25,11 +29,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: v${{ inputs.version }}
-          fetch-depth: 0
+          fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: false
 
       - name: Verify release tag exists
         run: |
+          git fetch --tags --depth=1
           if ! git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
             echo "❌ Release tag v${{ inputs.version }} not found!"
             echo "Available tags:"
@@ -69,8 +75,32 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache whisper.cpp build
+        id: cache-whisper
+        uses: actions/cache@v4
+        with:
+          path: |
+            whisper.cpp/build-arm64
+            whisper.cpp/build-x86_64
+            bin/whisper-cli
+          key: whisper-cpp-universal-${{ runner.os }}-${{ hashFiles('scripts/setup-whisper-cpp.sh') }}
+          restore-keys: |
+            whisper-cpp-universal-${{ runner.os }}-
+
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/electron
+            .cache/electron-builder
+            ~/Library/Caches/electron
+            ~/Library/Caches/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            electron-${{ runner.os }}-
+
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Update package.json version
         run: |
@@ -78,7 +108,18 @@ jobs:
           echo "✅ Updated package.json to version ${{ inputs.version }}"
 
       - name: Build whisper.cpp (universal binary)
+        if: steps.cache-whisper.outputs.cache-hit != 'true'
         run: npm run setup:whisper:universal
+
+      - name: Verify whisper-cli exists
+        run: |
+          if [ ! -f "bin/whisper-cli" ]; then
+            echo "❌ whisper-cli not found, rebuilding..."
+            npm run setup:whisper:universal
+          else
+            echo "✅ whisper-cli found"
+            lipo -info bin/whisper-cli
+          fi
 
       - name: Generate icons
         run: npm run icons
@@ -95,6 +136,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          USE_HARD_LINKS: false
 
       - name: Upload macOS artifacts to release
         if: success()
