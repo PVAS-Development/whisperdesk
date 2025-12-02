@@ -10,7 +10,7 @@
 
 A beautiful, native macOS desktop application for transcribing audio and video files using [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
-![WhisperDesk Screenshot](docs/screenshot.png)
+![WhisperDesk Screenshot](src/docs/screenshot.png)
 
 ## ✨ Features
 
@@ -23,7 +23,6 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 - **Dark Mode** - Beautiful dark theme that respects your system preference
 - **Keyboard Shortcuts** - Full keyboard navigation support
 - **Transcription History** - Keep track of your recent transcriptions
-- **Auto-Updates** - Automatic updates via GitHub releases
 - **Native Performance** - Uses whisper.cpp for fast, efficient transcription
 - **TypeScript** - Fully typed codebase for better maintainability
 - **Feature-Driven Architecture** - Modular codebase organized by feature domains
@@ -277,43 +276,45 @@ Tests run automatically in GitHub Actions on every PR and push:
 | `npm run test:run`                | Run tests once (CI mode)                 |
 | `npm run test:coverage`           | Run tests with coverage report           |
 
+### Architecture
+
+This project follows a modern Electron architecture with strict separation of concerns:
+
+- **`src/main/`**: Electron Main process (TypeScript). Handles OS integration, window management, and native services.
+- **`src/preload/`**: Preload scripts (TypeScript). Exposes a secure, typed API to the renderer via `contextBridge`.
+- **`src/renderer/`**: React application (TypeScript). The UI layer, built with Vite.
+- **`src/shared/`**: Shared types and constants used by both Main and Renderer processes.
+
+**Security Features:**
+
+- **Context Isolation**: Enabled. Renderer cannot access Node.js primitives directly.
+- **Sandbox**: Enabled. Renderer runs in a sandboxed environment.
+- **IPC**: All communication happens via typed IPC channels defined in `src/main/ipc/`.
+
 ### Project Structure
 
 ```
 whisperdesk/
-├── electron/                # Electron main process (CommonJS)
-│   ├── main.cjs             # Main process entry, IPC handlers
-│   ├── preload.cjs          # Preload scripts for secure IPC
-│   ├── whisper-cpp.cjs      # whisper.cpp integration
-│   └── export-helper.cjs    # Document export helpers
-├── src/                     # React frontend (TypeScript)
-│   ├── App.tsx              # Main app component
-│   ├── main.tsx             # React entry point
-│   ├── components/          # Shared UI components
-│   │   ├── ui/              # Reusable UI primitives (ProgressBar, etc.)
-│   │   └── layout/          # Layout components
-│   ├── features/            # Feature-based modules
-│   │   ├── transcription/   # Transcription feature
-│   │   │   ├── components/  # Feature-specific components
-│   │   │   ├── hooks/       # Feature-specific hooks
-│   │   │   ├── services/    # Feature-specific services
-│   │   │   └── types/       # Feature-specific types
-│   │   ├── settings/        # Settings feature
-│   │   ├── history/         # History feature
-│   │   └── updates/         # Updates feature
-│   ├── contexts/            # React Context providers
-│   ├── hooks/               # Shared custom hooks
-│   ├── services/            # Shared services (Electron API wrappers)
-│   ├── config/              # App configuration & constants
-│   ├── types/               # Shared TypeScript types
-│   ├── utils/               # Utility functions
-│   └── test/                # Test utilities and fixtures
+├── src/
+│   ├── main/                # Electron Main process (TypeScript)
+│   │   ├── index.ts         # Entry point
+│   │   ├── ipc/             # IPC Handlers
+│   │   ├── services/        # Business logic (Whisper, FileSystem)
+│   │   └── utils/           # Utilities
+│   ├── preload/             # Preload scripts (TypeScript)
+│   │   └── index.ts         # Secure API exposure
+│   ├── renderer/            # React frontend (TypeScript)
+│   │   ├── App.tsx          # Main app component
+│   │   ├── main.tsx         # React entry point
+│   │   ├── components/      # Shared UI components
+│   │   ├── features/        # Feature-based modules
+│   │   └── ...
+│   └── shared/              # Shared types and constants
+├── dist-electron/           # Output folder for main process build
+├── dist/                    # Output folder for renderer build
 ├── scripts/                 # Build and setup scripts
-│   ├── setup-whisper-cpp.sh # Builds whisper.cpp with Metal
-│   └── generate-icons.js    # Generates app icons
 ├── bin/                     # whisper-cli binary (built)
-├── models/                  # Downloaded GGML models (dev)
-└── build/                   # Build resources (icons, entitlements)
+└── models/                  # Downloaded GGML models (dev)
 ```
 
 ## 🐛 Troubleshooting
