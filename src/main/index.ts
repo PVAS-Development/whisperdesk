@@ -1,11 +1,13 @@
-import { app, BrowserWindow, Menu, shell } from 'electron';
+import { app, BrowserWindow, Menu, shell, dialog } from 'electron';
 import type { MenuItemConstructorOptions } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc';
+import packageJson from '../../package.json';
 
 let mainWindow: BrowserWindow | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+const appVersion = packageJson.version;
 
 function createMenu() {
   if (!mainWindow) return;
@@ -114,6 +116,29 @@ function createMenu() {
     {
       role: 'help',
       submenu: [
+        {
+          label: 'About WhisperDesk',
+          click: async () => {
+            const author = 'Pedro Siqueira';
+            const githubUrl = 'https://github.com/pedrovsiqueira';
+            const linkedinUrl = 'https://www.linkedin.com/in/pedrovsiqueira';
+
+            const result = await dialog.showMessageBox({
+              type: 'info',
+              title: 'About WhisperDesk',
+              message: `WhisperDesk ${appVersion}`,
+              detail: `Author: ${author}`,
+              buttons: ['Open GitHub', 'Open LinkedIn', 'Close'],
+              cancelId: 2,
+            });
+
+            if (result.response === 0) {
+              await shell.openExternal(githubUrl);
+            } else if (result.response === 1) {
+              await shell.openExternal(linkedinUrl);
+            }
+          },
+        },
         {
           label: 'Learn More',
           click: async () => {
