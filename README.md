@@ -218,7 +218,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic v
 
 ### Testing
 
-WhisperDesk has a comprehensive test suite with **257 tests** covering utilities, services, hooks, and React components.
+WhisperDesk has a comprehensive test suite with **335+ tests** covering utilities, services, hooks, and React components.
 
 #### Run Tests
 
@@ -251,7 +251,7 @@ Tests run automatically in GitHub Actions on every PR and push:
 
 - ✅ Linting & formatting checks
 - ✅ TypeScript type checking
-- ✅ Unit & component tests (257 tests)
+- ✅ Unit & component tests (335+ tests)
 - ✅ Production build validation
 
 ### Available Scripts
@@ -343,7 +343,24 @@ brew install ffmpeg
 
 ### App won't open (macOS Gatekeeper)
 
-Right-click the app and select "Open" to bypass Gatekeeper for unsigned apps.
+The app is **code-signed and notarized** by Apple, so it should open normally. If you still see a warning:
+
+1. Right-click the app and select "Open"
+2. Click "Open" in the dialog that appears
+
+For builds from source (unsigned), you may need to run:
+
+```bash
+xattr -cr /Applications/WhisperDesk.app
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up your development environment
+- Code style and commit conventions
+- Submitting pull requests
 
 ## 📄 License
 

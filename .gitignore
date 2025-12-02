@@ -50,6 +50,12 @@ yarn-error.log*
 coverage/
 .nyc_output/
 
+# Certificates and secrets (code signing)
+*.p12
+*.pem
+*.key
+developer-application-certificate.*
+
 # Temporary files
 tmp/
 temp/
