@@ -2,6 +2,8 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import type { ElectronAPI } from '../types/electron';
 
+Element.prototype.scrollIntoView = vi.fn();
+
 const mockElectronAPI: ElectronAPI = {
   openFile: vi.fn().mockResolvedValue(null),
   saveFile: vi.fn().mockResolvedValue({ success: false, error: 'Not implemented' }),

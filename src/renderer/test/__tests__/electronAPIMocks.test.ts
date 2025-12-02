@@ -149,5 +149,60 @@ describe('electronAPIMocks', () => {
       });
       expect(transcResult.text).toBe('Transcribed');
     });
+
+    it('withDownloadProgress sets custom progress callback', () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mockCallback = vi.fn((_fn) => () => {});
+      const mock = builder.withDownloadProgress(mockCallback).build();
+
+      const progressFn = vi.fn();
+      mock.onModelDownloadProgress?.(progressFn);
+
+      expect(mockCallback).toHaveBeenCalled();
+    });
+
+    it('withTranscriptionResult with failure', async () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mock = builder.withTranscriptionResult('', false).build();
+      const result = await mock.startTranscription({
+        filePath: '/path/file.mp3',
+        model: 'base',
+        language: 'en',
+        outputFormat: 'vtt',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('withDownloadModel with failure', async () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mock = builder.withDownloadModel(false).build();
+      const result = await mock.downloadModel('base');
+      expect(result.success).toBe(false);
+    });
+
+    it('withDeleteModel with failure', async () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mock = builder.withDeleteModel(false).build();
+      const result = await mock.deleteModel('base');
+      expect(result.success).toBe(false);
+    });
+
+    it('withFileSave with failure', async () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mock = builder.withFileSave(false).build();
+      const result = await mock.saveFile({
+        content: 'test',
+        format: 'txt',
+        defaultName: 'test.txt',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('withFileOpen with null', async () => {
+      const builder = new ElectronAPIMockBuilder();
+      const mock = builder.withFileOpen(null).build();
+      const result = await mock.openFile();
+      expect(result).toBeNull();
+    });
   });
 });

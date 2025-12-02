@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useHistory } from '@/features/history';
 import type { HistoryItem } from '@/types';
@@ -143,5 +143,45 @@ describe('useHistory', () => {
     expect(saved).toHaveLength(20);
     expect(saved[0].id).toBe(20);
     expect(saved.some((item: HistoryItem) => item.id === 0)).toBe(false);
+  });
+
+  it('should call onSelect callback and hide history when selecting item', () => {
+    const { result } = renderHook(() => useHistory());
+    const mockItem = createMockHistoryItem();
+    const onSelectMock = vi.fn();
+
+    act(() => {
+      result.current.addHistoryItem(mockItem);
+      result.current.setShowHistory(true);
+    });
+
+    expect(result.current.showHistory).toBe(true);
+
+    act(() => {
+      result.current.selectHistoryItem(mockItem, onSelectMock);
+    });
+
+    expect(onSelectMock).toHaveBeenCalledWith(mockItem);
+    expect(result.current.showHistory).toBe(false);
+  });
+
+  it('should handle localStorage save failure gracefully', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+
+    localStorage.setItem = vi.fn().mockImplementation(() => {
+      throw new Error('Storage quota exceeded');
+    });
+
+    const { result } = renderHook(() => useHistory());
+
+    act(() => {
+      result.current.addHistoryItem(createMockHistoryItem());
+    });
+
+    expect(consoleSpy).toHaveBeenCalled();
+
+    localStorage.setItem = originalSetItem;
+    consoleSpy.mockRestore();
   });
 });

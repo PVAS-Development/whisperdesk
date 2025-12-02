@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import React from 'react';
 import {
   setupSettingsPanelMocks,
   setupFileMocks,
@@ -7,8 +9,10 @@ import {
   waitForCall,
   waitForCallWith,
   createDownloadProgressMock,
+  renderAndWait,
+  setupHistoryMocks,
 } from '../componentTestHelpers';
-import { createMockModels, MOCK_GPU_INFO } from '../fixtures';
+import { createMockModels, MOCK_GPU_INFO, createMockHistoryItem } from '../fixtures';
 
 describe('componentTestHelpers', () => {
   describe('setupSettingsPanelMocks', () => {
@@ -105,6 +109,78 @@ describe('componentTestHelpers', () => {
       setTimeout(() => mock('test', 123), 10);
       await waitForCallWith(mock, 'test', 123);
       expect(mock).toHaveBeenCalledWith('test', 123);
+    });
+  });
+
+  describe('renderAndWait', () => {
+    it('renders component and waits for text', async () => {
+      const TestComponent = () => React.createElement('div', null, 'Hello Test');
+      const result = await renderAndWait(React.createElement(TestComponent), 'Hello Test');
+      expect(result.container).toBeDefined();
+      expect(screen.getByText('Hello Test')).toBeInTheDocument();
+    });
+
+    it('renders component without waiting when no expectText provided', async () => {
+      const TestComponent = () => React.createElement('div', null, 'Simple');
+      const result = await renderAndWait(React.createElement(TestComponent));
+      expect(result.container).toBeDefined();
+    });
+
+    it('renders with options', async () => {
+      const TestComponent = () => React.createElement('span', null, 'With Options');
+      const result = await renderAndWait(React.createElement(TestComponent), 'With Options', {});
+      expect(result.container).toBeDefined();
+    });
+
+    it('waits for regex pattern', async () => {
+      const TestComponent = () => React.createElement('p', null, 'Pattern Match 123');
+      const result = await renderAndWait(React.createElement(TestComponent), /Pattern Match/);
+      expect(result.container).toBeDefined();
+    });
+  });
+
+  describe('setupHistoryMocks', () => {
+    it('sets up history mocks with default items', () => {
+      setupHistoryMocks();
+      expect(window.electronAPI).toBeDefined();
+    });
+
+    it('sets up history mocks with custom items', () => {
+      const customItems = [
+        createMockHistoryItem({ id: 1, fileName: 'custom1.mp3' }),
+        createMockHistoryItem({ id: 2, fileName: 'custom2.mp3' }),
+      ];
+      setupHistoryMocks(customItems);
+      expect(window.electronAPI).toBeDefined();
+    });
+  });
+
+  describe('createDownloadProgressMock edge cases', () => {
+    it('stores multiple callbacks when called multiple times', () => {
+      const { mock, callbacks } = createDownloadProgressMock(false);
+
+      const cb1 = vi.fn();
+      const cb2 = vi.fn();
+
+      (mock as unknown as (cb: typeof cb1) => void)(cb1);
+      (mock as unknown as (cb: typeof cb2) => void)(cb2);
+
+      expect(callbacks).toHaveLength(2);
+    });
+
+    it('triggers all stored callbacks with custom data', () => {
+      const { mock, triggerCallback } = createDownloadProgressMock(false);
+
+      const cb1 = vi.fn();
+      const cb2 = vi.fn();
+
+      (mock as unknown as (cb: typeof cb1) => void)(cb1);
+      (mock as unknown as (cb: typeof cb2) => void)(cb2);
+
+      triggerCallback({ percent: 75 });
+
+      expect(cb1).toHaveBeenCalledWith({ percent: 75 });
+      expect(cb2).toHaveBeenCalledWith({ percent: 75 });
     });
   });
 });

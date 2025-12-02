@@ -132,4 +132,219 @@ describe('SettingsPanel', () => {
       expect(screen.getByText(/GPU|RTX 3080/i)).toBeInTheDocument();
     });
   });
+
+  it('should handle loadModelInfo error gracefully', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    overrideElectronAPI({
+      listModels: vi.fn().mockRejectedValue(new Error('Network error')),
+      getGpuStatus: vi.fn().mockRejectedValue(new Error('GPU error')),
+      onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle model download error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const downloadedModels = createMockModels(3, [false, false, false]);
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: downloadedModels }),
+      getGpuStatus: vi.fn().mockResolvedValue({
+        available: true,
+        name: 'GPU',
+        memory: '8 GB',
+      }),
+      onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
+      downloadModel: vi.fn().mockRejectedValue(new Error('Download failed')),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Download/i)).toBeInTheDocument();
+    });
+
+    const downloadButton = screen.getByLabelText(/Download/i);
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should persist model selection to localStorage', async () => {
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Select Whisper model/i)).toBeInTheDocument();
+    });
+
+    const modelSelect = screen.getByLabelText(/Select Whisper model/i) as HTMLSelectElement;
+    fireEvent.change(modelSelect, { target: { value: 'small' } });
+
+    expect(localStorage.getItem('whisperdesk_lastModel')).toBe('small');
+  });
+
+  it('should show download progress during model download', async () => {
+    let progressCallback: ((data: { status: string; percent: number }) => void) | undefined;
+    const downloadedModels = createMockModels(3, [false, false, false]);
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: downloadedModels }),
+      getGpuStatus: vi.fn().mockResolvedValue({
+        available: true,
+        name: 'GPU',
+        memory: '8 GB',
+      }),
+      onModelDownloadProgress: vi.fn((callback) => {
+        progressCallback = callback;
+        return () => {};
+      }),
+      downloadModel: vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          })
+      ),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Download/i)).toBeInTheDocument();
+    });
+
+    const downloadButton = screen.getByLabelText(/Download/i);
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Downloading/i)).toBeInTheDocument();
+    });
+
+    if (progressCallback) {
+      progressCallback({ status: 'progress', percent: 50 });
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText(/50%/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should handle delete model confirmation cancel', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const downloadedModels = createMockModels(3, [true, true, true]);
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: downloadedModels }),
+      getGpuStatus: vi.fn().mockResolvedValue({
+        available: true,
+        name: 'GPU',
+        memory: '8 GB',
+      }),
+      onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
+      deleteModel: vi.fn(),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Delete/i)).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByLabelText(/Delete/i);
+    fireEvent.click(deleteButton);
+
+    expect(window.electronAPI?.deleteModel).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  it('should handle delete model failure', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const downloadedModels = createMockModels(3, [true, true, true]);
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: downloadedModels }),
+      getGpuStatus: vi.fn().mockResolvedValue({
+        available: true,
+        name: 'GPU',
+        memory: '8 GB',
+      }),
+      onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
+      deleteModel: vi.fn().mockResolvedValue({ success: false, error: 'Permission denied' }),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Delete/i)).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByLabelText(/Delete/i);
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Permission denied'));
+    });
+
+    confirmSpy.mockRestore();
+    alertSpy.mockRestore();
+  });
+
+  it('should handle delete model exception', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const downloadedModels = createMockModels(3, [true, true, true]);
+
+    overrideElectronAPI({
+      listModels: vi.fn().mockResolvedValue({ models: downloadedModels }),
+      getGpuStatus: vi.fn().mockResolvedValue({
+        available: true,
+        name: 'GPU',
+        memory: '8 GB',
+      }),
+      onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
+      deleteModel: vi.fn().mockRejectedValue(new Error('Network error')),
+    });
+
+    const onChange = vi.fn();
+
+    render(<SettingsPanel settings={mockSettings} onChange={onChange} disabled={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Delete/i)).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByLabelText(/Delete/i);
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    confirmSpy.mockRestore();
+    alertSpy.mockRestore();
+    consoleSpy.mockRestore();
+  });
 });

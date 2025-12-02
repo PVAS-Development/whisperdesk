@@ -51,8 +51,9 @@ describe('electronAPI wrapper', () => {
     const cancelRes = await cancelTranscription();
     expect(cancelRes.success).toBe(false);
 
-    const unsubscribe = onTranscriptionProgress(() => {});
-    expect(typeof unsubscribe).toBe('function');
+    const unsubscribeProgress = onTranscriptionProgress(() => {});
+    expect(typeof unsubscribeProgress).toBe('function');
+    unsubscribeProgress();
 
     const models = await listModels();
     expect(models.models).toEqual([]);
@@ -63,8 +64,9 @@ describe('electronAPI wrapper', () => {
     const del = await deleteModel('base');
     expect(del.success).toBe(false);
 
-    const onDl = onModelDownloadProgress(() => {});
-    expect(typeof onDl).toBe('function');
+    const unsubscribeDownload = onModelDownloadProgress(() => {});
+    expect(typeof unsubscribeDownload).toBe('function');
+    unsubscribeDownload();
 
     const gpu = await getGpuStatus();
     expect(gpu.available).toBe(false);

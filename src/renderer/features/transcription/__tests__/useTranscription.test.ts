@@ -507,4 +507,160 @@ describe('useTranscription', () => {
 
     expect(copyMock).not.toHaveBeenCalled();
   });
+
+  it('should handle transcription with no text result', async () => {
+    const noTextResult = { success: true, text: '' };
+    const startTranscriptionMock = vi.fn().mockResolvedValue(noTextResult);
+    overrideElectronAPI({
+      startTranscription: startTranscriptionMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+    });
+
+    await act(async () => {
+      await result.current.handleTranscribe();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isTranscribing).toBe(false);
+    });
+
+    expect(result.current.error).toContain('no output');
+  });
+
+  it('should handle null result from transcription service', async () => {
+    const startTranscriptionMock = vi.fn().mockResolvedValue(null);
+    overrideElectronAPI({
+      startTranscription: startTranscriptionMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+    });
+
+    await act(async () => {
+      await result.current.handleTranscribe();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isTranscribing).toBe(false);
+    });
+
+    expect(result.current.error).toContain('No response');
+  });
+
+  it('should handle transcription progress updates', async () => {
+    let progressCallback: ((data: { percent: number; status: string }) => void) | null = null;
+
+    overrideElectronAPI({
+      onTranscriptionProgress: vi.fn((callback) => {
+        progressCallback = callback;
+        return () => {};
+      }),
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await waitFor(() => {
+      expect(progressCallback).toBeDefined();
+    });
+
+    act(() => {
+      progressCallback?.({ percent: 50, status: 'Processing...' });
+    });
+
+    expect(result.current.progress.percent).toBe(50);
+    expect(result.current.progress.status).toBe('Processing...');
+  });
+
+  it('should reset progress after transcription completes', async () => {
+    vi.useFakeTimers();
+
+    const startTranscriptionMock = vi.fn().mockResolvedValue(mockTranscriptionResult);
+    overrideElectronAPI({
+      startTranscription: startTranscriptionMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+    });
+
+    await act(async () => {
+      await result.current.handleTranscribe();
+    });
+
+    expect(result.current.progress.percent).toBe(100);
+
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+
+    expect(result.current.progress.percent).toBe(0);
+    expect(result.current.progress.status).toBe('');
+
+    vi.useRealTimers();
+  });
+
+  it('should handle non-Error object thrown during transcription', async () => {
+    const startTranscriptionMock = vi.fn().mockRejectedValue('String error');
+    overrideElectronAPI({
+      startTranscription: startTranscriptionMock,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+    });
+
+    await act(async () => {
+      await result.current.handleTranscribe();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isTranscribing).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Unknown error occurred');
+  });
+
+  it('should clear state when selecting new file', () => {
+    const { result } = renderHook(() => useTranscription());
+
+    act(() => {
+      result.current.setSelectedFile(mockFile);
+      result.current.setTranscription('Some text');
+    });
+
+    expect(result.current.selectedFile).toEqual(mockFile);
+    expect(result.current.transcription).toBe('Some text');
+
+    const newFile = createMockFile({ path: '/new/file.mp3', name: 'new.mp3' });
+
+    act(() => {
+      result.current.handleFileSelect(newFile);
+    });
+
+    expect(result.current.selectedFile).toEqual(newFile);
+    expect(result.current.transcription).toBe('');
+    expect(result.current.error).toBeNull();
+  });
+
+  it('should cleanup progress timeout on unmount', () => {
+    vi.useFakeTimers();
+
+    const { unmount } = renderHook(() => useTranscription());
+
+    unmount();
+
+    vi.useRealTimers();
+  });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   getStorageItem,
   setStorageItem,
@@ -146,6 +146,84 @@ describe('storage', () => {
       expect(() => {
         removeStorageItem('whisperdesk_theme' as StorageKey);
       }).not.toThrow();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle localStorage.setItem failure for setStorageItem', () => {
+      const originalSetItem = localStorage.setItem.bind(localStorage);
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      localStorage.setItem = vi.fn().mockImplementation(() => {
+        throw new Error('Storage quota exceeded');
+      });
+
+      const result = setStorageItem('whisperdesk_theme' as StorageKey, { data: 'test' });
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalled();
+
+      localStorage.setItem = originalSetItem;
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle localStorage.setItem failure for setStorageString', () => {
+      const originalSetItem = localStorage.setItem.bind(localStorage);
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      localStorage.setItem = vi.fn().mockImplementation(() => {
+        throw new Error('Storage quota exceeded');
+      });
+
+      const result = setStorageString('whisperdesk_theme' as StorageKey, 'test');
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalled();
+
+      localStorage.setItem = originalSetItem;
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle localStorage.getItem failure for getStorageItem', () => {
+      const originalGetItem = localStorage.getItem.bind(localStorage);
+
+      localStorage.getItem = vi.fn().mockImplementation(() => {
+        throw new Error('Storage access denied');
+      });
+
+      const result = getStorageItem('whisperdesk_theme' as StorageKey, 'default');
+
+      expect(result).toBe('default');
+
+      localStorage.getItem = originalGetItem;
+    });
+
+    it('should handle localStorage.getItem failure for getStorageString', () => {
+      const originalGetItem = localStorage.getItem.bind(localStorage);
+
+      localStorage.getItem = vi.fn().mockImplementation(() => {
+        throw new Error('Storage access denied');
+      });
+
+      const result = getStorageString('whisperdesk_theme' as StorageKey, 'light');
+
+      expect(result).toBe('light');
+
+      localStorage.getItem = originalGetItem;
+    });
+
+    it('should handle localStorage.removeItem failure silently', () => {
+      const originalRemoveItem = localStorage.removeItem.bind(localStorage);
+
+      localStorage.removeItem = vi.fn().mockImplementation(() => {
+        throw new Error('Storage access denied');
+      });
+
+      expect(() => {
+        removeStorageItem('whisperdesk_theme' as StorageKey);
+      }).not.toThrow();
+
+      localStorage.removeItem = originalRemoveItem;
     });
   });
 });
