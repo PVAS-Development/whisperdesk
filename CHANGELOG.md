@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/PVAS-Development/whisperdesk/compare/v1.2.0...v1.2.1) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+- update README links and add auto updates feature ([06ed6bf](https://github.com/PVAS-Development/whisperdesk/commit/06ed6bfcc569ba83350b57d2e698959b8333ea4f))
+
 ## [1.2.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.1.6...v1.2.0) (2025-12-04)
 
 ### ✨ Features
