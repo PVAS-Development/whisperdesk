@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pedrovsiqueira/whisperdesk.git"
+    "url": "https://github.com/PVAS-Development/whisperdesk.git"
   },
   "bugs": {
-    "url": "https://github.com/pedrovsiqueira/whisperdesk/issues"
+    "url": "https://github.com/PVAS-Development/whisperdesk/issues"
   },
-  "homepage": "https://github.com/pedrovsiqueira/whisperdesk#readme",
+  "homepage": "https://github.com/PVAS-Development/whisperdesk#readme",
   "main": "dist-electron/main.cjs",
   "author": {
     "name": "Pedro Siqueira",
@@ -169,7 +169,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "pedrovsiqueira",
+      "owner": "PVAS-Development",
       "repo": "whisperdesk"
     }
   }
