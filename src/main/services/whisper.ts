@@ -389,6 +389,7 @@ export function transcribe(
 ): Promise<TranscriptionResult> & { cancel?: () => void } {
   const { filePath, model, language, outputFormat } = options;
   let proc: ChildProcess | null = null;
+  let cancelled = false;
 
   const promise = new Promise<TranscriptionResult>((resolve, reject) => {
     const run = async () => {
@@ -488,6 +489,11 @@ export function transcribe(
           fs.unlinkSync(tempWavPath);
         }
 
+        if (cancelled) {
+          resolve({ success: true, cancelled: true, text: '' });
+          return;
+        }
+
         if (code === 0) {
           const baseName = audioPath.replace(/\.[^/.]+$/, '');
           let txtPath = baseName + '.txt';
@@ -544,6 +550,7 @@ export function transcribe(
 
   promise.cancel = () => {
     if (proc) {
+      cancelled = true;
       proc.kill();
     }
   };

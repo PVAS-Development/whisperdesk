@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAppTheme, useAppHistory } from '../../../contexts';
+import appIcon from '../../../assets/icon.png';
 
 function AppHeader(): React.JSX.Element {
   const { theme, toggleTheme } = useAppTheme();
@@ -9,7 +10,7 @@ function AppHeader(): React.JSX.Element {
     <header className="app-header">
       <div className="header-content">
         <div className="header-left">
-          <div className="app-logo">🎙️</div>
+          <img src={appIcon} alt="WhisperDesk" className="app-logo" />
           <div className="header-title">
             <h1>WhisperDesk</h1>
             <p>Transcribe audio & video with AI</p>

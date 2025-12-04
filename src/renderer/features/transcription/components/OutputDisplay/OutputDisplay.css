@@ -8,6 +8,7 @@
   overflow: hidden;
   box-shadow: var(--shadow);
   min-height: 0;
+  transition: all var(--transition-base);
 }
 
 .output-header {
@@ -17,15 +18,15 @@
   padding: 14px 18px;
   border-bottom: 1px solid var(--border);
   gap: 12px;
-  background: var(--bg-tertiary);
+  background: var(--surface);
 }
 
 .output-header h3 {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .output-meta {
@@ -45,15 +46,15 @@
 .output-actions .btn-icon {
   padding: 6px 12px;
   font-size: 0.8rem;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .output-actions .btn-icon:hover {
-  background: var(--bg-hover);
+  background: var(--surface-hover);
   border-color: var(--border-hover);
 }
 
@@ -92,11 +93,11 @@
   border: none;
   color: var(--text-primary);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .save-menu-item:hover {
-  background: var(--bg-hover);
+  background: var(--surface-hover);
 }
 
 .format-ext {
@@ -110,13 +111,12 @@
   color: var(--accent);
 }
 
-/* Search Bar */
 .search-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: var(--bg-tertiary);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
@@ -124,12 +124,12 @@
   flex: 1;
   padding: 8px 12px;
   font-size: 0.9rem;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .search-input:focus {
@@ -161,16 +161,16 @@
   height: 28px;
   padding: 0;
   font-size: 0.85rem;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .search-nav-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--surface-hover);
   border-color: var(--border-hover);
 }
 
@@ -185,7 +185,6 @@
   color: var(--danger);
 }
 
-/* Search Highlights */
 .search-highlight {
   background: rgba(255, 213, 0, 0.4);
   border-radius: 2px;

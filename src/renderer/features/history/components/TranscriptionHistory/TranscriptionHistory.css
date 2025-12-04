@@ -7,6 +7,7 @@
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow);
+  transition: all var(--transition-base);
 }
 
 .history-header {
@@ -15,15 +16,15 @@
   align-items: center;
   padding: 14px 18px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-tertiary);
+  background: var(--surface);
 }
 
 .history-header h3 {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .history-actions {
@@ -34,14 +35,15 @@
 .history-actions button {
   padding: 6px 10px;
   font-size: 0.8rem;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
 }
 
 .history-actions button:hover {
-  background: var(--bg-hover);
+  background: var(--surface-hover);
 }
 
 .history-actions .danger {
@@ -82,16 +84,16 @@
 
 .history-item {
   padding: 12px;
-  background: var(--bg-primary);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .history-item:hover,
 .history-item:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   background: var(--accent-light);
   outline: none;
 }

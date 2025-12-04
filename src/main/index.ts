@@ -5,6 +5,7 @@ import { registerIpcHandlers } from './ipc';
 import packageJson from '../../package.json';
 
 let mainWindow: BrowserWindow | null = null;
+let ipcHandlersRegistered = false;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const appVersion = packageJson.version;
@@ -186,7 +187,10 @@ const createWindow = () => {
     trafficLightPosition: { x: 20, y: 20 },
   });
 
-  registerIpcHandlers(mainWindow);
+  if (!ipcHandlersRegistered) {
+    registerIpcHandlers(() => mainWindow);
+    ipcHandlersRegistered = true;
+  }
 
   createMenu();
 

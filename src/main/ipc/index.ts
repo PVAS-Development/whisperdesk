@@ -16,8 +16,11 @@ import {
 } from '../utils/export-helper';
 import type { TranscriptionOptions, SaveFileOptions } from '../../shared/types';
 
-export function registerIpcHandlers(mainWindow: BrowserWindow) {
+export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
   ipcMain.handle('dialog:openFile', async () => {
+    const mainWindow = getMainWindow();
+    if (!mainWindow) return null;
+
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
       filters: [
@@ -34,6 +37,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   });
 
   ipcMain.handle('dialog:saveFile', async (_event, options: SaveFileOptions) => {
+    const mainWindow = getMainWindow();
+    if (!mainWindow) return { success: false, error: 'No window available' };
+
     const { defaultName, content, format } = options;
 
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
@@ -86,7 +92,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle('models:download', async (_event, modelName: string) => {
     try {
       return await downloadModel(modelName, (progress) => {
-        mainWindow.webContents.send('models:downloadProgress', progress);
+        getMainWindow()?.webContents.send('models:downloadProgress', progress);
       });
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) };
@@ -102,7 +108,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle('transcribe:start', async (_event, options: TranscriptionOptions) => {
     try {
       const promise = transcribe(options, (progress) => {
-        mainWindow.webContents.send('transcribe:progress', progress);
+        getMainWindow()?.webContents.send('transcribe:progress', progress);
       });
 
       currentTranscription = promise;

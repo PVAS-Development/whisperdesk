@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhisperDesk - Local AI Transcription</title>
+    <meta name="description"
+        content="Transcribe audio privately and fast using OpenAI's Whisper model directly on your desktop. No cloud, no subscriptions, no data leaks.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="#" class="nav-logo">
+                <img src="icon.png" alt="WhisperDesk" class="nav-logo-icon" />
+                <span>WhisperDesk</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How it Works</a>
+                <a href="https://github.com/PVAS-Development/whisperdesk" class="nav-link-icon" target="_blank"
+                    rel="noopener">
+                    <i data-lucide="github"></i>
+                </a>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                    <i data-lucide="sun" class="theme-icon-light"></i>
+                    <i data-lucide="moon" class="theme-icon-dark"></i>
+                </button>
+                <a href="#download" class="nav-cta">Download</a>
+            </div>
+            <button class="nav-mobile-toggle" aria-label="Toggle menu">
+                <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <div class="container">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span id="version-badge">Latest version</span> is now available
+            </div>
+
+            <h1 class="hero-title">
+                Transcribe Audio <br class="hidden-mobile" />
+                <span class="gradient-text">Private, Fast, & Local.</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Unlock the power of OpenAI's Whisper model directly on your desktop.
+                No cloud subscriptions, no data leaks, just pure speed.
+            </p>
+
+            <p class="hero-features">
+                Free and Open Source • Supports Intel and Apple Silicon
+            </p>
+
+            <div id="download" class="download-anchor"></div>
+            <div class="hero-buttons">
+                <a href="https://github.com/PVAS-Development/whisperdesk/releases/latest" class="btn btn-primary">
+                    <i data-lucide="apple" style="width: 20px; height: 20px;"></i>
+                    Download for macOS
+                </a>
+            </div>
+
+            <div class="screenshot-wrapper">
+                <img src="screenshot.png" alt="WhisperDesk application screenshot"
+                    class="screenshot screenshot-light" />
+                <img src="screenshot-dark.png" alt="WhisperDesk application screenshot"
+                    class="screenshot screenshot-dark" />
+            </div>
+            <p class="mockup-version"><span id="version-footer"></span> - Open Source under MIT License</p>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why use WhisperDesk?</h2>
+                <p class="section-subtitle">We built this tool because uploading sensitive meeting recordings to the
+                    cloud is risky. WhisperDesk runs entirely on your hardware.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon indigo">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="feature-title">100% Private</h3>
+                    <p class="feature-description">
+                        Your audio never leaves your device. Transcription happens locally using your CPU or GPU.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon purple">
+                        <i data-lucide="zap" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="feature-title">GPU Accelerated</h3>
+                    <p class="feature-description">
+                        Optimized for Apple Silicon (Metal) and NVIDIA (CUDA) for blazing fast 100x real-time speeds.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon blue">
+                        <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="feature-title">Multi-Format Export</h3>
+                    <p class="feature-description">
+                        Export to SRT, VTT, JSON, or plain text. Perfect for subtitles, content creation, or archives.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="opensource">
+        <div class="opensource-glow"></div>
+        <div class="container opensource-inner">
+            <div class="opensource-content">
+                <h2 class="opensource-title">Open Source & Community Driven</h2>
+                <p class="opensource-text">
+                    WhisperDesk is free software licensed under MIT. Transparency is key when handling private data.
+                    Check our code, contribute features, or build your own fork.
+                </p>
+                <div class="opensource-buttons">
+                    <a href="https://github.com/PVAS-Development/whisperdesk" target="_blank" rel="noopener"
+                        class="btn btn-white">
+                        <i data-lucide="github" style="width: 20px; height: 20px;"></i>
+                        Star on GitHub
+                    </a>
+                    <a href="https://github.com/PVAS-Development/whisperdesk#readme" target="_blank" rel="noopener"
+                        class="btn btn-dark">
+                        <i data-lucide="book" style="width: 20px; height: 20px;"></i>
+                        Documentation
+                    </a>
+                </div>
+            </div>
+            <div class="opensource-terminal">
+                <div class="terminal-header">
+                    <div class="mockup-dot mockup-dot-red"></div>
+                    <div class="mockup-dot mockup-dot-yellow"></div>
+                    <div class="mockup-dot mockup-dot-green"></div>
+                    <span class="terminal-title">terminal</span>
+                </div>
+                <div class="terminal-line">$ git clone https://github.com/PVAS-Development/whisperdesk.git
+                </div>
+                <div class="terminal-line">$ cd whisperdesk</div>
+                <div class="terminal-line">$ npm install</div>
+                <div class="terminal-line">$ npm run setup:whisper</div>
+                <div class="terminal-line">$ npm run electron:dev</div>
+                <div class="terminal-line success">✔ Dev server running on http://localhost:5173</div>
+                <div class="terminal-cursor">_</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-logo">
+                <img src="icon.png" alt="WhisperDesk" class="footer-logo-img" />
+                <span>WhisperDesk</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/PVAS-Development/whisperdesk/blob/main/LICENSE" target="_blank"
+                    rel="noopener" class="footer-link">License</a>
+                <a href="https://github.com/PVAS-Development/whisperdesk/blob/main/CONTRIBUTING.md" target="_blank"
+                    rel="noopener" class="footer-link">Contributing</a>
+                <a href="https://github.com/PVAS-Development/whisperdesk" target="_blank" rel="noopener"
+                    class="footer-link">GitHub</a>
+            </div>
+            <p class="footer-copyright">© <span id="year"></span> WhisperDesk. Open Source (MIT).</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            html.setAttribute('data-theme', 'dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            lucide.createIcons();
+        });
+
+        const mobileToggle = document.querySelector('.nav-mobile-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-links-open');
+            const isOpen = navLinks.classList.contains('nav-links-open');
+            mobileToggle.innerHTML = isOpen
+                ? '<i data-lucide="x"></i>'
+                : '<i data-lucide="menu"></i>';
+            lucide.createIcons();
+        });
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        (async () => {
+            try {
+                const res = await fetch('https://api.github.com/repos/PVAS-Development/whisperdesk/releases/latest');
+                const data = await res.json();
+                const version = data.tag_name || 'v1.0.0';
+                document.getElementById('version-badge').textContent = version;
+                document.getElementById('version-footer').textContent = version;
+            } catch {
+                document.getElementById('version-badge').textContent = 'Latest';
+                document.getElementById('version-footer').textContent = 'Latest';
+            }
+        })();
+    </script>
+</body>
+
+</html>

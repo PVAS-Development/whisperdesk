@@ -4,8 +4,9 @@
   padding: 32px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: var(--bg-primary);
+  transition: all var(--transition-base);
+  background: var(--surface);
+  position: relative;
 }
 
 .dropzone:hover:not(.disabled) {
@@ -14,7 +15,7 @@
 }
 
 .dropzone.disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -104,11 +105,12 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
-  background: var(--bg-tertiary);
+  background: var(--surface);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--border);
 }
 
 .file-details {
