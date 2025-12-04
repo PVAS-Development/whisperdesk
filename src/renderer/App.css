@@ -31,15 +31,8 @@
 .app-logo {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.25rem;
-  box-shadow: var(--shadow-accent);
-  position: relative;
+  object-fit: contain;
 }
 
 .header-title h1 {
