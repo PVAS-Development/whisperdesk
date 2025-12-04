@@ -1,3 +1,14 @@
+## [1.4.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.3.0...v1.4.0) (2025-12-04)
+
+### ✨ Features
+
+- enhance SEO and accessibility in index.html with updated metadata and structured data ([1e88f0b](https://github.com/PVAS-Development/whisperdesk/commit/1e88f0b03b3a91e91947addd4c939be5e17ac902))
+
+### 🐛 Bug Fixes
+
+- improve accessibility by updating aria attributes and enhancing layout structure ([cdc8d3c](https://github.com/PVAS-Development/whisperdesk/commit/cdc8d3ca7a6849e62b6be57def2c7f5b708496b4))
+- update aria-label for download button and adjust icon sizes for better accessibility ([1b85a13](https://github.com/PVAS-Development/whisperdesk/commit/1b85a139d1a80c3a1374e610bf68bf7d45e97e5f))
+
 ## [1.3.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.2.1...v1.3.0) (2025-12-04)
 
 ### ✨ Features
