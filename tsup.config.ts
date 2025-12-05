@@ -12,5 +12,5 @@ export default defineConfig({
   splitting: false,
   clean: true,
   external: ['electron'],
-  noExternal: ['docx', 'jspdf'], // Bundle these
+  noExternal: ['docx', 'jspdf'],
 });
