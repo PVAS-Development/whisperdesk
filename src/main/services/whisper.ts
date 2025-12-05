@@ -546,7 +546,6 @@ export function transcribe(
               txtPath,
               vttPath,
               stdoutLength: stdout.length,
-              stdoutSnippet: stdout.slice(0, 500) + (stdout.length > 500 ? '...[truncated]' : ''),
             });
             reject(new Error('Transcription produced no output'));
             return;
