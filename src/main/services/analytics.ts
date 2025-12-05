@@ -3,7 +3,7 @@ import { app } from 'electron';
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
-const APTABASE_APP_KEY = process.env.APTABASE_APP_KEY || '';
+const APTABASE_APP_KEY = 'A-US-9040496641';
 
 let initialized = false;
 

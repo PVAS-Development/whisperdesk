@@ -5,6 +5,7 @@ import fs from 'fs';
 import https from 'https';
 import { app } from 'electron';
 import os from 'os';
+import crypto from 'crypto';
 import type {
   TranscriptionOptions,
   TranscriptionResult,
@@ -426,17 +427,43 @@ export function transcribe(
       let tempWavPath: string | null = null;
 
       if (ext !== '.wav') {
-        tempWavPath = path.join(app.getPath('temp'), `whisperdesk_${Date.now()}.wav`);
+        tempWavPath = path.join(app.getPath('temp'), `whisperdesk_${crypto.randomUUID()}.wav`);
         try {
           audioPath = await convertToWav(filePath, tempWavPath);
           onProgress?.({ percent: 15, status: 'Audio converted. Starting transcription...' });
         } catch (err) {
+          try {
+            if (fs.existsSync(tempWavPath)) fs.unlinkSync(tempWavPath);
+          } catch (e) {
+            console.error('Failed to delete temp wav file on conversion error:', e);
+          }
           reject(err);
           return;
         }
       }
 
       onProgress?.({ percent: 20, status: 'Transcribing...' });
+
+      const outputBase = path.join(app.getPath('temp'), `whisper_output_${crypto.randomUUID()}`);
+
+      const cleanupFiles = () => {
+        try {
+          if (tempWavPath && fs.existsSync(tempWavPath)) {
+            fs.unlinkSync(tempWavPath);
+          }
+        } catch (e) {
+          console.error('Failed to delete temp wav file:', e);
+        }
+
+        try {
+          const txtPath = outputBase + '.txt';
+          const vttPath = outputBase + '.vtt';
+          if (fs.existsSync(txtPath)) fs.unlinkSync(txtPath);
+          if (fs.existsSync(vttPath)) fs.unlinkSync(vttPath);
+        } catch (e) {
+          console.error('Failed to delete output files:', e);
+        }
+      };
 
       const args = [
         '-m',
@@ -447,6 +474,8 @@ export function transcribe(
         '--output-vtt', // Output VTT subtitles
         '--no-timestamps', // Don't print timestamps in main output (we use VTT)
         '-pp', // Print progress
+        '-of',
+        outputBase,
       ];
 
       // Add language if specified
@@ -461,6 +490,7 @@ export function transcribe(
       proc = child;
 
       if (!child.stdout || !child.stderr) {
+        cleanupFiles();
         reject(new Error('Failed to spawn whisper process'));
         return;
       }
@@ -485,26 +515,15 @@ export function transcribe(
       });
 
       child.on('close', (code: number) => {
-        if (tempWavPath && fs.existsSync(tempWavPath)) {
-          fs.unlinkSync(tempWavPath);
-        }
-
         if (cancelled) {
+          cleanupFiles();
           resolve({ success: true, cancelled: true, text: '' });
           return;
         }
 
         if (code === 0) {
-          const baseName = audioPath.replace(/\.[^/.]+$/, '');
-          let txtPath = baseName + '.txt';
-          let vttPath = baseName + '.vtt';
-
-          if (!fs.existsSync(txtPath) && fs.existsSync(audioPath + '.txt')) {
-            txtPath = audioPath + '.txt';
-          }
-          if (!fs.existsSync(vttPath) && fs.existsSync(audioPath + '.vtt')) {
-            vttPath = audioPath + '.vtt';
-          }
+          const txtPath = outputBase + '.txt';
+          const vttPath = outputBase + '.vtt';
 
           let text = stdout.trim();
 
@@ -512,16 +531,23 @@ export function transcribe(
             if (!text) {
               text = fs.readFileSync(txtPath, 'utf-8').trim();
             }
-            fs.unlinkSync(txtPath);
           }
 
           let vtt: string | null = null;
           if (fs.existsSync(vttPath)) {
             vtt = fs.readFileSync(vttPath, 'utf-8');
-            fs.unlinkSync(vttPath);
           }
 
+          // Clean up files after reading
+          cleanupFiles();
+
           if (!text && !vtt) {
+            console.error('Transcription failed: No output generated.', {
+              txtPath,
+              vttPath,
+              stdoutLength: stdout.length,
+              stdoutSnippet: stdout.slice(0, 500) + (stdout.length > 500 ? '...[truncated]' : ''),
+            });
             reject(new Error('Transcription produced no output'));
             return;
           }
@@ -534,14 +560,16 @@ export function transcribe(
             text: outputFormat === 'vtt' && vtt ? vtt : text,
           });
         } else {
+          cleanupFiles();
+          console.error('Transcription process exited with code', code);
+          console.error('Stderr:', stderr);
           reject(new Error(stderr || 'Transcription failed'));
         }
       });
 
       child.on('error', (err: Error) => {
-        if (tempWavPath && fs.existsSync(tempWavPath)) {
-          fs.unlinkSync(tempWavPath);
-        }
+        console.error('Failed to spawn whisper process:', err);
+        cleanupFiles();
         reject(err);
       });
     };
