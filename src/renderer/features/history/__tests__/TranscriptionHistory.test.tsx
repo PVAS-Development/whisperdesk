@@ -173,6 +173,6 @@ describe('TranscriptionHistory component', () => {
     expect(screen.getByText('base')).toBeInTheDocument();
     expect(screen.getByText('English')).toBeInTheDocument();
     expect(screen.getByText('.vtt')).toBeInTheDocument();
-    expect(screen.getByText(/⏱️/)).toBeInTheDocument();
+    expect(screen.getByText('2m 0s')).toBeInTheDocument();
   });
 });

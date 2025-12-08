@@ -122,7 +122,7 @@ describe('SettingsPanel', () => {
     render(<SettingsPanel settings={mockSettings} onChange={vi.fn()} disabled={false} />);
 
     await waitFor(() => {
-      expect(screen.getByText('✓ Ready to use')).toBeInTheDocument();
+      expect(screen.getByText(/Ready to use/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Delete/ })).toBeInTheDocument();
     });
   });
@@ -548,7 +548,9 @@ describe('SettingsPanel', () => {
     render(<SettingsPanel settings={mockSettings} onChange={vi.fn()} disabled={false} />);
 
     await waitFor(() => {
-      expect(screen.getByText('💻')).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: /GPU acceleration: disabled/i })
+      ).toBeInTheDocument();
     });
   });
 

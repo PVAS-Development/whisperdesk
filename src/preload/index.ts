@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   listModels: () => ipcRenderer.invoke('models:list'),
   getGpuStatus: () => ipcRenderer.invoke('models:gpuStatus'),
+  checkFFmpeg: () => ipcRenderer.invoke('system:checkFFmpeg'),
   downloadModel: (modelName: string) => ipcRenderer.invoke('models:download', modelName),
   deleteModel: (modelName: string) => ipcRenderer.invoke('models:delete', modelName),
   onModelDownloadProgress: (callback: (data: ModelDownloadProgress) => void) => {
@@ -31,6 +32,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   getMemoryUsage: () => ipcRenderer.invoke('app:getMemoryUsage'),
+  trackEvent: (eventName: string, properties?: Record<string, string | number | boolean>) =>
+    ipcRenderer.invoke('analytics:track', eventName, properties),
 
   onMenuOpenFile: (callback: () => void) => {
     ipcRenderer.on('menu:openFile', () => callback());

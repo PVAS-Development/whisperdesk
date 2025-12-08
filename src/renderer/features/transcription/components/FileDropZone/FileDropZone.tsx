@@ -1,4 +1,5 @@
 import React, { useCallback, type DragEvent, type KeyboardEvent } from 'react';
+import { X } from 'lucide-react';
 import { isValidMediaFile, formatFileSize } from '../../../../utils';
 import type { SelectedFile } from '../../../../types';
 import './FileDropZone.css';
@@ -81,7 +82,7 @@ function FileDropZone({
             title="Remove file"
             aria-label="Remove selected file"
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
           <span className="file-icon">📁</span>
           <div className="file-details">

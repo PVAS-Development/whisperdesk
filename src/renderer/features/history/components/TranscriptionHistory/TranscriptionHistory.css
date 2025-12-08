@@ -25,6 +25,9 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .history-actions {
@@ -72,7 +75,6 @@
 }
 
 .empty-icon {
-  font-size: 2.5rem;
   opacity: 0.5;
 }
 

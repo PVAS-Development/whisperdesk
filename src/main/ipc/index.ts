@@ -7,6 +7,7 @@ import {
   downloadModel,
   deleteModel,
   checkGpuStatus,
+  checkFFmpeg,
   transcribe,
 } from '../services/whisper';
 import {
@@ -90,6 +91,8 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
   });
 
   ipcMain.handle('models:gpuStatus', () => checkGpuStatus());
+
+  ipcMain.handle('system:checkFFmpeg', () => checkFFmpeg());
 
   ipcMain.handle('models:download', async (_event, modelName: string) => {
     try {
@@ -183,4 +186,11 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       isTranscribing: !!currentTranscription,
     };
   });
+
+  ipcMain.handle(
+    'analytics:track',
+    (_event, eventName: string, properties?: Record<string, string | number | boolean>) => {
+      trackEvent(eventName, properties);
+    }
+  );
 }

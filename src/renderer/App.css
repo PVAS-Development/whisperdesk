@@ -109,6 +109,13 @@
   overflow-y: auto;
 }
 
+.system-check-loading {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 .right-panel {
   padding: 20px;
   display: flex;

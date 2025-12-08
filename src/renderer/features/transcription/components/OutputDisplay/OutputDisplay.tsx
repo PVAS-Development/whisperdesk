@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, type ChangeEvent } from 'react';
+import { Search, Check, Copy, Save, ChevronUp, ChevronDown, X, FileText } from 'lucide-react';
 import type { OutputFormat } from '../../../../types';
 import { OUTPUT_FORMATS } from '../../../../config';
 import './OutputDisplay.css';
@@ -182,7 +183,7 @@ function OutputDisplay({
               title="Search transcript (⌘F)"
               aria-label="Search transcript"
             >
-              🔍 Search
+              <Search size={14} /> Search
             </button>
             <button
               className={`btn-icon ${copySuccess ? 'success' : ''}`}
@@ -190,7 +191,15 @@ function OutputDisplay({
               title="Copy to clipboard"
               aria-label="Copy transcription to clipboard"
             >
-              {copySuccess ? '✓ Copied!' : '📋 Copy'}
+              {copySuccess ? (
+                <>
+                  <Check size={14} /> Copied!
+                </>
+              ) : (
+                <>
+                  <Copy size={14} /> Copy
+                </>
+              )}
             </button>
             <div className="save-dropdown" ref={saveMenuRef}>
               <button
@@ -200,7 +209,7 @@ function OutputDisplay({
                 aria-label="Save transcription to file"
                 aria-expanded={showSaveMenu}
               >
-                💾 Save
+                <Save size={14} /> Save
               </button>
               {showSaveMenu && (
                 <div className="save-menu">
@@ -246,7 +255,7 @@ function OutputDisplay({
               title="Previous match (Shift+Enter)"
               aria-label="Previous match"
             >
-              ↑
+              <ChevronUp size={14} />
             </button>
             <button
               className="search-nav-btn"
@@ -255,7 +264,7 @@ function OutputDisplay({
               title="Next match (Enter)"
               aria-label="Next match"
             >
-              ↓
+              <ChevronDown size={14} />
             </button>
             <button
               className="search-nav-btn close"
@@ -263,7 +272,7 @@ function OutputDisplay({
               title="Close search (Esc)"
               aria-label="Close search"
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
         </div>
@@ -281,7 +290,9 @@ function OutputDisplay({
           </pre>
         ) : (
           <div className="output-placeholder" role="status" aria-live="polite">
-            <span className="placeholder-icon">📝</span>
+            <span className="placeholder-icon">
+              <FileText size={48} strokeWidth={1.5} aria-hidden="true" />
+            </span>
             <span>Transcription will appear here</span>
             <span className="placeholder-hint">Select a file and click Transcribe to start</span>
           </div>

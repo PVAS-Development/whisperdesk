@@ -1,4 +1,5 @@
 import React from 'react';
+import { Zap } from 'lucide-react';
 import { useAppTranscription } from '../../../contexts';
 
 export function TranscriptionActions(): React.JSX.Element {
@@ -15,7 +16,7 @@ export function TranscriptionActions(): React.JSX.Element {
           aria-label="Start transcription"
           title={!modelDownloaded ? 'Please download the selected model first' : ''}
         >
-          🚀 Transcribe
+          <Zap size={18} aria-hidden="true" /> Transcribe
         </button>
       ) : (
         <button

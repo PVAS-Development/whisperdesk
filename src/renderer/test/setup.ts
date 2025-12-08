@@ -10,6 +10,7 @@ const mockElectronAPI: ElectronAPI = {
   getFileInfo: vi.fn().mockResolvedValue(null),
   listModels: vi.fn().mockResolvedValue({ models: [] }),
   deleteModel: vi.fn().mockResolvedValue({ success: true }),
+  checkFFmpeg: vi.fn().mockResolvedValue(true),
   getGpuStatus: vi.fn().mockResolvedValue({ available: false }),
   downloadModel: vi
     .fn()
@@ -31,6 +32,7 @@ const mockElectronAPI: ElectronAPI = {
     heapUsed: 100 * 1024 * 1024,
     heapTotal: 200 * 1024 * 1024,
   }),
+  trackEvent: vi.fn().mockResolvedValue(undefined),
   onMenuOpenFile: vi.fn().mockReturnValue(() => {}),
   onMenuSaveFile: vi.fn().mockReturnValue(() => {}),
   onMenuCopyTranscription: vi.fn().mockReturnValue(() => {}),

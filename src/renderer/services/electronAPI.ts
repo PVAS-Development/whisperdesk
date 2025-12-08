@@ -80,6 +80,10 @@ export async function getGpuStatus(): Promise<GpuInfo> {
   return result ?? { available: false, type: 'cpu', name: 'CPU' };
 }
 
+export async function checkFFmpeg(): Promise<boolean> {
+  return (await window.electronAPI?.checkFFmpeg()) ?? false;
+}
+
 export async function getAppInfo(): Promise<AppInfo> {
   const result = await window.electronAPI?.getAppInfo();
   return result ?? { isDev: true, version: '0.0.0', platform: process.platform as NodeJS.Platform };
@@ -88,4 +92,11 @@ export async function getAppInfo(): Promise<AppInfo> {
 export async function getMemoryUsage(): Promise<MemoryUsage> {
   const result = await window.electronAPI?.getMemoryUsage();
   return result ?? { heapUsed: 0, heapTotal: 0, rss: 0, external: 0, isTranscribing: false };
+}
+
+export async function trackEvent(
+  eventName: string,
+  properties?: Record<string, string | number | boolean>
+): Promise<void> {
+  await window.electronAPI?.trackEvent(eventName, properties);
 }

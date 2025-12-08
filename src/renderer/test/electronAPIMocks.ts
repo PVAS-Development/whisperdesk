@@ -8,6 +8,7 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
   getFileInfo: vi.fn().mockResolvedValue(null),
   listModels: vi.fn().mockResolvedValue({ models: [] }),
   deleteModel: vi.fn().mockResolvedValue({ success: true }),
+  checkFFmpeg: vi.fn().mockResolvedValue(true),
   getGpuStatus: vi.fn().mockResolvedValue({ available: false }),
   downloadModel: vi
     .fn()
@@ -29,6 +30,7 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
     heapUsed: 100 * 1024 * 1024,
     heapTotal: 200 * 1024 * 1024,
   }),
+  trackEvent: vi.fn().mockResolvedValue(undefined),
   onMenuOpenFile: vi.fn().mockReturnValue(() => {}),
   onMenuSaveFile: vi.fn().mockReturnValue(() => {}),
   onMenuCopyTranscription: vi.fn().mockReturnValue(() => {}),
@@ -43,6 +45,7 @@ export const createFullElectronAPIMock = (): ElectronAPI => ({
   getFileInfo: vi.fn().mockResolvedValue({ name: 'file.mp3', path: '/path/file.mp3', size: 10 }),
   listModels: vi.fn().mockResolvedValue({ models: [] }),
   deleteModel: vi.fn().mockResolvedValue({ success: true }),
+  checkFFmpeg: vi.fn().mockResolvedValue(true),
   getGpuStatus: vi.fn().mockResolvedValue({ available: true, type: 'gpu', name: 'GPU' }),
   downloadModel: vi.fn().mockResolvedValue({ success: true, model: 'base', path: '/model' }),
   onModelDownloadProgress: vi.fn().mockReturnValue(() => {}),
@@ -53,6 +56,7 @@ export const createFullElectronAPIMock = (): ElectronAPI => ({
   getMemoryUsage: vi
     .fn()
     .mockResolvedValue({ heapUsed: 1, heapTotal: 2, rss: 3, external: 4, isTranscribing: false }),
+  trackEvent: vi.fn().mockResolvedValue(undefined),
   onMenuOpenFile: vi.fn().mockReturnValue(() => {}),
   onMenuSaveFile: vi.fn().mockReturnValue(() => {}),
   onMenuCopyTranscription: vi.fn().mockReturnValue(() => {}),

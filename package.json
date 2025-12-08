@@ -65,6 +65,7 @@
     "@aptabase/electron": "^0.3.1",
     "docx": "^8.5.0",
     "jspdf": "^2.5.2",
+    "lucide-react": "^0.556.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

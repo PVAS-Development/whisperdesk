@@ -327,21 +327,54 @@ export function deleteModel(modelName: string): { success: boolean; error?: stri
   }
 }
 
+const FFMPEG_PATHS = [
+  '/opt/homebrew/bin/ffmpeg',
+  '/usr/local/bin/ffmpeg',
+  '/usr/bin/ffmpeg',
+  'ffmpeg',
+];
+
+export async function checkFFmpeg(): Promise<boolean> {
+  for (const p of FFMPEG_PATHS) {
+    try {
+      if (path.isAbsolute(p) && !fs.existsSync(p)) {
+        continue;
+      }
+
+      const works = await new Promise<boolean>((resolve) => {
+        const proc = spawn(p, ['-version']);
+        const timeout = setTimeout(() => {
+          proc.kill();
+          resolve(false);
+        }, 5000);
+
+        proc.on('error', () => {
+          clearTimeout(timeout);
+          resolve(false);
+        });
+
+        proc.on('close', (code) => {
+          clearTimeout(timeout);
+          resolve(code === 0);
+        });
+      });
+
+      if (works) return true;
+    } catch {
+      continue;
+    }
+  }
+  return false;
+}
+
 export function checkGpuStatus(): GpuInfo {
   return detectGpuStatus();
 }
 
 function convertToWav(inputPath: string, outputPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const ffmpegPaths = [
-      '/opt/homebrew/bin/ffmpeg',
-      '/usr/local/bin/ffmpeg',
-      '/usr/bin/ffmpeg',
-      'ffmpeg',
-    ];
-
     let ffmpegPath = 'ffmpeg';
-    for (const p of ffmpegPaths) {
+    for (const p of FFMPEG_PATHS) {
       if (p === 'ffmpeg' || fs.existsSync(p)) {
         ffmpegPath = p;
         break;

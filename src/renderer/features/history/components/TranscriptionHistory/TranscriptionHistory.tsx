@@ -1,4 +1,5 @@
 import React, { type KeyboardEvent } from 'react';
+import { History, Trash2, X, Inbox, Clock } from 'lucide-react';
 import { formatDate, formatDuration } from '../../../../utils';
 import { getLanguageLabel } from '../../../../config';
 import './TranscriptionHistory.css';
@@ -29,15 +30,17 @@ function TranscriptionHistory({
   return (
     <div className="history-container">
       <div className="history-header">
-        <h3>📜 Transcription History</h3>
+        <h3>
+          <History size={20} aria-hidden="true" /> Transcription History
+        </h3>
         <div className="history-actions">
           {history.length > 0 && (
             <button className="btn-icon danger" onClick={onClear}>
-              🗑️ Clear All
+              <Trash2 size={16} aria-hidden="true" /> Clear All
             </button>
           )}
           <button className="btn-icon" onClick={onClose}>
-            ✕ Close
+            <X size={16} aria-hidden="true" /> Close
           </button>
         </div>
       </div>
@@ -45,7 +48,9 @@ function TranscriptionHistory({
       <div className="history-content">
         {history.length === 0 ? (
           <div className="history-empty">
-            <span className="empty-icon">📭</span>
+            <span className="empty-icon">
+              <Inbox size={48} aria-hidden="true" />
+            </span>
             <span>No transcriptions yet</span>
             <span className="empty-hint">Your transcription history will appear here</span>
           </div>
@@ -73,7 +78,7 @@ function TranscriptionHistory({
                       title="Delete transcription"
                       aria-label={`Delete ${item.fileName}`}
                     >
-                      🗑️
+                      <Trash2 size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -81,7 +86,9 @@ function TranscriptionHistory({
                   <span className="history-tag">{item.model}</span>
                   <span className="history-tag">{getLanguageLabel(item.language)}</span>
                   {item.format && <span className="history-tag">.{item.format}</span>}
-                  <span className="history-duration">⏱️ {formatDuration(item.duration)}</span>
+                  <span className="history-duration">
+                    <Clock size={12} aria-hidden="true" /> {formatDuration(item.duration)}
+                  </span>
                 </div>
                 <p className="history-preview">{item.preview}</p>
               </div>
