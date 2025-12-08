@@ -34,6 +34,12 @@ function TranscriptionHistory({
     }
   };
 
+  const handleClearAll = (): void => {
+    if (window.confirm('Are you sure you want to clear all transcription history?')) {
+      onClear();
+    }
+  };
+
   return (
     <div className="history-container">
       <div className="history-header">
@@ -42,7 +48,7 @@ function TranscriptionHistory({
         </h3>
         <div className="history-actions">
           {history.length > 0 && (
-            <button className="btn-icon danger" onClick={onClear}>
+            <button className="btn-icon danger" onClick={handleClearAll}>
               <Trash2 size={16} aria-hidden="true" /> Clear All
             </button>
           )}

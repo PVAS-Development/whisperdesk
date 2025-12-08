@@ -81,6 +81,8 @@ describe('TranscriptionHistory component', () => {
     const onSelect = vi.fn();
     const onDelete = vi.fn();
 
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
     render(
       <TranscriptionHistory
         history={[mockHistoryItem]}
@@ -93,11 +95,16 @@ describe('TranscriptionHistory component', () => {
 
     const clearButton = screen.getByText(/Clear All/i);
     fireEvent.click(clearButton);
+    expect(confirmSpy).toHaveBeenCalledWith(
+      'Are you sure you want to clear all transcription history?'
+    );
     expect(onClear).toHaveBeenCalled();
 
     const closeButton = screen.getByText(/Close/i);
     fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
   });
 
   it('calls onDelete when delete button is clicked without selecting item', () => {
@@ -155,6 +162,36 @@ describe('TranscriptionHistory component', () => {
 
     expect(confirmSpy).toHaveBeenCalled();
     expect(onDelete).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
+  });
+
+  it('does not call onClear when clear all confirmation is cancelled', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+
+    const clearButton = screen.getByText(/Clear All/i);
+    fireEvent.click(clearButton);
+
+    expect(confirmSpy).toHaveBeenCalledWith(
+      'Are you sure you want to clear all transcription history?'
+    );
+    expect(onClear).not.toHaveBeenCalled();
 
     confirmSpy.mockRestore();
   });
