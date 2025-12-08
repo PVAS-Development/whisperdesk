@@ -1,4 +1,4 @@
-import { ipcMain, dialog, app } from 'electron';
+import { ipcMain, dialog, app, shell } from 'electron';
 import type { BrowserWindow } from 'electron';
 import path from 'path';
 import fs from 'fs';
@@ -202,5 +202,12 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
   ipcMain.handle('update:install', () => {
     trackEvent(AnalyticsEvents.UPDATE_INSTALLED);
     quitAndInstall();
+  });
+
+  ipcMain.handle('shell:openExternal', async (_event, url: string) => {
+    if (!url.startsWith('https://')) {
+      throw new Error('Invalid URL protocol. Only HTTPS is allowed.');
+    }
+    await shell.openExternal(url);
   });
 }

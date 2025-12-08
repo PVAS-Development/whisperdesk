@@ -5,6 +5,7 @@ import { useAppTranscription } from '../../../contexts';
 import { TranscriptionActions } from './TranscriptionActions';
 import { TranscriptionProgress } from './TranscriptionProgress';
 import { ErrorMessage } from './ErrorMessage';
+import { DonationSection } from './DonationSection';
 import { SystemWarning } from '../../ui';
 import { checkFFmpeg } from '../../../services/electronAPI';
 
@@ -63,6 +64,8 @@ function LeftPanel(): React.JSX.Element {
       <TranscriptionProgress />
 
       <ErrorMessage />
+
+      <DonationSection />
     </div>
   );
 }

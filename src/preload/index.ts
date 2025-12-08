@@ -36,6 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   trackEvent: (eventName: string, properties?: Record<string, string | number | boolean>) =>
     ipcRenderer.invoke('analytics:track', eventName, properties),
 
+  openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
+
   onMenuOpenFile: (callback: () => void) => {
     ipcRenderer.on('menu:openFile', () => callback());
     return () => ipcRenderer.removeAllListeners('menu:openFile');

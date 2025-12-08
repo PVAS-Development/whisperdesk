@@ -34,6 +34,9 @@
   --warning: #f59e0b;
   --warning-light: rgba(245, 158, 11, 0.1);
 
+  --color-heart: #ef4444;
+  --color-coffee: #ffdd00;
+
   --border: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.12);
   --border-accent: rgba(37, 99, 235, 0.3);

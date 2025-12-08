@@ -793,3 +793,20 @@ img {
     display: none;
   }
 }
+.heart-icon {
+  color: #ef4444;
+  fill: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

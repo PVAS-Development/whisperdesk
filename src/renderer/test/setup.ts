@@ -33,6 +33,7 @@ const mockElectronAPI: ElectronAPI = {
     heapTotal: 200 * 1024 * 1024,
   }),
   trackEvent: vi.fn().mockResolvedValue(undefined),
+  openExternal: vi.fn().mockResolvedValue(undefined),
   onMenuOpenFile: vi.fn().mockReturnValue(() => {}),
   onMenuSaveFile: vi.fn().mockReturnValue(() => {}),
   onMenuCopyTranscription: vi.fn().mockReturnValue(() => {}),

@@ -119,3 +119,7 @@ export function installUpdate(): void {
 export function onUpdateStatus(callback: (status: UpdateStatus) => void): Unsubscribe {
   return window.electronAPI?.onUpdateStatus(callback) ?? (() => {});
 }
+
+export async function openExternal(url: string): Promise<void> {
+  await window.electronAPI?.openExternal(url);
+}

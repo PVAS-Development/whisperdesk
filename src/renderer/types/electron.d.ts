@@ -50,6 +50,7 @@ export interface ElectronAPI {
     eventName: string,
     properties?: Record<string, string | number | boolean>
   ) => Promise<void>;
+  openExternal: (url: string) => Promise<void>;
   onMenuOpenFile: (callback: () => void) => Unsubscribe;
   onMenuSaveFile: (callback: () => void) => Unsubscribe;
   onMenuCopyTranscription: (callback: () => void) => Unsubscribe;
