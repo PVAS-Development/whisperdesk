@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 import type { ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -340,8 +340,26 @@ export async function checkFFmpeg(): Promise<boolean> {
       if (path.isAbsolute(p) && !fs.existsSync(p)) {
         continue;
       }
-      const result = spawnSync(p, ['-version'], { timeout: 5000 });
-      if (result.status === 0) return true;
+
+      const works = await new Promise<boolean>((resolve) => {
+        const proc = spawn(p, ['-version']);
+        const timeout = setTimeout(() => {
+          proc.kill();
+          resolve(false);
+        }, 5000);
+
+        proc.on('error', () => {
+          clearTimeout(timeout);
+          resolve(false);
+        });
+
+        proc.on('close', (code) => {
+          clearTimeout(timeout);
+          resolve(code === 0);
+        });
+      });
+
+      if (works) return true;
     } catch {
       continue;
     }

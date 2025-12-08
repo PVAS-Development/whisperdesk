@@ -159,11 +159,7 @@ function SettingsPanel({
           aria-label={`GPU acceleration: ${gpuInfo.available ? 'enabled' : 'disabled'}. Using ${gpuInfo.name}`}
         >
           <span className="gpu-icon" aria-hidden="true">
-            {gpuInfo.available ? (
-              <Zap size={16} aria-hidden="true" />
-            ) : (
-              <Cpu size={16} aria-hidden="true" />
-            )}
+            {gpuInfo.available ? <Zap size={16} /> : <Cpu size={16} />}
           </span>
           <span className="gpu-text">{gpuInfo.name}</span>
         </div>
