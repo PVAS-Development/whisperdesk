@@ -37,6 +37,10 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
   onMenuStartTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuCancelTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuToggleHistory: vi.fn().mockReturnValue(() => {}),
+  checkForUpdates: vi.fn().mockResolvedValue({ success: true }),
+  downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
+  installUpdate: vi.fn(),
+  onUpdateStatus: vi.fn().mockReturnValue(() => {}),
 });
 
 export const createFullElectronAPIMock = (): ElectronAPI => ({
@@ -63,6 +67,10 @@ export const createFullElectronAPIMock = (): ElectronAPI => ({
   onMenuStartTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuCancelTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuToggleHistory: vi.fn().mockReturnValue(() => {}),
+  checkForUpdates: vi.fn().mockResolvedValue({ success: true }),
+  downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
+  installUpdate: vi.fn(),
+  onUpdateStatus: vi.fn().mockReturnValue(() => {}),
 });
 
 export class ElectronAPIMockBuilder {

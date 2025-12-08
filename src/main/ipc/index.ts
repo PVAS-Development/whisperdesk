@@ -10,6 +10,7 @@ import {
   checkFFmpeg,
   transcribe,
 } from '../services/whisper';
+import { checkForUpdates, downloadUpdate, quitAndInstall } from '../services/auto-updater';
 import {
   generateWordDocument,
   generatePdfDocument,
@@ -193,4 +194,13 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       trackEvent(eventName, properties);
     }
   );
+
+  ipcMain.handle('update:check', () => checkForUpdates());
+
+  ipcMain.handle('update:download', () => downloadUpdate());
+
+  ipcMain.handle('update:install', () => {
+    trackEvent(AnalyticsEvents.UPDATE_INSTALLED);
+    quitAndInstall();
+  });
 }

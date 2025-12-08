@@ -191,3 +191,23 @@ export const QUALITY_STARS: readonly string[] = [
   '★★★★☆',
   '★★★★★',
 ] as const;
+
+export interface UpdateInfo {
+  version: string;
+  releaseDate: string;
+  releaseNotes?: string;
+}
+
+export interface UpdateProgress {
+  percent: number;
+  bytesPerSecond: number;
+  transferred: number;
+  total: number;
+}
+
+export interface UpdateStatus {
+  status: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
+  info?: UpdateInfo;
+  progress?: UpdateProgress;
+  error?: string;
+}

@@ -3,6 +3,7 @@ import type { MenuItemConstructorOptions } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc';
 import { initAnalytics, trackEvent, AnalyticsEvents } from './services/analytics';
+import { initAutoUpdater, checkForUpdates } from './services/auto-updater';
 import packageJson from '../../package.json';
 
 initAnalytics();
@@ -12,6 +13,10 @@ let ipcHandlersRegistered = false;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const appVersion = packageJson.version;
+
+// Delay update check to allow the UI to fully render before checking for updates.
+// This helps prevent update dialogs or notifications from appearing before the main window is ready.
+const UPDATE_CHECK_DELAY_MS = 3000;
 
 function createMenu() {
   if (!mainWindow) return;
@@ -144,6 +149,17 @@ function createMenu() {
           },
         },
         {
+          label: 'Check for Updates...',
+          click: () => {
+            if (!isDev) {
+              checkForUpdates().catch((err) => {
+                console.error('Failed to check for updates:', err);
+              });
+            }
+          },
+        },
+        { type: 'separator' as const },
+        {
           label: 'Learn More',
           click: async () => {
             await shell.openExternal('https://github.com/pedrovsiqueira/whisperdesk');
@@ -206,10 +222,24 @@ const createWindow = () => {
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
+
+  if (!isDev) {
+    mainWindow.once('ready-to-show', () => {
+      setTimeout(() => {
+        checkForUpdates().catch((err) => {
+          console.error('Failed to check for updates on startup:', err);
+        });
+      }, UPDATE_CHECK_DELAY_MS);
+    });
+  }
 };
 
 app.on('ready', () => {
   createWindow();
+
+  if (!isDev) {
+    initAutoUpdater(() => mainWindow);
+  }
 });
 
 app.on('before-quit', () => {

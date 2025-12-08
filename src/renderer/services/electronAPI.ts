@@ -11,6 +11,7 @@ import type {
   AppInfo,
   MemoryUsage,
   Unsubscribe,
+  UpdateStatus,
 } from '../types';
 
 export type { TranscriptionOptions, TranscriptionResult, SaveFileOptions, SaveFileResult };
@@ -99,4 +100,22 @@ export async function trackEvent(
   properties?: Record<string, string | number | boolean>
 ): Promise<void> {
   await window.electronAPI?.trackEvent(eventName, properties);
+}
+
+export async function checkForUpdates(): Promise<{ success: boolean; error?: string }> {
+  const result = await window.electronAPI?.checkForUpdates();
+  return result ?? { success: false, error: 'Electron API not available' };
+}
+
+export async function downloadUpdate(): Promise<{ success: boolean; error?: string }> {
+  const result = await window.electronAPI?.downloadUpdate();
+  return result ?? { success: false, error: 'Electron API not available' };
+}
+
+export function installUpdate(): void {
+  window.electronAPI?.installUpdate();
+}
+
+export function onUpdateStatus(callback: (status: UpdateStatus) => void): Unsubscribe {
+  return window.electronAPI?.onUpdateStatus(callback) ?? (() => {});
 }

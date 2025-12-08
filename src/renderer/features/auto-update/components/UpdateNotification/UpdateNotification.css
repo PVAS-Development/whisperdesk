@@ -1,0 +1,257 @@
+.update-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.update-notification-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  animation: scaleIn 0.2s ease-out;
+  position: relative;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.update-available,
+.update-downloading,
+.update-downloaded,
+.update-error {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.update-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.update-available .update-icon {
+  color: var(--accent);
+}
+
+.update-downloading .update-icon {
+  color: var(--accent);
+}
+
+.update-downloaded .update-icon {
+  color: var(--success);
+}
+
+.update-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.update-text h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.update-text p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.release-notes {
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+.release-notes summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  user-select: none;
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.release-notes summary:hover {
+  color: var(--text-primary);
+}
+
+.release-notes[open] summary {
+  margin-bottom: 8px;
+}
+
+.release-notes-content {
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.update-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-download,
+.btn-install {
+  flex: 1;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover,
+.btn-install:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-dismiss {
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dismiss:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0 4px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.progress-details {
+  font-size: 0.75rem !important;
+  color: var(--text-muted) !important;
+  margin-top: 4px !important;
+}
+
+.update-error {
+  border-left: 3px solid #ef4444;
+}
+
+.update-error .update-icon {
+  color: #ef4444;
+}
+
+.btn-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.btn-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .update-notification-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .update-available,
+  .update-downloading,
+  .update-downloaded,
+  .update-error {
+    padding: 20px;
+  }
+
+  .update-actions {
+    flex-direction: column;
+  }
+
+  .btn-download,
+  .btn-install,
+  .btn-dismiss {
+    width: 100%;
+  }
+}

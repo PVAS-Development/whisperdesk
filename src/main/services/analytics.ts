@@ -44,7 +44,6 @@ export function trackEvent(
   }
 }
 
-// Predefined events for consistency
 export const AnalyticsEvents = {
   // App lifecycle
   APP_LAUNCHED: 'app_launched',
@@ -66,4 +65,12 @@ export const AnalyticsEvents = {
   // Feature usage
   HISTORY_VIEWED: 'history_viewed',
   THEME_CHANGED: 'theme_changed',
+
+  // Auto-update events
+  UPDATE_CHECKING: 'update_checking',
+  UPDATE_AVAILABLE: 'update_available',
+  UPDATE_NOT_AVAILABLE: 'update_not_available',
+  UPDATE_DOWNLOADED: 'update_downloaded',
+  UPDATE_ERROR: 'update_error',
+  UPDATE_INSTALLED: 'update_installed',
 } as const;

@@ -107,6 +107,8 @@ describe('TranscriptionHistory component', () => {
     const onSelect = vi.fn();
     const onDelete = vi.fn();
 
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
     render(
       <TranscriptionHistory
         history={[mockHistoryItem]}
@@ -120,8 +122,41 @@ describe('TranscriptionHistory component', () => {
     const deleteButton = screen.getByLabelText(`Delete ${mockHistoryItem.fileName}`);
     fireEvent.click(deleteButton);
 
+    expect(confirmSpy).toHaveBeenCalledWith(
+      `Are you sure you want to delete the transcription for "${mockHistoryItem.fileName}"?`
+    );
     expect(onDelete).toHaveBeenCalledWith(mockHistoryItem.id);
     expect(onSelect).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
+  });
+
+  it('does not call onDelete when delete confirmation is cancelled', () => {
+    const mockHistoryItem = createMockHistoryItem();
+    const onClear = vi.fn();
+    const onClose = vi.fn();
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    render(
+      <TranscriptionHistory
+        history={[mockHistoryItem]}
+        onClear={onClear}
+        onClose={onClose}
+        onSelect={onSelect}
+        onDelete={onDelete}
+      />
+    );
+
+    const deleteButton = screen.getByLabelText(`Delete ${mockHistoryItem.fileName}`);
+    fireEvent.click(deleteButton);
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
   });
 
   it('does not call onSelect on non-Enter key press', () => {

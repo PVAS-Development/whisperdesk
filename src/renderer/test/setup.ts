@@ -39,6 +39,10 @@ const mockElectronAPI: ElectronAPI = {
   onMenuStartTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuCancelTranscription: vi.fn().mockReturnValue(() => {}),
   onMenuToggleHistory: vi.fn().mockReturnValue(() => {}),
+  checkForUpdates: vi.fn().mockResolvedValue({ success: true }),
+  downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
+  installUpdate: vi.fn(),
+  onUpdateStatus: vi.fn().mockReturnValue(() => {}),
 };
 
 Object.defineProperty(window, 'electronAPI', {
