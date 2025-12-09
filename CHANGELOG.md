@@ -1,3 +1,9 @@
+## [1.6.2](https://github.com/PVAS-Development/whisperdesk/compare/v1.6.1...v1.6.2) (2025-12-09)
+
+### 🐛 Bug Fixes
+
+- use Electron API for retrieving file paths ([9ced370](https://github.com/PVAS-Development/whisperdesk/commit/9ced370b756cf4bf9114c6e6a57850b7b85be2f6))
+
 ## [1.6.1](https://github.com/PVAS-Development/whisperdesk/compare/v1.6.0...v1.6.1) (2025-12-08)
 
 ### 🐛 Bug Fixes
