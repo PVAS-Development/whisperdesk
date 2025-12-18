@@ -33,14 +33,12 @@ export interface TranscriptionStateContextValue {
   error: string | null;
   modelDownloaded: boolean;
   copySuccess: boolean;
-  isFFmpegAvailable: boolean | null;
 }
 
 export interface TranscriptionActionsContextValue {
   setSelectedFile: (file: SelectedFile | null) => void;
   setSettings: (settings: TranscriptionSettings) => void;
   setModelDownloaded: (downloaded: boolean) => void;
-  setIsFFmpegAvailable: (available: boolean | null) => void;
   handleFileSelect: (file: SelectedFile) => void;
   handleTranscribe: () => Promise<void>;
   handleCancel: () => Promise<void>;

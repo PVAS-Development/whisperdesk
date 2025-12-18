@@ -2,15 +2,15 @@ import React from 'react';
 import { Zap } from 'lucide-react';
 import { useAppTranscription } from '../../../../contexts';
 
-export function TranscriptionActions(): React.JSX.Element {
-  const {
-    selectedFile,
-    isTranscribing,
-    modelDownloaded,
-    isFFmpegAvailable,
-    handleTranscribe,
-    handleCancel,
-  } = useAppTranscription();
+export interface TranscriptionActionsProps {
+  isFFmpegAvailable: boolean | null;
+}
+
+export function TranscriptionActions({
+  isFFmpegAvailable,
+}: TranscriptionActionsProps): React.JSX.Element {
+  const { selectedFile, isTranscribing, modelDownloaded, handleTranscribe, handleCancel } =
+    useAppTranscription();
 
   const canTranscribe = selectedFile && modelDownloaded && isFFmpegAvailable === true;
 

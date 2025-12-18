@@ -6,3 +6,6 @@ export type { ElectronMenuHandlers } from './useElectronMenu';
 
 export { useCopyToClipboard } from './useCopyToClipboard';
 export type { UseCopyToClipboardReturn } from './useCopyToClipboard';
+
+export { useFFmpegStatus } from './useFFmpegStatus';
+export type { UseFFmpegStatusReturn } from './useFFmpegStatus';
