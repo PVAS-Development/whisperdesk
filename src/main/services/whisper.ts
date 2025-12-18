@@ -542,7 +542,7 @@ export function transcribe(
 
         const progressMatch = message.match(/progress\s*=\s*(\d+)%/);
         if (progressMatch && progressMatch[1]) {
-          const percent = parseInt(progressMatch[1], 10);
+          const percent = Math.min(100, parseInt(progressMatch[1], 10));
           const scaledPercent = 20 + Math.round((percent / 100) * 70);
           onProgress?.({ percent: scaledPercent, status: `Transcribing... ${percent}%` });
         }
