@@ -150,4 +150,4 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
   );
 }
 
-export default SystemWarning;
+export { SystemWarning };

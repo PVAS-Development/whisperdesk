@@ -44,4 +44,4 @@ function AppHeader(): React.JSX.Element {
   );
 }
 
-export default AppHeader;
+export { AppHeader };

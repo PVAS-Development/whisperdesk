@@ -13,7 +13,7 @@ import type {
 import { LANGUAGES, QUALITY_STARS } from '../../../../config';
 import { DEFAULT_MODELS } from '../../services/modelService';
 
-interface SettingsPanelProps {
+export interface SettingsPanelProps {
   settings: TranscriptionSettings;
   onChange: (settings: TranscriptionSettings) => void;
   disabled: boolean;
@@ -265,4 +265,4 @@ function SettingsPanel({
   );
 }
 
-export default SettingsPanel;
+export { SettingsPanel };

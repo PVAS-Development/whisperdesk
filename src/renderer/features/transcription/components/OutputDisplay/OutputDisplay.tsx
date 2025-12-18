@@ -302,4 +302,4 @@ function OutputDisplay({
   );
 }
 
-export default OutputDisplay;
+export { OutputDisplay };

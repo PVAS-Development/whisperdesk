@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SettingsPanel from '../SettingsPanel';
+import { SettingsPanel } from '../SettingsPanel';
 import type { TranscriptionSettings } from '../../../../../types';
 import { overrideElectronAPI } from '../../../../../test/utils';
 import { MOCK_SETTINGS, createMockModels, MOCK_GPU_INFO } from '../../../../../test/fixtures';

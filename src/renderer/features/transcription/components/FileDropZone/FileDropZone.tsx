@@ -109,4 +109,4 @@ function FileDropZone({
   );
 }
 
-export default FileDropZone;
+export { FileDropZone };

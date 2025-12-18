@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SystemWarning from '../SystemWarning';
+import { SystemWarning } from '../SystemWarning';
 import { overrideElectronAPI } from '../../../../test/utils';
 
 const mockCopyToClipboard = vi.fn();

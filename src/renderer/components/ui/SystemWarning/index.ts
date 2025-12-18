@@ -1,1 +1,2 @@
-export { default as SystemWarning } from './SystemWarning';
+export { SystemWarning } from './SystemWarning';
+export type { SystemWarningProps } from './SystemWarning';

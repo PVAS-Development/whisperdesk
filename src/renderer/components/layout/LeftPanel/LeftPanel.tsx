@@ -72,4 +72,4 @@ function LeftPanel(): React.JSX.Element {
   );
 }
 
-export default LeftPanel;
+export { LeftPanel };
