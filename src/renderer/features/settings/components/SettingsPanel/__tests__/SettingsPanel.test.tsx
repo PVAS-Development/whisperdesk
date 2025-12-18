@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SettingsPanel from '../SettingsPanel';
+import { SettingsPanel } from '../SettingsPanel';
 import type { TranscriptionSettings } from '../../../../../types';
 import { overrideElectronAPI } from '../../../../../test/utils';
 import { MOCK_SETTINGS, createMockModels, MOCK_GPU_INFO } from '../../../../../test/fixtures';
+import { logger } from '../../../../../services/logger';
 
 describe('SettingsPanel', () => {
   const mockSettings = MOCK_SETTINGS;
@@ -514,7 +515,6 @@ describe('SettingsPanel', () => {
   it('handles download model failure gracefully', async () => {
     const downloadModel = vi.fn().mockRejectedValue(new Error('Download failed'));
     const listModels = vi.fn().mockResolvedValue({ models: mockModels });
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     overrideElectronAPI({
       listModels,
@@ -534,10 +534,8 @@ describe('SettingsPanel', () => {
     fireEvent.click(downloadButton);
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to download model:', expect.any(Error));
+      expect(logger.error).toHaveBeenCalledWith('Failed to download model:', expect.any(Error));
     });
-
-    consoleSpy.mockRestore();
   });
 
   it('shows GPU status as unavailable when GPU is not available', async () => {
@@ -558,8 +556,6 @@ describe('SettingsPanel', () => {
   });
 
   it('handles model info loading failure', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
     overrideElectronAPI({
       listModels: vi.fn().mockRejectedValue(new Error('Failed to load')),
       getGpuStatus: vi.fn().mockRejectedValue(new Error('Failed to get GPU')),
@@ -571,9 +567,7 @@ describe('SettingsPanel', () => {
       expect(screen.getByLabelText('Select Whisper model')).toBeInTheDocument();
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to load model info:', expect.any(Error));
-
-    consoleSpy.mockRestore();
+    expect(logger.error).toHaveBeenCalledWith('Failed to load model info:', expect.any(Error));
   });
 
   it('displays download progress without remaining time', async () => {

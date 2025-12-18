@@ -114,6 +114,7 @@ export interface AppInfo {
   isDev: boolean;
   version: string;
   platform: NodeJS.Platform;
+  osVersion?: string;
 }
 
 export interface MemoryUsage {

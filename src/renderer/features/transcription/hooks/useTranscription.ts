@@ -7,6 +7,16 @@ import type {
   OutputFormat,
 } from '../../../types';
 import { APP_CONFIG } from '../../../config';
+import {
+  openFileDialog,
+  getFileInfo,
+  startTranscription,
+  cancelTranscription,
+  onTranscriptionProgress,
+  saveFile,
+} from '../../../services/electronAPI';
+import { logger } from '../../../services/logger';
+import { sanitizePath } from '../../../../shared/utils';
 
 interface UseTranscriptionOptions {
   onHistoryAdd?: (item: HistoryItem) => void;
@@ -75,13 +85,11 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   );
 
   useEffect(() => {
-    const unsubscribe = window.electronAPI?.onTranscriptionProgress(
-      (data: TranscriptionProgress) => {
-        setProgress(data);
-      }
-    );
+    const unsubscribe = onTranscriptionProgress((data: TranscriptionProgress) => {
+      setProgress(data);
+    });
     return () => {
-      unsubscribe?.();
+      unsubscribe();
     };
   }, []);
 
@@ -99,14 +107,21 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
       setError(null);
       setProgress({ percent: 0, status: '' });
       setTranscriptionStartTime(null);
+
+      logger.info('File selected', {
+        name: file.name,
+        path: sanitizePath(file.path),
+
+        size: file.size,
+      });
     },
     [clearProgressMessageTimeout]
   );
 
   const handleFileSelectFromMenu = useCallback(async (): Promise<void> => {
-    const filePath = await window.electronAPI?.openFile();
+    const filePath = await openFileDialog();
     if (filePath) {
-      const fileInfo = await window.electronAPI?.getFileInfo(filePath);
+      const fileInfo = await getFileInfo(filePath);
       if (fileInfo) {
         handleFileSelect(fileInfo);
       }
@@ -122,10 +137,16 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
     setProgress({ percent: 0, status: 'Starting transcription...' });
     setTranscriptionStartTime(Date.now());
 
+    logger.info('Starting transcription', {
+      file: sanitizePath(selectedFile.path),
+      model: settings.model,
+      language: settings.language,
+    });
+
     const startTime = Date.now();
 
     try {
-      const result = await window.electronAPI?.startTranscription({
+      const result = await startTranscription({
         filePath: selectedFile.path,
         model: settings.model,
         language: settings.language,
@@ -136,17 +157,33 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
         throw new Error('No response from transcription service');
       }
 
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (!result.success) {
+        throw new Error('Transcription failed with unknown error');
+      }
+
       if (result.cancelled) {
         setProgress({ percent: 0, status: 'Cancelled' });
+        logger.info('Transcription cancelled by service');
         return;
       }
 
       if (!result.text) {
-        throw new Error('Transcription produced no output');
+        throw new Error(
+          'Transcription produced no output. The file may be silent or contain no audio stream.'
+        );
       }
 
       setTranscription(result.text);
       setProgress({ percent: 100, status: 'Complete!' });
+
+      logger.info('Transcription complete', {
+        durationMs: Date.now() - startTime,
+        length: result.text.length,
+      });
 
       const historyItem: HistoryItem = {
         id: Date.now(),
@@ -162,8 +199,16 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
       onHistoryAdd?.(historyItem);
       scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
+      const fullError = err instanceof Error ? err.message : 'Unknown error occurred';
+
+      const uiError =
+        fullError.includes('FFmpeg conversion failed') ||
+        fullError.includes('whisper process exited')
+          ? 'Transcription produced no output. The file may be invalid or missing audio. (See Debug Logs for details)'
+          : fullError;
+
+      setError(uiError);
+      logger.error('Transcription failed', { error: err, message: fullError });
       setProgress({ percent: 0, status: '' });
       setTranscriptionStartTime(null);
       clearProgressMessageTimeout();
@@ -173,10 +218,11 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   }, [selectedFile, settings, onHistoryAdd, scheduleProgressReset, clearProgressMessageTimeout]);
 
   const handleCancel = useCallback(async (): Promise<void> => {
-    await window.electronAPI?.cancelTranscription();
+    await cancelTranscription();
     clearProgressMessageTimeout();
     setIsTranscribing(false);
     setProgress({ percent: 0, status: 'Cancelled' });
+    logger.warn('Transcription cancelled by user');
     setTranscriptionStartTime(null);
     scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
   }, [clearProgressMessageTimeout, scheduleProgressReset]);
@@ -218,7 +264,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       // For docx, pdf, md formats, the main process will handle the conversion
 
-      const result = await window.electronAPI?.saveFile({
+      const result = await saveFile({
         defaultName: `${fileName}.${format}`,
         content,
         format,
@@ -226,9 +272,11 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       if (result?.success && result.filePath) {
         setProgress({ percent: 100, status: `Saved to ${result.filePath}` });
+        logger.info('File saved', { path: sanitizePath(result.filePath), format });
         scheduleProgressReset(APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION);
       } else if (result?.error) {
         setError(`Failed to save: ${result.error}`);
+        logger.error('Failed to save file', { error: result.error, format });
       }
     },
     [transcription, selectedFile, scheduleProgressReset]
@@ -240,6 +288,9 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
       const success = await copyToClipboard(transcription);
       if (!success) {
         setError('Failed to copy to clipboard');
+        logger.error('Failed to copy transcription to clipboard');
+      } else {
+        logger.info('Copied transcription to clipboard');
       }
       return success;
     },

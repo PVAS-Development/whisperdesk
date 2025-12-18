@@ -6,7 +6,7 @@ import './TranscriptionHistory.css';
 
 import type { HistoryItem } from '../../../../types';
 
-interface TranscriptionHistoryProps {
+export interface TranscriptionHistoryProps {
   history: HistoryItem[];
   onClear: () => void;
   onClose: () => void;
@@ -110,4 +110,4 @@ function TranscriptionHistory({
   );
 }
 
-export default TranscriptionHistory;
+export { TranscriptionHistory };

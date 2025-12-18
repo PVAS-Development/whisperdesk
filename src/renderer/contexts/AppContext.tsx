@@ -3,8 +3,18 @@ import { useTranscription } from '../features/transcription';
 import { useHistory } from '../features/history';
 import { useTheme, useCopyToClipboard, useElectronMenu } from '../hooks';
 import type { HistoryItem } from '../types';
-import { ThemeContext, HistoryContext, TranscriptionContext } from './contexts';
-import type { ThemeContextValue, HistoryContextValue, TranscriptionContextValue } from './types';
+import {
+  ThemeContext,
+  HistoryContext,
+  TranscriptionStateContext,
+  TranscriptionActionsContext,
+} from './contexts';
+import type {
+  ThemeContextValue,
+  HistoryContextValue,
+  TranscriptionStateContextValue,
+  TranscriptionActionsContextValue,
+} from './types';
 
 interface AppProviderProps {
   children: ReactNode;
@@ -116,7 +126,7 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
     ]
   );
 
-  const transcriptionContextValue = useMemo<TranscriptionContextValue>(
+  const transcriptionStateValue = useMemo<TranscriptionStateContextValue>(
     () => ({
       selectedFile,
       settings,
@@ -127,14 +137,6 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
       error,
       modelDownloaded,
       copySuccess,
-      setSelectedFile,
-      setSettings,
-      setModelDownloaded,
-      handleFileSelect,
-      handleTranscribe,
-      handleCancel,
-      handleSave,
-      handleCopy: onCopy,
     }),
     [
       selectedFile,
@@ -146,6 +148,21 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
       error,
       modelDownloaded,
       copySuccess,
+    ]
+  );
+
+  const transcriptionActionsValue = useMemo<TranscriptionActionsContextValue>(
+    () => ({
+      setSelectedFile,
+      setSettings,
+      setModelDownloaded,
+      handleFileSelect,
+      handleTranscribe,
+      handleCancel,
+      handleSave,
+      handleCopy: onCopy,
+    }),
+    [
       setSelectedFile,
       setSettings,
       setModelDownloaded,
@@ -160,9 +177,11 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
   return (
     <ThemeContext.Provider value={themeContextValue}>
       <HistoryContext.Provider value={historyContextValue}>
-        <TranscriptionContext.Provider value={transcriptionContextValue}>
-          {children}
-        </TranscriptionContext.Provider>
+        <TranscriptionStateContext.Provider value={transcriptionStateValue}>
+          <TranscriptionActionsContext.Provider value={transcriptionActionsValue}>
+            {children}
+          </TranscriptionActionsContext.Provider>
+        </TranscriptionStateContext.Provider>
       </HistoryContext.Provider>
     </ThemeContext.Provider>
   );

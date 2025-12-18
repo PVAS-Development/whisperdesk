@@ -1,1 +1,2 @@
-export { default as TranscriptionHistory } from './TranscriptionHistory';
+export { TranscriptionHistory } from './TranscriptionHistory';
+export type { TranscriptionHistoryProps } from './TranscriptionHistory';

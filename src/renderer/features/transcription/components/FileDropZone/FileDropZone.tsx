@@ -2,6 +2,7 @@ import React, { useCallback, type DragEvent, type KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
 import { isValidMediaFile, formatFileSize } from '../../../../utils';
 import type { SelectedFile } from '../../../../types';
+import { openFileDialog, getPathForFile } from '../../../../services/electronAPI';
 import './FileDropZone.css';
 
 export interface FileDropZoneProps {
@@ -20,7 +21,7 @@ function FileDropZone({
   const handleClick = async (): Promise<void> => {
     if (disabled) return;
 
-    const filePath = await window.electronAPI?.openFile();
+    const filePath = await openFileDialog();
     if (filePath) {
       const fileName = filePath.split('/').pop();
       if (fileName && isValidMediaFile(fileName)) {
@@ -36,7 +37,7 @@ function FileDropZone({
 
       const file = e.dataTransfer.files[0];
       if (file && isValidMediaFile(file.name)) {
-        const filePath = window.electronAPI?.getPathForFile(file);
+        const filePath = getPathForFile(file);
         if (filePath) {
           onFileSelect({ path: filePath, name: file.name });
         }
@@ -109,4 +110,4 @@ function FileDropZone({
   );
 }
 
-export default FileDropZone;
+export { FileDropZone };

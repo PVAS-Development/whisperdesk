@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { logger } from '../../../services/logger';
 import { useHistory } from '@/features/history';
 import type { HistoryItem } from '@/types';
 import { createMockHistoryItem, createHistoryItems } from '@/test/fixtures';
@@ -190,7 +191,6 @@ describe('useHistory', () => {
   });
 
   it('should handle localStorage save failure gracefully', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const originalSetItem = localStorage.setItem.bind(localStorage);
 
     localStorage.setItem = vi.fn().mockImplementation(() => {
@@ -203,9 +203,8 @@ describe('useHistory', () => {
       result.current.addHistoryItem(createMockHistoryItem());
     });
 
-    expect(consoleSpy).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
 
     localStorage.setItem = originalSetItem;
-    consoleSpy.mockRestore();
   });
 });

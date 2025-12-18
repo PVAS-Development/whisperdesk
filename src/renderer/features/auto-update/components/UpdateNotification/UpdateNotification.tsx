@@ -3,7 +3,7 @@ import { convertHtmlToText, formatFileSize } from '../../../../utils';
 import { X, AlertTriangle, Sparkles, Download, CheckCircle } from 'lucide-react';
 import './UpdateNotification.css';
 
-export function UpdateNotification() {
+function UpdateNotification() {
   const {
     updateStatus,
     isDownloading,
@@ -139,3 +139,5 @@ export function UpdateNotification() {
     </div>
   );
 }
+
+export { UpdateNotification };

@@ -552,7 +552,7 @@ describe('useTranscription', () => {
       expect(result.current.isTranscribing).toBe(false);
     });
 
-    expect(result.current.error).toContain('No response');
+    expect(result.current.error).toContain('Electron API not available');
   });
 
   it('should handle transcription progress updates', async () => {

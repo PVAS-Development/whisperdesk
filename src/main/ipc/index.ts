@@ -174,6 +174,7 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       isDev: !app.isPackaged,
       version: app.getVersion(),
       platform: process.platform,
+      osVersion: process.getSystemVersion(),
     };
   });
 

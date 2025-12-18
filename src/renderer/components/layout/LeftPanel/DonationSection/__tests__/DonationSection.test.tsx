@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DonationSection } from '../DonationSection';
 import { overrideElectronAPI } from '../../../../../test/utils';
+import { logger } from '../../../../../services/logger';
 
 describe('DonationSection', () => {
   beforeEach(() => {
@@ -52,7 +53,6 @@ describe('DonationSection', () => {
 
   it('should handle error when openExternal fails for PayPal', async () => {
     const mockOpenExternal = vi.fn().mockRejectedValue(new Error('Failed to open link'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     overrideElectronAPI({
       openExternal: mockOpenExternal,
@@ -64,18 +64,12 @@ describe('DonationSection', () => {
     fireEvent.click(paypalButton);
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to open donation link:',
-        expect.any(Error)
-      );
+      expect(logger.error).toHaveBeenCalledWith('Failed to open donation link:', expect.any(Error));
     });
-
-    consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when openExternal fails for Buy Me a Coffee', async () => {
     const mockOpenExternal = vi.fn().mockRejectedValue(new Error('Failed to open link'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     overrideElectronAPI({
       openExternal: mockOpenExternal,
@@ -87,18 +81,12 @@ describe('DonationSection', () => {
     fireEvent.click(coffeeButton);
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to open donation link:',
-        expect.any(Error)
-      );
+      expect(logger.error).toHaveBeenCalledWith('Failed to open donation link:', expect.any(Error));
     });
-
-    consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when trackEvent fails for PayPal', async () => {
     const mockTrackEvent = vi.fn().mockRejectedValue(new Error('Failed to track'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     overrideElectronAPI({
       trackEvent: mockTrackEvent,
@@ -111,18 +99,15 @@ describe('DonationSection', () => {
     fireEvent.click(paypalButton);
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to track donation click'),
         expect.any(Error)
       );
     });
-
-    consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when trackEvent fails for Buy Me a Coffee', async () => {
     const mockTrackEvent = vi.fn().mockRejectedValue(new Error('Failed to track'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     overrideElectronAPI({
       trackEvent: mockTrackEvent,
@@ -135,13 +120,11 @@ describe('DonationSection', () => {
     fireEvent.click(coffeeButton);
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to track donation click'),
         expect.any(Error)
       );
     });
-
-    consoleErrorSpy.mockRestore();
   });
 
   it('should have proper aria-labels for accessibility', () => {

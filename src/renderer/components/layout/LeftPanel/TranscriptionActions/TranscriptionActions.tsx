@@ -1,10 +1,22 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
-import { useAppTranscription } from '../../../contexts';
+import { useAppTranscription } from '../../../../contexts';
 
-export function TranscriptionActions(): React.JSX.Element {
+export interface TranscriptionActionsProps {
+  isFFmpegAvailable: boolean | null;
+}
+
+function TranscriptionActions({ isFFmpegAvailable }: TranscriptionActionsProps): React.JSX.Element {
   const { selectedFile, isTranscribing, modelDownloaded, handleTranscribe, handleCancel } =
     useAppTranscription();
+
+  const canTranscribe = selectedFile && modelDownloaded && isFFmpegAvailable === true;
+
+  const getDisabledReason = (): string => {
+    if (!isFFmpegAvailable) return 'Please install FFmpeg first';
+    if (!modelDownloaded) return 'Please download the selected model first';
+    return '';
+  };
 
   return (
     <div className="actions">
@@ -12,9 +24,9 @@ export function TranscriptionActions(): React.JSX.Element {
         <button
           className="btn-primary"
           onClick={handleTranscribe}
-          disabled={!selectedFile || !modelDownloaded}
+          disabled={!canTranscribe}
           aria-label="Start transcription"
-          title={!modelDownloaded ? 'Please download the selected model first' : ''}
+          title={getDisabledReason()}
         >
           <Zap size={18} aria-hidden="true" /> Transcribe
         </button>
@@ -30,3 +42,5 @@ export function TranscriptionActions(): React.JSX.Element {
     </div>
   );
 }
+
+export { TranscriptionActions };

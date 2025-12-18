@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatTime } from '../../../utils';
 import './ProgressBar.css';
 
-interface ProgressBarProps {
+export interface ProgressBarProps {
   percent: number;
   status: string;
   startTime: number | null;
@@ -59,4 +59,4 @@ function ProgressBar({
   );
 }
 
-export default ProgressBar;
+export { ProgressBar };

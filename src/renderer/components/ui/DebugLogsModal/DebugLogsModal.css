@@ -1,0 +1,196 @@
+.debug-logs-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.debug-logs-modal {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: min(90vw, 800px);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.debug-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-secondary);
+}
+
+.debug-logs-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.debug-logs-header .log-count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.debug-logs-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.debug-logs-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.debug-logs-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Consolas', monospace);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.debug-logs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.debug-logs-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.log-entry {
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-entry.level-debug {
+  color: var(--text-secondary);
+}
+
+.log-entry.level-info {
+  color: var(--accent);
+}
+
+.log-entry.level-warn {
+  color: var(--warning);
+  background-color: var(--warning-surface-dim);
+}
+
+.log-entry.level-error {
+  color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.debug-logs-footer {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background-color: var(--bg-secondary);
+}
+
+.debug-logs-footer button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-copy-logs {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+}
+
+.btn-copy-logs:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-copy-with-info {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-copy-with-info:hover {
+  background-color: var(--bg-hover);
+}
+
+.btn-clear-logs {
+  background-color: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  flex: 0.5;
+}
+
+.btn-clear-logs:hover {
+  background-color: var(--danger-light);
+}
+
+.btn-copy-logs.copied,
+.btn-copy-with-info.copied {
+  background-color: var(--success);
+  color: white;
+  border-color: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}

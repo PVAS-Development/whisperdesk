@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy & Terms - WhisperDesk</title>
+    <meta name="description" content="Privacy Policy and Terms of Service for WhisperDesk. We prioritize your privacy with local-only processing.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .policy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+        
+        .policy-section {
+            margin-bottom: 3rem;
+        }
+        
+        .policy-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .policy-section h3 {
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+        
+        .policy-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        
+        .policy-section ul {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .policy-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container nav-inner">
+            <a href="index.html" class="logo" aria-label="WhisperDesk Home">
+                <img src="icon.png" alt="WhisperDesk Logo" width="32" height="32" />
+                <span class="logo-text">WhisperDesk</span>
+            </a>
+            <div class="nav-actions">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <i data-lucide="moon" class="moon-icon" aria-hidden="true"></i>
+                    <i data-lucide="sun" class="sun-icon" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="policy-container">
+        <a href="index.html" class="back-link">
+            <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+            Back to Home
+        </a>
+
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--text-primary);">Privacy Policy & Terms</h1>
+        <p style="color: var(--text-muted); margin-bottom: 3rem;">Last updated: December 17, 2025</p>
+
+        <section class="policy-section">
+            <h2>Privacy Policy</h2>
+            <p>At WhisperDesk, we believe your data belongs to you. Our application is designed with privacy as its core principle.</p>
+
+            <h3>1. Local Processing</h3>
+            <p><strong>All audio and video transcription is performed locally on your device.</strong></p>
+            <p>WhisperDesk uses the <code>whisper.cpp</code> engine to process files directly on your Mac. Your audio files, video files, and transcriptions are <strong>never</strong> uploaded to any cloud server or third-party service for processing. They never leave your computer.</p>
+
+            <h3>2. Data Collection</h3>
+            <p>We collect anonymous usage data to help us improve the application, fix bugs, and understand which features are most valuable to our users. This data is collected via <strong>Aptabase</strong>, a privacy-first analytics provider that is fully GDPR, CCPA, and PECR compliant.</p>
+
+            <h3>3. What We Collect</h3>
+            <ul>
+                <li><strong>App Lifecycle:</strong> When the app is opened or closed.</li>
+                <li><strong>Feature Usage:</strong> Anonymous statistics such as "transcription started", "model downloaded", or "export saved".</li>
+                <li><strong>System Information:</strong> Basic details like your OS version (e.g., macOS 14.0) and App version (e.g., v1.6.2).</li>
+                <li><strong>Error Logs:</strong> If the app crashes or encounters an error, we receive a log to help us fix it. These logs are <strong>sanitized</strong> to remove any file paths, file names, or personal information before they are sent.</li>
+            </ul>
+
+            <h3>4. What We Do NOT Collect</h3>
+            <ul>
+                <li><strong>No File Content:</strong> We never access or transmit the audio/video content you transcribe.</li>
+                <li><strong>No Transcriptions:</strong> We never access or transmit the text generated by the transcription.</li>
+                <li><strong>No File Names:</strong> We do not track the names of the files you open.</li>
+                <li><strong>No Personal Information:</strong> We do not collect your name, email, IP address, or any other personally identifiable information (PII).</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Terms of Service</h2>
+            
+            <h3>1. License</h3>
+            <p>WhisperDesk is open-source software licensed under the <strong>MIT License</strong>. You are free to use, modify, and distribute the software in accordance with the license terms.</p>
+
+            <h3>2. Disclaimer</h3>
+            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+            <h3>3. User Responsibility</h3>
+            <p>You are solely responsible for the content you transcribe using WhisperDesk. Please ensure you have the necessary rights and permissions to process any audio or video files you use with the application.</p>
+        </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="container footer-inner">
+            <div class="footer-logo">
+                <img src="icon.png" alt="WhisperDesk Logo" class="footer-logo-img" width="24" height="24" />
+                <span>WhisperDesk</span>
+            </div>
+            <nav class="footer-links" aria-label="Footer navigation">
+                <a href="https://www.paypal.com/donate/?hosted_button_id=HTJXGMEGMWWD6" target="_blank"
+                    rel="noopener noreferrer" class="footer-link">Donate</a>
+                <a href="https://www.buymeacoffee.com/pedrovsiqueira" target="_blank"
+                    rel="noopener noreferrer" class="footer-link">Buy me a coffee</a>
+                <a href="https://github.com/PVAS-Development/whisperdesk/blob/main/LICENSE" target="_blank"
+                    rel="noopener noreferrer" class="footer-link">License</a>
+                <a href="privacy.html" class="footer-link">Privacy & Terms</a>
+                <a href="https://github.com/PVAS-Development/whisperdesk" target="_blank" rel="noopener noreferrer"
+                    class="footer-link">GitHub</a>
+            </nav>
+            <p class="footer-copyright">© <span id="year"></span> <a href="https://github.com/PVAS-Development"
+                    rel="noopener noreferrer" target="_blank">PVAS Development</a>. WhisperDesk is Open Source (MIT
+                License).</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            html.setAttribute('data-theme', 'dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            lucide.createIcons();
+        });
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

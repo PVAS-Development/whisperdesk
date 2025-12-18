@@ -1,6 +1,6 @@
 # 🎙️ WhisperDesk
 
-[![CI](https://github.com/PVAS-Development/whisperdesk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PVAS-Development/whisperdesk/actions/workflows/ci.yml)
+[![Downloads](https://img.shields.io/github/downloads/PVAS-Development/whisperdesk/total.svg)](https://github.com/PVAS-Development/whisperdesk/releases)
 [![Release Version](https://img.shields.io/github/v/release/PVAS-Development/whisperdesk?label=release&logo=github)](https://github.com/PVAS-Development/whisperdesk/releases)
 [![Lint](https://img.shields.io/badge/lint-passing-brightgreen.svg?logo=eslint&logoColor=white)](https://github.com/PVAS-Development/whisperdesk/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/PVAS-Development/whisperdesk?style=social)](https://github.com/PVAS-Development/whisperdesk/stargazers)
@@ -136,7 +136,7 @@ Models are downloaded automatically on first use and cached in:
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22.12+ (use `nvm use` to auto-switch via `.nvmrc`)
 - CMake (for building whisper.cpp)
 - FFmpeg
 
@@ -348,11 +348,23 @@ Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) 
 - Code style and commit conventions
 - Submitting pull requests
 
-## 🔒 Security
+## 🔒 Privacy & Security
 
-- All audio/video processing happens **locally** on your device
-- No data is sent to external servers
-- The app is **code-signed and notarized** by Apple
+- **Local Processing**: All audio/video processing happens **locally** on your device. Your files never leave your computer.
+- **No Cloud Uploads**: We do not upload your media files or transcriptions to any server.
+- **Anonymous Analytics**: We collect minimal, anonymous usage data (e.g., app launches, feature usage) to improve the app. No personal data or file content is collected.
+- **Code Signing**: The app is **code-signed and notarized** by Apple for your safety.
+
+For more details, please read our [Privacy Policy](https://whisperdesk.org/privacy.html).
+
+## ☕ Support the Project
+
+WhisperDesk is free and open-source software. If you find it useful, please consider supporting its development:
+
+- [**Donate via PayPal**](https://www.paypal.com/donate/?hosted_button_id=HTJXGMEGMWWD6)
+- [**Buy me a coffee**](https://www.buymeacoffee.com/pedrovsiqueira)
+
+Your support helps cover the costs of Apple Developer Program fees and keeps the project alive!
 
 ## 📄 License
 

@@ -40,4 +40,4 @@ function RightPanel(): React.JSX.Element {
   );
 }
 
-export default RightPanel;
+export { RightPanel };

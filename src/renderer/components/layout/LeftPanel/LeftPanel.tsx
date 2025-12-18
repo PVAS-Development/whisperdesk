@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { FileDropZone } from '../../../features/transcription';
 import { SettingsPanel } from '../../../features/settings';
 import { useAppTranscription } from '../../../contexts';
+import { useFFmpegStatus } from '../../../hooks';
 import { TranscriptionActions } from './TranscriptionActions';
 import { TranscriptionProgress } from './TranscriptionProgress';
 import { ErrorMessage } from './ErrorMessage';
 import { DonationSection } from './DonationSection';
 import { SystemWarning } from '../../ui';
-import { checkFFmpeg } from '../../../services/electronAPI';
 
 function LeftPanel(): React.JSX.Element {
   const {
@@ -20,32 +20,16 @@ function LeftPanel(): React.JSX.Element {
     handleFileSelect,
   } = useAppTranscription();
 
-  const [isFFmpegAvailable, setIsFFmpegAvailable] = useState<boolean | null>(null);
-
-  const checkStatus = useCallback(async () => {
-    try {
-      const available = await checkFFmpeg();
-      setIsFFmpegAvailable(available);
-      return available;
-    } catch (error) {
-      console.error('Failed to check FFmpeg status:', error);
-      setIsFFmpegAvailable(false);
-      return false;
-    }
-  }, []);
-
-  useEffect(() => {
-    checkStatus();
-  }, [checkStatus]);
+  const { isFFmpegAvailable, isChecking, recheckStatus } = useFFmpegStatus();
 
   return (
     <div className="left-panel">
-      {isFFmpegAvailable === null && (
+      {isChecking && isFFmpegAvailable === null && (
         <div className="system-check-loading" role="status" aria-live="polite">
           Checking system requirements...
         </div>
       )}
-      {isFFmpegAvailable === false && <SystemWarning onRefresh={checkStatus} />}
+      {isFFmpegAvailable === false && <SystemWarning onRefresh={recheckStatus} />}
 
       <FileDropZone
         onFileSelect={handleFileSelect}
@@ -61,7 +45,7 @@ function LeftPanel(): React.JSX.Element {
         onModelStatusChange={setModelDownloaded}
       />
 
-      <TranscriptionActions />
+      <TranscriptionActions isFFmpegAvailable={isFFmpegAvailable} />
 
       <TranscriptionProgress />
 
@@ -72,4 +56,4 @@ function LeftPanel(): React.JSX.Element {
   );
 }
 
-export default LeftPanel;
+export { LeftPanel };

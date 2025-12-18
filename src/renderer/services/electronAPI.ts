@@ -28,6 +28,10 @@ export async function getFileInfo(filePath: string): Promise<SelectedFile | null
   return window.electronAPI?.getFileInfo(filePath) ?? null;
 }
 
+export function getPathForFile(file: File): string | undefined {
+  return window.electronAPI?.getPathForFile(file);
+}
+
 export async function saveFile(options: SaveFileOptions): Promise<SaveFileResult> {
   const result = await window.electronAPI?.saveFile(options);
   return result ?? { success: false, error: 'Electron API not available' };
@@ -122,4 +126,28 @@ export function onUpdateStatus(callback: (status: UpdateStatus) => void): Unsubs
 
 export async function openExternal(url: string): Promise<void> {
   await window.electronAPI?.openExternal(url);
+}
+
+export function onMenuOpenFile(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuOpenFile(callback) ?? (() => {});
+}
+
+export function onMenuSaveFile(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuSaveFile(callback) ?? (() => {});
+}
+
+export function onMenuCopyTranscription(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuCopyTranscription(callback) ?? (() => {});
+}
+
+export function onMenuStartTranscription(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuStartTranscription(callback) ?? (() => {});
+}
+
+export function onMenuCancelTranscription(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuCancelTranscription(callback) ?? (() => {});
+}
+
+export function onMenuToggleHistory(callback: () => void): Unsubscribe {
+  return window.electronAPI?.onMenuToggleHistory(callback) ?? (() => {});
 }

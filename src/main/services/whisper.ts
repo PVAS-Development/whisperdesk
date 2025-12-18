@@ -15,6 +15,7 @@ import type {
   GpuInfo,
   QualityLevel,
 } from '../../shared/types';
+import { sanitizePath } from '../../shared/utils';
 import { detectGpuStatus } from './gpu-detector';
 
 interface WhisperModelInfo {
@@ -576,11 +577,15 @@ export function transcribe(
 
           if (!text && !vtt) {
             console.error('Transcription failed: No output generated.', {
-              txtPath,
-              vttPath,
+              txtPath: sanitizePath(txtPath),
+              vttPath: sanitizePath(vttPath),
               stdoutLength: stdout.length,
             });
-            reject(new Error('Transcription produced no output'));
+            reject(
+              new Error(
+                'Transcription produced no output. The audio file might be empty, silent, or contain no valid audio stream.'
+              )
+            );
             return;
           }
 

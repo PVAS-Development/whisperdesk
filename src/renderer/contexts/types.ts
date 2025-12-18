@@ -23,7 +23,7 @@ export interface HistoryContextValue {
   selectHistoryItem: (item: HistoryItem) => void;
 }
 
-export interface TranscriptionContextValue {
+export interface TranscriptionStateContextValue {
   selectedFile: SelectedFile | null;
   settings: TranscriptionSettings;
   isTranscribing: boolean;
@@ -33,7 +33,9 @@ export interface TranscriptionContextValue {
   error: string | null;
   modelDownloaded: boolean;
   copySuccess: boolean;
+}
 
+export interface TranscriptionActionsContextValue {
   setSelectedFile: (file: SelectedFile | null) => void;
   setSettings: (settings: TranscriptionSettings) => void;
   setModelDownloaded: (downloaded: boolean) => void;
@@ -43,3 +45,6 @@ export interface TranscriptionContextValue {
   handleSave: (format?: OutputFormat) => Promise<void>;
   handleCopy: () => Promise<void>;
 }
+
+export interface TranscriptionContextValue
+  extends TranscriptionStateContextValue, TranscriptionActionsContextValue {}

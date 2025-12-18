@@ -1,20 +1,20 @@
 import React from 'react';
 import { Heart, Coffee } from 'lucide-react';
-import { openExternal, trackEvent } from '../../../../services/electronAPI';
+import { openExternal, trackEvent, logger } from '../../../../services';
 import './DonationSection.css';
 
 const PAYPAL_DONATION_URL = 'https://www.paypal.com/donate/?hosted_button_id=HTJXGMEGMWWD6';
 const BUY_ME_A_COFFEE_URL = 'https://www.buymeacoffee.com/pedrovsiqueira';
 
-export function DonationSection(): React.JSX.Element {
+function DonationSection(): React.JSX.Element {
   const handleDonationClick = async (url: string, type: string) => {
     trackEvent('donation_clicked', { location: 'left_panel', type }).catch((error) => {
-      console.error(`Failed to track donation click (type: ${type}, url: ${url}):`, error);
+      logger.error(`Failed to track donation click (type: ${type}, url: ${url}):`, error);
     });
     try {
       await openExternal(url);
     } catch (error) {
-      console.error('Failed to open donation link:', error);
+      logger.error('Failed to open donation link:', error);
     }
   };
 
@@ -41,3 +41,5 @@ export function DonationSection(): React.JSX.Element {
     </div>
   );
 }
+
+export { DonationSection };

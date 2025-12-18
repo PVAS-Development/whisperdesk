@@ -69,3 +69,11 @@ DEVELOPMENT_PLAN.md
 .github/copilot-instructions.md
 
 *.tsbuildinfo
+
+# TypeScript build artifacts (config files)
+vite.config.js
+vite.config.d.ts
+tsup.config.js
+tsup.config.d.ts
+vitest.config.js
+vitest.config.d.ts

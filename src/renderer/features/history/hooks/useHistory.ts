@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { HistoryItem } from '../../../types';
 import { STORAGE_KEYS } from '../../../utils/storage';
 import { APP_CONFIG } from '../../../config';
+import { logger } from '../../../services';
 
 const STORAGE_KEY = STORAGE_KEYS.HISTORY;
 const MAX_HISTORY_ITEMS = APP_CONFIG.MAX_HISTORY_ITEMS;
@@ -23,7 +24,7 @@ const saveHistoryToStorage = (history: HistoryItem[]): void => {
     const trimmed = history.slice(0, MAX_HISTORY_ITEMS);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch (e) {
-    console.error('Failed to save history:', e);
+    logger.error('Failed to save history:', e);
   }
 };
 

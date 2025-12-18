@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, AlertTriangle, RefreshCw } from 'lucide-react';
 import './SystemWarning.css';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
-import { trackEvent, openExternal } from '../../../services/electronAPI';
+import { trackEvent, openExternal, getAppInfo, logger } from '../../../services';
 
 const FFMPEG_DOWNLOAD_URL = 'https://ffmpeg.org/download.html';
 const VERIFICATION_RETRY_DELAY_MS = 1000;
@@ -25,19 +25,17 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
 
   useEffect(() => {
     const getPlatform = async () => {
-      if (window.electronAPI?.getAppInfo) {
-        try {
-          const appInfo = await window.electronAPI.getAppInfo();
-          if (appInfo.platform === 'win32') {
-            setInstallCommand('winget install ffmpeg');
-          } else if (appInfo.platform === 'linux') {
-            setInstallCommand('sudo apt install ffmpeg');
-          } else {
-            setInstallCommand('brew install ffmpeg');
-          }
-        } catch (error) {
-          console.error('Failed to get platform info:', error);
+      try {
+        const appInfo = await getAppInfo();
+        if (appInfo.platform === 'win32') {
+          setInstallCommand('winget install ffmpeg');
+        } else if (appInfo.platform === 'linux') {
+          setInstallCommand('sudo apt install ffmpeg');
+        } else {
+          setInstallCommand('brew install ffmpeg');
         }
+      } catch (error) {
+        logger.error('Failed to get platform info:', error);
       }
     };
     getPlatform();
@@ -46,13 +44,13 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
   const handleCopy = () => {
     copyToClipboard(installCommand);
     trackEvent('ffmpeg_install_command_copied', { command: installCommand }).catch((error) => {
-      console.error('Failed to track copy event:', error);
+      logger.error('Failed to track copy event:', error);
     });
   };
 
   const handleDownloadLink = async () => {
     trackEvent('ffmpeg_download_link_clicked').catch((error) => {
-      console.error(
+      logger.error(
         `Failed to track FFmpeg download link click (event: 'ffmpeg_download_link_clicked', url: ${FFMPEG_DOWNLOAD_URL}):`,
         error
       );
@@ -60,14 +58,14 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
     try {
       await openExternal(FFMPEG_DOWNLOAD_URL);
     } catch (error) {
-      console.error('Failed to open link:', error);
+      logger.error('Failed to open link:', error);
     }
   };
 
   const handleRefresh = async () => {
     setIsChecking(true);
     trackEvent('ffmpeg_check_again_clicked').catch((error) => {
-      console.error('Failed to track refresh event:', error);
+      logger.error('Failed to track refresh event:', error);
     });
     try {
       const isAvailable = await onRefresh();
@@ -82,7 +80,7 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
 
       await onRefresh();
     } catch (error) {
-      console.error('Failed to refresh FFmpeg status:', error);
+      logger.error('Failed to refresh FFmpeg status:', error);
     } finally {
       if (isMounted.current) {
         setIsChecking(false);
@@ -150,4 +148,4 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
   );
 }
 
-export default SystemWarning;
+export { SystemWarning };

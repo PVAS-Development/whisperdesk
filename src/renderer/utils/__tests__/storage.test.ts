@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { logger } from '../../services/logger';
 import {
   getStorageItem,
   setStorageItem,
@@ -152,7 +153,6 @@ describe('storage', () => {
   describe('error handling', () => {
     it('should handle localStorage.setItem failure for setStorageItem', () => {
       const originalSetItem = localStorage.setItem.bind(localStorage);
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       localStorage.setItem = vi.fn().mockImplementation(() => {
         throw new Error('Storage quota exceeded');
@@ -161,15 +161,13 @@ describe('storage', () => {
       const result = setStorageItem('whisperdesk_theme' as StorageKey, { data: 'test' });
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
 
       localStorage.setItem = originalSetItem;
-      consoleSpy.mockRestore();
     });
 
     it('should handle localStorage.setItem failure for setStorageString', () => {
       const originalSetItem = localStorage.setItem.bind(localStorage);
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       localStorage.setItem = vi.fn().mockImplementation(() => {
         throw new Error('Storage quota exceeded');
@@ -178,10 +176,9 @@ describe('storage', () => {
       const result = setStorageString('whisperdesk_theme' as StorageKey, 'test');
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
 
       localStorage.setItem = originalSetItem;
-      consoleSpy.mockRestore();
     });
 
     it('should handle localStorage.getItem failure for getStorageItem', () => {

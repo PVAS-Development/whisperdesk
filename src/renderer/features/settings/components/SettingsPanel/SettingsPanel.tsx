@@ -1,5 +1,4 @@
-import React, { useState, useEffect, type ChangeEvent } from 'react';
-import { Download, Check, Trash2, Zap, Cpu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import './SettingsPanel.css';
 
 import type {
@@ -10,10 +9,22 @@ import type {
   WhisperModelName,
   LanguageCode,
 } from '../../../../types';
-import { LANGUAGES, QUALITY_STARS } from '../../../../config';
 import { DEFAULT_MODELS } from '../../services/modelService';
+import {
+  listModels,
+  getGpuStatus,
+  onModelDownloadProgress,
+  downloadModel,
+  deleteModel,
+  logger,
+} from '../../../../services';
 
-interface SettingsPanelProps {
+import { GpuStatus } from '../GpuStatus';
+import { ModelSelector } from '../ModelSelector';
+import { ModelDetails } from '../ModelDetails';
+import { LanguageSelector } from '../LanguageSelector';
+
+export interface SettingsPanelProps {
   settings: TranscriptionSettings;
   onChange: (settings: TranscriptionSettings) => void;
   disabled: boolean;
@@ -35,10 +46,7 @@ function SettingsPanel({
   const loadModelInfo = async (): Promise<void> => {
     try {
       setLoading(true);
-      const [modelList, gpu] = await Promise.all([
-        window.electronAPI?.listModels(),
-        window.electronAPI?.getGpuStatus(),
-      ]);
+      const [modelList, gpu] = await Promise.all([listModels(), getGpuStatus()]);
 
       if (modelList?.models) {
         setModels(modelList.models);
@@ -47,7 +55,7 @@ function SettingsPanel({
         setGpuInfo(gpu);
       }
     } catch (err) {
-      console.error('Failed to load model info:', err);
+      logger.error('Failed to load model info:', err);
       setModels(DEFAULT_MODELS);
     } finally {
       setLoading(false);
@@ -57,22 +65,20 @@ function SettingsPanel({
   useEffect(() => {
     loadModelInfo();
 
-    const unsubscribe = window.electronAPI?.onModelDownloadProgress?.(
-      (data: ModelDownloadProgress) => {
-        setDownloadProgress(data);
-        if (data.status === 'complete') {
-          setDownloading(null);
-          setDownloadProgress(null);
-          loadModelInfo();
-        } else if (data.status === 'error') {
-          setDownloading(null);
-          setDownloadProgress(null);
-        }
+    const unsubscribe = onModelDownloadProgress((data: ModelDownloadProgress) => {
+      setDownloadProgress(data);
+      if (data.status === 'complete') {
+        setDownloading(null);
+        setDownloadProgress(null);
+        loadModelInfo();
+      } else if (data.status === 'error') {
+        setDownloading(null);
+        setDownloadProgress(null);
       }
-    );
+    });
 
     return () => {
-      unsubscribe?.();
+      unsubscribe();
     };
   }, []);
 
@@ -93,22 +99,22 @@ function SettingsPanel({
     }
   }, [models, onChange, settings]);
 
-  const handleChange = (key: keyof TranscriptionSettings, value: string): void => {
-    if (key === 'model') {
-      onChange({ ...settings, model: value as WhisperModelName });
-      localStorage.setItem('whisperdesk_lastModel', value);
-    } else if (key === 'language') {
-      onChange({ ...settings, language: value as LanguageCode });
-    }
+  const handleModelChange = (model: WhisperModelName): void => {
+    onChange({ ...settings, model });
+    localStorage.setItem('whisperdesk_lastModel', model);
+  };
+
+  const handleLanguageChange = (language: LanguageCode): void => {
+    onChange({ ...settings, language });
   };
 
   const handleDownloadModel = async (modelName: string): Promise<void> => {
     try {
       setDownloading(modelName);
-      await window.electronAPI?.downloadModel(modelName);
+      await downloadModel(modelName);
       await loadModelInfo();
     } catch (err) {
-      console.error('Failed to download model:', err);
+      logger.error('Failed to download model:', err);
     } finally {
       setDownloading(null);
     }
@@ -120,14 +126,14 @@ function SettingsPanel({
     }
     try {
       setLoading(true);
-      const result = await window.electronAPI?.deleteModel(modelName);
+      const result = await deleteModel(modelName);
       if (!result?.success) {
         window.alert(`Failed to delete model: ${result?.error || 'Unknown error'}`);
         return;
       }
       await loadModelInfo();
     } catch (err) {
-      console.error('Failed to delete model:', err);
+      logger.error('Failed to delete model:', err);
       window.alert(
         `Failed to delete model: ${err && typeof err === 'object' && 'message' in err ? err.message : String(err)}`
       );
@@ -136,133 +142,39 @@ function SettingsPanel({
     }
   };
 
-  const handleModelChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    handleChange('model', e.target.value);
-  };
-
-  const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    handleChange('language', e.target.value);
-  };
-
-  const selectedModel = models.find((m) => m.name === settings.model);
-  const trimmedRemainingTime = downloadProgress?.remainingTime?.trim() ?? '';
+  const selectedModelInfo = models.find((m) => m.name === settings.model);
 
   return (
     <div className={`settings-panel ${disabled ? 'disabled' : ''}`}>
       <h3>Settings</h3>
 
-      {gpuInfo && (
-        <div
-          className={`gpu-status ${gpuInfo.available ? 'gpu-available' : 'gpu-unavailable'}`}
-          role="status"
-          aria-live="polite"
-          aria-label={`GPU acceleration: ${gpuInfo.available ? 'enabled' : 'disabled'}. Using ${gpuInfo.name}`}
-        >
-          <span className="gpu-icon" aria-hidden="true">
-            {gpuInfo.available ? <Zap size={16} /> : <Cpu size={16} />}
-          </span>
-          <span className="gpu-text">{gpuInfo.name}</span>
-        </div>
-      )}
+      <GpuStatus gpuInfo={gpuInfo} />
 
-      <div className="setting-group">
-        <label htmlFor="model-select">Model</label>
-        <select
-          id="model-select"
-          value={settings.model}
-          onChange={handleModelChange}
-          disabled={disabled || loading}
-          aria-label="Select Whisper model"
-          aria-describedby={selectedModel ? 'model-details' : undefined}
-        >
-          {models.map((model) => (
-            <option key={model.name} value={model.name}>
-              {model.name.charAt(0).toUpperCase() + model.name.slice(1)} ({model.size})
-              {model.downloaded ? ' ✓' : ''}
-            </option>
-          ))}
-        </select>
+      <ModelSelector
+        models={models}
+        selectedModel={settings.model}
+        disabled={disabled}
+        loading={loading}
+        onChange={handleModelChange}
+        ariaDescribedBy={selectedModelInfo ? 'model-details' : undefined}
+      />
 
-        {selectedModel && (
-          <div className="model-details" id="model-details" role="status" aria-live="polite">
-            <div className="model-info-row">
-              <span className="model-stat">
-                <span className="stat-label">Speed:</span>
-                <span className="stat-value">{selectedModel.speed}</span>
-              </span>
-              <span className="model-stat">
-                <span className="stat-label">Quality:</span>
-                <span className="stat-value quality">
-                  {QUALITY_STARS[selectedModel.quality - 1]}
-                </span>
-              </span>
-            </div>
+      <ModelDetails
+        model={selectedModelInfo}
+        downloading={downloading}
+        downloadProgress={downloadProgress}
+        disabled={disabled || loading}
+        onDownload={handleDownloadModel}
+        onDelete={handleDeleteModel}
+      />
 
-            {!selectedModel.downloaded && (
-              <div className="model-download">
-                {downloading === selectedModel.name ? (
-                  <div className="download-progress">
-                    <span className="downloading">
-                      <span className="spinner"></span> Downloading...
-                    </span>
-                    {downloadProgress && downloadProgress.percent !== undefined && (
-                      <span className="progress-text">
-                        {downloadProgress.percent}%
-                        {trimmedRemainingTime && ` (${trimmedRemainingTime} left)`}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    className="btn-download"
-                    onClick={() => handleDownloadModel(selectedModel.name)}
-                    disabled={disabled}
-                    aria-label={`Download ${selectedModel.name} model, size ${selectedModel.size}`}
-                  >
-                    <Download size={14} aria-hidden="true" /> Download {selectedModel.size}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {selectedModel.downloaded && (
-              <div className="model-ready-container">
-                <div className="model-ready">
-                  <Check size={14} aria-hidden="true" /> Ready to use
-                </div>
-                <button
-                  className="btn-delete-model"
-                  onClick={() => handleDeleteModel(selectedModel.name)}
-                  disabled={disabled || loading}
-                  title="Delete model"
-                  aria-label={`Delete ${selectedModel.name} model`}
-                >
-                  <Trash2 size={16} aria-hidden="true" />
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="setting-group">
-        <label htmlFor="language-select">Language</label>
-        <select
-          id="language-select"
-          value={settings.language}
-          onChange={handleLanguageChange}
-          disabled={disabled}
-          aria-label="Select transcription language"
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <LanguageSelector
+        selectedLanguage={settings.language}
+        disabled={disabled}
+        onChange={handleLanguageChange}
+      />
     </div>
   );
 }
 
-export default SettingsPanel;
+export { SettingsPanel };

@@ -1,3 +1,5 @@
+import { logger } from '../services';
+
 const STORAGE_KEYS = {
   HISTORY: 'whisperdesk_history',
   THEME: 'whisperdesk_theme',
@@ -23,7 +25,7 @@ export function setStorageItem<T>(key: StorageKey, value: T): boolean {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (e) {
-    console.error(`Failed to save to localStorage [${key}]:`, e);
+    logger.error(`Failed to save to localStorage [${key}]:`, e);
     return false;
   }
 }
@@ -42,7 +44,7 @@ export function setStorageString(key: StorageKey, value: string): boolean {
     localStorage.setItem(key, value);
     return true;
   } catch (e) {
-    console.error(`Failed to save to localStorage [${key}]:`, e);
+    logger.error(`Failed to save to localStorage [${key}]:`, e);
     return false;
   }
 }

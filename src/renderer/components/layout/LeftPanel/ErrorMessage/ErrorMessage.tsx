@@ -1,8 +1,8 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { useAppTranscription } from '../../../contexts';
+import { useAppTranscription } from '../../../../contexts';
 
-export function ErrorMessage(): React.JSX.Element | null {
+function ErrorMessage(): React.JSX.Element | null {
   const { error } = useAppTranscription();
 
   if (!error) {
@@ -15,3 +15,5 @@ export function ErrorMessage(): React.JSX.Element | null {
     </div>
   );
 }
+
+export { ErrorMessage };
