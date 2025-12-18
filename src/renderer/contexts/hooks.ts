@@ -1,6 +1,18 @@
 import { useContext } from 'react';
-import { ThemeContext, HistoryContext, TranscriptionContext } from './contexts';
-import type { ThemeContextValue, HistoryContextValue, TranscriptionContextValue } from './types';
+import {
+  ThemeContext,
+  HistoryContext,
+  TranscriptionContext,
+  TranscriptionStateContext,
+  TranscriptionActionsContext,
+} from './contexts';
+import type {
+  ThemeContextValue,
+  HistoryContextValue,
+  TranscriptionContextValue,
+  TranscriptionStateContextValue,
+  TranscriptionActionsContextValue,
+} from './types';
 
 export function useAppTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
@@ -22,6 +34,22 @@ export function useAppTranscription(): TranscriptionContextValue {
   const context = useContext(TranscriptionContext);
   if (!context) {
     throw new Error('useAppTranscription must be used within AppProvider');
+  }
+  return context;
+}
+
+export function useAppTranscriptionState(): TranscriptionStateContextValue {
+  const context = useContext(TranscriptionStateContext);
+  if (!context) {
+    throw new Error('useAppTranscriptionState must be used within AppProvider');
+  }
+  return context;
+}
+
+export function useAppTranscriptionActions(): TranscriptionActionsContextValue {
+  const context = useContext(TranscriptionActionsContext);
+  if (!context) {
+    throw new Error('useAppTranscriptionActions must be used within AppProvider');
   }
   return context;
 }
