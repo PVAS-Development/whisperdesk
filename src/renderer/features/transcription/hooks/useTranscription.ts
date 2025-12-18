@@ -7,6 +7,14 @@ import type {
   OutputFormat,
 } from '../../../types';
 import { APP_CONFIG } from '../../../config';
+import {
+  openFileDialog,
+  getFileInfo,
+  startTranscription,
+  cancelTranscription,
+  onTranscriptionProgress,
+  saveFile,
+} from '../../../services/electronAPI';
 
 interface UseTranscriptionOptions {
   onHistoryAdd?: (item: HistoryItem) => void;
@@ -75,13 +83,11 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   );
 
   useEffect(() => {
-    const unsubscribe = window.electronAPI?.onTranscriptionProgress(
-      (data: TranscriptionProgress) => {
-        setProgress(data);
-      }
-    );
+    const unsubscribe = onTranscriptionProgress((data: TranscriptionProgress) => {
+      setProgress(data);
+    });
     return () => {
-      unsubscribe?.();
+      unsubscribe();
     };
   }, []);
 
@@ -104,9 +110,9 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   );
 
   const handleFileSelectFromMenu = useCallback(async (): Promise<void> => {
-    const filePath = await window.electronAPI?.openFile();
+    const filePath = await openFileDialog();
     if (filePath) {
-      const fileInfo = await window.electronAPI?.getFileInfo(filePath);
+      const fileInfo = await getFileInfo(filePath);
       if (fileInfo) {
         handleFileSelect(fileInfo);
       }
@@ -125,7 +131,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
     const startTime = Date.now();
 
     try {
-      const result = await window.electronAPI?.startTranscription({
+      const result = await startTranscription({
         filePath: selectedFile.path,
         model: settings.model,
         language: settings.language,
@@ -173,7 +179,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   }, [selectedFile, settings, onHistoryAdd, scheduleProgressReset, clearProgressMessageTimeout]);
 
   const handleCancel = useCallback(async (): Promise<void> => {
-    await window.electronAPI?.cancelTranscription();
+    await cancelTranscription();
     clearProgressMessageTimeout();
     setIsTranscribing(false);
     setProgress({ percent: 0, status: 'Cancelled' });
@@ -218,7 +224,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
 
       // For docx, pdf, md formats, the main process will handle the conversion
 
-      const result = await window.electronAPI?.saveFile({
+      const result = await saveFile({
         defaultName: `${fileName}.${format}`,
         content,
         format,

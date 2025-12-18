@@ -1,5 +1,13 @@
 import { useEffect, useRef } from 'react';
 import type { Unsubscribe } from '../types';
+import {
+  onMenuOpenFile,
+  onMenuSaveFile,
+  onMenuCopyTranscription,
+  onMenuStartTranscription,
+  onMenuCancelTranscription,
+  onMenuToggleHistory,
+} from '../services/electronAPI';
 
 export interface ElectronMenuHandlers {
   onOpenFile?: () => void;
@@ -18,46 +26,46 @@ export function useElectronMenu(handlers: ElectronMenuHandlers): void {
   });
 
   useEffect(() => {
-    const unsubscribers: (Unsubscribe | undefined)[] = [];
+    const unsubscribers: Unsubscribe[] = [];
 
     unsubscribers.push(
-      window.electronAPI?.onMenuOpenFile(() => {
+      onMenuOpenFile(() => {
         handlersRef.current.onOpenFile?.();
       })
     );
 
     unsubscribers.push(
-      window.electronAPI?.onMenuSaveFile(() => {
+      onMenuSaveFile(() => {
         handlersRef.current.onSaveFile?.();
       })
     );
 
     unsubscribers.push(
-      window.electronAPI?.onMenuCopyTranscription(() => {
+      onMenuCopyTranscription(() => {
         handlersRef.current.onCopyTranscription?.();
       })
     );
 
     unsubscribers.push(
-      window.electronAPI?.onMenuStartTranscription(() => {
+      onMenuStartTranscription(() => {
         handlersRef.current.onStartTranscription?.();
       })
     );
 
     unsubscribers.push(
-      window.electronAPI?.onMenuCancelTranscription(() => {
+      onMenuCancelTranscription(() => {
         handlersRef.current.onCancelTranscription?.();
       })
     );
 
     unsubscribers.push(
-      window.electronAPI?.onMenuToggleHistory(() => {
+      onMenuToggleHistory(() => {
         handlersRef.current.onToggleHistory?.();
       })
     );
 
     return () => {
-      unsubscribers.forEach((unsub) => unsub?.());
+      unsubscribers.forEach((unsub) => unsub());
     };
   }, []);
 }
