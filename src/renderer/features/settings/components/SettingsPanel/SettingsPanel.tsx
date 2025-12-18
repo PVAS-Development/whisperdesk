@@ -12,7 +12,14 @@ import type {
 } from '../../../../types';
 import { LANGUAGES, QUALITY_STARS } from '../../../../config';
 import { DEFAULT_MODELS } from '../../services/modelService';
-import { logger } from '../../../../services';
+import {
+  listModels,
+  getGpuStatus,
+  onModelDownloadProgress,
+  downloadModel,
+  deleteModel,
+  logger,
+} from '../../../../services';
 
 export interface SettingsPanelProps {
   settings: TranscriptionSettings;
@@ -36,10 +43,7 @@ function SettingsPanel({
   const loadModelInfo = async (): Promise<void> => {
     try {
       setLoading(true);
-      const [modelList, gpu] = await Promise.all([
-        window.electronAPI?.listModels(),
-        window.electronAPI?.getGpuStatus(),
-      ]);
+      const [modelList, gpu] = await Promise.all([listModels(), getGpuStatus()]);
 
       if (modelList?.models) {
         setModels(modelList.models);
@@ -58,22 +62,20 @@ function SettingsPanel({
   useEffect(() => {
     loadModelInfo();
 
-    const unsubscribe = window.electronAPI?.onModelDownloadProgress?.(
-      (data: ModelDownloadProgress) => {
-        setDownloadProgress(data);
-        if (data.status === 'complete') {
-          setDownloading(null);
-          setDownloadProgress(null);
-          loadModelInfo();
-        } else if (data.status === 'error') {
-          setDownloading(null);
-          setDownloadProgress(null);
-        }
+    const unsubscribe = onModelDownloadProgress((data: ModelDownloadProgress) => {
+      setDownloadProgress(data);
+      if (data.status === 'complete') {
+        setDownloading(null);
+        setDownloadProgress(null);
+        loadModelInfo();
+      } else if (data.status === 'error') {
+        setDownloading(null);
+        setDownloadProgress(null);
       }
-    );
+    });
 
     return () => {
-      unsubscribe?.();
+      unsubscribe();
     };
   }, []);
 
@@ -106,7 +108,7 @@ function SettingsPanel({
   const handleDownloadModel = async (modelName: string): Promise<void> => {
     try {
       setDownloading(modelName);
-      await window.electronAPI?.downloadModel(modelName);
+      await downloadModel(modelName);
       await loadModelInfo();
     } catch (err) {
       logger.error('Failed to download model:', err);
@@ -121,7 +123,7 @@ function SettingsPanel({
     }
     try {
       setLoading(true);
-      const result = await window.electronAPI?.deleteModel(modelName);
+      const result = await deleteModel(modelName);
       if (!result?.success) {
         window.alert(`Failed to delete model: ${result?.error || 'Unknown error'}`);
         return;

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, AlertTriangle, RefreshCw } from 'lucide-react';
 import './SystemWarning.css';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
-import { trackEvent, openExternal, logger } from '../../../services';
+import { trackEvent, openExternal, getAppInfo, logger } from '../../../services';
 
 const FFMPEG_DOWNLOAD_URL = 'https://ffmpeg.org/download.html';
 const VERIFICATION_RETRY_DELAY_MS = 1000;
@@ -25,19 +25,17 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
 
   useEffect(() => {
     const getPlatform = async () => {
-      if (window.electronAPI?.getAppInfo) {
-        try {
-          const appInfo = await window.electronAPI.getAppInfo();
-          if (appInfo.platform === 'win32') {
-            setInstallCommand('winget install ffmpeg');
-          } else if (appInfo.platform === 'linux') {
-            setInstallCommand('sudo apt install ffmpeg');
-          } else {
-            setInstallCommand('brew install ffmpeg');
-          }
-        } catch (error) {
-          logger.error('Failed to get platform info:', error);
+      try {
+        const appInfo = await getAppInfo();
+        if (appInfo.platform === 'win32') {
+          setInstallCommand('winget install ffmpeg');
+        } else if (appInfo.platform === 'linux') {
+          setInstallCommand('sudo apt install ffmpeg');
+        } else {
+          setInstallCommand('brew install ffmpeg');
         }
+      } catch (error) {
+        logger.error('Failed to get platform info:', error);
       }
     };
     getPlatform();
