@@ -1,6 +1,6 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
-import { useAppTranscription } from '../../../contexts';
+import { useAppTranscription } from '../../../../contexts';
 
 export function TranscriptionActions(): React.JSX.Element {
   const { selectedFile, isTranscribing, modelDownloaded, handleTranscribe, handleCancel } =

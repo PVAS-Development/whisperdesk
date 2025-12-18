@@ -1,6 +1,6 @@
 import React from 'react';
-import { ProgressBar } from '../../ui';
-import { useAppTranscription } from '../../../contexts';
+import { ProgressBar } from '../../../ui';
+import { useAppTranscription } from '../../../../contexts';
 
 export function TranscriptionProgress(): React.JSX.Element | null {
   const { isTranscribing, progress, transcriptionStartTime } = useAppTranscription();
