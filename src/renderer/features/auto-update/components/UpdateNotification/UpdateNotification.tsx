@@ -37,6 +37,7 @@ function UpdateNotification() {
           iconOnly
           onClick={dismissUpdate}
           aria-label="Close"
+          className="update-close-btn"
         />
 
         {error && (
