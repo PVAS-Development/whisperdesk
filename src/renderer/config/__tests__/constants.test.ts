@@ -8,6 +8,7 @@ import {
   getLanguageLabel,
   APP_CONFIG,
 } from '../../config/constants';
+import type { LanguageCode, QualityLevel } from '../../types';
 
 describe('config/constants', () => {
   describe('SUPPORTED_EXTENSIONS', () => {
@@ -95,15 +96,15 @@ describe('config/constants', () => {
     });
 
     it('handles out of range values', () => {
-      const tooLow = getQualityStars(0 as unknown as 1);
-      const tooHigh = getQualityStars(10 as unknown as 1);
+      const tooLow = getQualityStars(0 as QualityLevel);
+      const tooHigh = getQualityStars(10 as QualityLevel);
 
       expect(tooLow).toBe('★☆☆☆☆');
       expect(tooHigh).toBe('★★★★★');
     });
 
     it('clamps negative values', () => {
-      const result = getQualityStars(-5 as unknown as 1);
+      const result = getQualityStars(-5 as QualityLevel);
       expect(result).toBe('★☆☆☆☆');
     });
   });
@@ -135,6 +136,16 @@ describe('config/constants', () => {
         const label = getLanguageLabel(lang.value);
         expect(label).toBe(lang.label);
       });
+    });
+
+    it('returns the code itself for unknown language code', () => {
+      const unknownCode = 'xx' as LanguageCode;
+      expect(getLanguageLabel(unknownCode)).toBe('xx');
+    });
+
+    it('handles edge cases with unknown codes', () => {
+      expect(getLanguageLabel('unknown' as LanguageCode)).toBe('unknown');
+      expect(getLanguageLabel('test-lang' as LanguageCode)).toBe('test-lang');
     });
   });
 });
