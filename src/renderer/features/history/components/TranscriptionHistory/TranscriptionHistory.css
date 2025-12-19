@@ -35,29 +35,6 @@
   gap: 8px;
 }
 
-.history-actions button {
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.history-actions button:hover {
-  background: var(--surface-hover);
-}
-
-.history-actions .danger {
-  color: var(--danger);
-  border-color: var(--danger);
-}
-
-.history-actions .danger:hover {
-  background: var(--danger-light);
-}
-
 .history-content {
   flex: 1;
   padding: 12px;

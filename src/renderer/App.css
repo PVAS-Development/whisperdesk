@@ -71,25 +71,6 @@
   border-color: var(--border-hover);
 }
 
-.history-btn {
-  -webkit-app-region: no-drag;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.history-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
 .app-main {
   flex: 1;
   display: grid;
@@ -128,92 +109,6 @@
 .actions {
   display: flex;
   gap: 12px;
-}
-
-button {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 12px 20px;
-  border-radius: var(--radius-sm);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  color: white;
-  flex: 1;
-  box-shadow: var(--shadow-accent);
-}
-
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px var(--accent-border),
-    0 4px 16px var(--accent-glow),
-    0 8px 32px rgba(37, 99, 235, 0.2);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: var(--shadow-accent);
-}
-
-.btn-danger {
-  background: var(--danger);
-  color: white;
-  flex: 1;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #dc2626;
-}
-
-.btn-secondary {
-  background: var(--surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-inner);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
-.btn-icon {
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: var(--radius-sm);
-}
-
-.btn-icon:hover:not(:disabled) {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
 }
 
 .error-message {

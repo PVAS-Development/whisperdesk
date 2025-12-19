@@ -38,24 +38,6 @@
   margin-top: 10px;
 }
 
-.btn-download {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  background: var(--accent-light);
-  border: 1px solid var(--accent-border);
-  color: var(--accent);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-download:hover {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
 .downloading {
   display: flex;
   align-items: center;
@@ -106,27 +88,4 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
-}
-
-.btn-delete-model {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  font-size: 1rem;
-  opacity: 0.6;
-  color: var(--text-muted);
-}
-
-.btn-delete-model:hover {
-  background: var(--danger-light);
-  opacity: 1;
-  color: var(--danger);
-}
-
-.btn-delete-model:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }

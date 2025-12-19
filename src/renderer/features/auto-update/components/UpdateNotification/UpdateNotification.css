@@ -141,44 +141,6 @@
   margin-top: 8px;
 }
 
-.btn-download,
-.btn-install {
-  flex: 1;
-  padding: 12px 24px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-download:hover,
-.btn-install:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-}
-
-.btn-dismiss {
-  padding: 12px 24px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-dismiss:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -206,30 +168,6 @@
 
 .update-error .update-icon {
   color: #ef4444;
-}
-
-.btn-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 1;
-}
-
-.btn-close:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {

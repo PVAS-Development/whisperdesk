@@ -123,56 +123,12 @@
   background-color: var(--bg-secondary);
 }
 
-.debug-logs-footer button {
+.debug-logs-footer .btn {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-base);
 }
 
-.btn-copy-logs {
-  background-color: var(--accent);
-  color: white;
-  border: none;
-}
-
-.btn-copy-logs:hover {
-  background-color: var(--accent-hover);
-}
-
-.btn-copy-with-info {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-}
-
-.btn-copy-with-info:hover {
-  background-color: var(--bg-hover);
-}
-
-.btn-clear-logs {
-  background-color: transparent;
-  color: var(--danger);
-  border: 1px solid var(--danger);
+.debug-logs-footer .btn-clear-logs {
   flex: 0.5;
-}
-
-.btn-clear-logs:hover {
-  background-color: var(--danger-light);
-}
-
-.btn-copy-logs.copied,
-.btn-copy-with-info.copied {
-  background-color: var(--success);
-  color: white;
-  border-color: transparent;
 }
 
 @keyframes fadeIn {

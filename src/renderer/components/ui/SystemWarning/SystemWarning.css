@@ -74,25 +74,6 @@
   box-shadow: var(--shadow-inner);
 }
 
-.copy-button {
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.copy-button:hover {
-  color: var(--text-primary);
-  background-color: var(--bg-secondary);
-  border-color: var(--border);
-}
-
 .alternative-option {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -102,67 +83,4 @@
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
-}
-
-.link-button {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.link-button:hover {
-  text-decoration: underline;
-}
-
-.refresh-button {
-  background: var(--warning);
-  border: none;
-  color: white;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.refresh-button:hover:not(:disabled) {
-  background: var(--warning-dark);
-  transform: translateY(-1px);
-}
-
-.refresh-button:focus-visible:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.refresh-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.refresh-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }

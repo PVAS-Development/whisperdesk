@@ -39,35 +39,3 @@
   padding: 0 8px;
   white-space: nowrap;
 }
-
-.search-nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  font-size: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.search-nav-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
-.search-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.search-nav-btn.close:hover {
-  background: var(--danger-light);
-  border-color: var(--danger);
-  color: var(--danger);
-}

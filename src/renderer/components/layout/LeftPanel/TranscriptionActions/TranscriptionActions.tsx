@@ -1,5 +1,6 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import { useAppTranscription } from '../../../../contexts';
 
 export interface TranscriptionActionsProps {
@@ -21,23 +22,29 @@ function TranscriptionActions({ isFFmpegAvailable }: TranscriptionActionsProps):
   return (
     <div className="actions">
       {!isTranscribing ? (
-        <button
-          className="btn-primary"
+        <Button
+          variant="primary"
+          size="lg"
+          icon={<Zap size={18} />}
           onClick={handleTranscribe}
           disabled={!canTranscribe}
           aria-label="Start transcription"
           title={getDisabledReason()}
+          fullWidth
         >
-          <Zap size={18} aria-hidden="true" /> Transcribe
-        </button>
+          Transcribe
+        </Button>
       ) : (
-        <button
-          className="btn-danger"
+        <Button
+          variant="danger"
+          size="lg"
           onClick={handleCancel}
           aria-label="Cancel ongoing transcription"
+          loading
+          fullWidth
         >
-          <span className="loading-spinner" aria-hidden="true"></span> Cancel
-        </button>
+          Cancel
+        </Button>
       )}
     </div>
   );

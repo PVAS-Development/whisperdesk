@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '../Button';
 import { logger } from '../../../services/logger';
 import './ErrorBoundary.css';
 
@@ -57,19 +58,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               <pre className="error-boundary-details">{this.state.error.message}</pre>
             )}
             <div className="error-boundary-actions">
-              <button
-                className="error-boundary-btn error-boundary-btn-primary"
-                onClick={this.handleReload}
-              >
-                <RefreshCw size={16} aria-hidden="true" />
+              <Button variant="primary" icon={<RefreshCw size={16} />} onClick={this.handleReload}>
                 Reload Application
-              </button>
-              <button
-                className="error-boundary-btn error-boundary-btn-secondary"
-                onClick={this.handleReset}
-              >
+              </Button>
+              <Button variant="secondary" onClick={this.handleReset}>
                 Try Again
-              </button>
+              </Button>
             </div>
           </div>
         </div>

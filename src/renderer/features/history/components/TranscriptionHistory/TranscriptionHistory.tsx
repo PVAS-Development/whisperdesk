@@ -1,5 +1,6 @@
 import React, { type KeyboardEvent } from 'react';
 import { History, Trash2, X, Inbox, Clock } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import { formatDate, formatDuration } from '../../../../utils';
 import { getLanguageLabel } from '../../../../config';
 import './TranscriptionHistory.css';
@@ -48,13 +49,18 @@ function TranscriptionHistory({
         </h3>
         <div className="history-actions">
           {history.length > 0 && (
-            <button className="btn-icon danger" onClick={handleClearAll}>
-              <Trash2 size={16} aria-hidden="true" /> Clear All
-            </button>
+            <Button
+              variant="icon"
+              icon={<Trash2 size={16} />}
+              onClick={handleClearAll}
+              className="danger"
+            >
+              Clear All
+            </Button>
           )}
-          <button className="btn-icon" onClick={onClose}>
-            <X size={16} aria-hidden="true" /> Close
-          </button>
+          <Button variant="icon" icon={<X size={16} />} onClick={onClose}>
+            Close
+          </Button>
         </div>
       </div>
 
@@ -82,14 +88,16 @@ function TranscriptionHistory({
                   <span className="history-filename">{item.fileName}</span>
                   <div className="history-item-header-actions">
                     <span className="history-date">{formatDate(item.date)}</span>
-                    <button
-                      className="history-item-delete"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<Trash2 size={14} />}
+                      iconOnly
                       onClick={(event) => handleDelete(event, item.id, item.fileName)}
                       title="Delete transcription"
                       aria-label={`Delete ${item.fileName}`}
-                    >
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
+                      className="history-item-delete"
+                    />
                   </div>
                 </div>
                 <div className="history-item-meta">

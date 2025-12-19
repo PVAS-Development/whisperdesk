@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, Coffee } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import { openExternal, trackEvent, logger } from '../../../../services';
 import './DonationSection.css';
 
@@ -22,21 +23,25 @@ function DonationSection(): React.JSX.Element {
     <div className="donation-container">
       <p className="donation-text">Enjoying the app?</p>
       <div className="donation-buttons">
-        <button
-          className="donation-link"
+        <Button
+          variant="ghost"
+          size="sm"
           aria-label="Donate via PayPal"
           onClick={() => handleDonationClick(PAYPAL_DONATION_URL, 'paypal')}
+          className="donation-link"
         >
           Donate <Heart size={12} className="heart-icon" fill="currentColor" />
-        </button>
+        </Button>
         <span className="donation-separator">•</span>
-        <button
-          className="donation-link"
+        <Button
+          variant="ghost"
+          size="sm"
           aria-label="Buy me a coffee"
           onClick={() => handleDonationClick(BUY_ME_A_COFFEE_URL, 'buymeacoffee')}
+          className="donation-link"
         >
           Buy me a coffee <Coffee size={12} className="coffee-icon" />
-        </button>
+        </Button>
       </div>
     </div>
   );

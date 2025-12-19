@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { X, Terminal, Copy, Clipboard, Trash2 } from 'lucide-react';
+import { Button } from '../Button';
 import type { LogEntry } from '../../../services/logger';
 import './DebugLogsModal.css';
 
@@ -88,9 +89,14 @@ function DebugLogsModal({
             Debug Logs
             <span className="log-count">({logs.length} entries)</span>
           </h2>
-          <button className="debug-logs-close" onClick={onClose} aria-label="Close debug logs">
-            <X size={20} />
-          </button>
+          <Button
+            variant="ghost"
+            icon={<X size={20} />}
+            iconOnly
+            onClick={onClose}
+            aria-label="Close debug logs"
+            className="debug-logs-close"
+          />
         </div>
 
         <div className="debug-logs-content">
@@ -113,26 +119,33 @@ function DebugLogsModal({
         </div>
 
         <div className="debug-logs-footer">
-          <button
-            className={`btn-copy-logs ${copyState === 'logs' ? 'copied' : ''}`}
+          <Button
+            variant="primary"
+            icon={<Copy size={16} />}
             onClick={handleCopyLogs}
             disabled={logs.length === 0}
+            className={`btn-copy-logs ${copyState === 'logs' ? 'copied' : ''}`}
           >
-            <Copy size={16} aria-hidden="true" />
             {copyState === 'logs' ? 'Copied!' : 'Copy Logs'}
-          </button>
-          <button
-            className={`btn-copy-with-info ${copyState === 'info' ? 'copied' : ''}`}
+          </Button>
+          <Button
+            variant="secondary"
+            icon={<Clipboard size={16} />}
             onClick={handleCopyWithInfo}
             disabled={logs.length === 0}
+            className={`btn-copy-with-info ${copyState === 'info' ? 'copied' : ''}`}
           >
-            <Clipboard size={16} aria-hidden="true" />
             {copyState === 'info' ? 'Copied!' : 'Copy with System Info'}
-          </button>
-          <button className="btn-clear-logs" onClick={onClearLogs} disabled={logs.length === 0}>
-            <Trash2 size={16} aria-hidden="true" />
+          </Button>
+          <Button
+            variant="secondary"
+            icon={<Trash2 size={16} />}
+            onClick={onClearLogs}
+            disabled={logs.length === 0}
+            className="btn-clear-logs danger"
+          >
             Clear
-          </button>
+          </Button>
         </div>
       </div>
     </div>

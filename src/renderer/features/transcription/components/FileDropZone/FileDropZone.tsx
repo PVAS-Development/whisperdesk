@@ -1,5 +1,6 @@
 import React, { useCallback, type DragEvent, type KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import { isValidMediaFile, formatFileSize } from '../../../../utils';
 import type { SelectedFile } from '../../../../types';
 import { openFileDialog, getPathForFile } from '../../../../services/electronAPI';
@@ -79,14 +80,16 @@ function FileDropZone({
     >
       {selectedFile ? (
         <div className="file-info">
-          <button
-            className="file-remove"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<X size={16} />}
+            iconOnly
             onClick={handleRemoveClick}
             title="Remove file"
             aria-label="Remove selected file"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
+            className="file-remove"
+          />
           <span className="file-icon">📁</span>
           <div className="file-details">
             <span className="file-name">{selectedFile.name}</span>

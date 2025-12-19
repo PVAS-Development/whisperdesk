@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '../Button';
 import './SystemWarning.css';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import { trackEvent, openExternal, getAppInfo, logger } from '../../../services';
@@ -107,43 +108,41 @@ function SystemWarning({ onRefresh }: SystemWarningProps): React.JSX.Element {
         <p className="instruction-text">Run this command in your terminal:</p>
         <div className="system-warning-code">
           <code>{installCommand}</code>
-          <button
-            className="copy-button"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={copySuccess ? <Check size={16} /> : <Copy size={16} />}
+            iconOnly
             onClick={handleCopy}
             title="Copy to clipboard"
             aria-label={copySuccess ? 'Copied to clipboard' : 'Copy install command to clipboard'}
-          >
-            {copySuccess ? (
-              <Check size={16} aria-hidden="true" />
-            ) : (
-              <Copy size={16} aria-hidden="true" />
-            )}
-          </button>
+          />
         </div>
 
         <div className="alternative-option">
           <span>Or download manually from</span>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleDownloadLink}
-            className="link-button"
             aria-label="Open FFmpeg download page"
+            className="link"
           >
             ffmpeg.org
-          </button>
+          </Button>
         </div>
       </div>
 
-      <button className="refresh-button" onClick={handleRefresh} disabled={isChecking}>
-        {isChecking ? (
-          <>
-            <RefreshCw size={16} className="spin" aria-hidden="true" /> Verifying Installation...
-          </>
-        ) : (
-          <>
-            <RefreshCw size={16} aria-hidden="true" /> I have installed FFmpeg
-          </>
-        )}
-      </button>
+      <Button
+        icon={<RefreshCw size={16} />}
+        onClick={handleRefresh}
+        disabled={isChecking}
+        loading={isChecking}
+        fullWidth
+        className="warning"
+      >
+        {isChecking ? 'Verifying Installation...' : 'I have installed FFmpeg'}
+      </Button>
     </div>
   );
 }

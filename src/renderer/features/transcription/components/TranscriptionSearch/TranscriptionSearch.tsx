@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, type ChangeEvent } from 'react';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import './TranscriptionSearch.css';
 
 export interface TranscriptionSearchProps {
@@ -50,32 +51,35 @@ function TranscriptionSearch({
             {totalMatches > 0 ? `${currentMatchIndex + 1} of ${totalMatches}` : 'No matches'}
           </span>
         )}
-        <button
-          className="search-nav-btn"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<ChevronUp size={14} />}
+          iconOnly
           onClick={onPrevMatch}
           disabled={totalMatches === 0}
           title="Previous match (Shift+Enter)"
           aria-label="Previous match"
-        >
-          <ChevronUp size={14} />
-        </button>
-        <button
-          className="search-nav-btn"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<ChevronDown size={14} />}
+          iconOnly
           onClick={onNextMatch}
           disabled={totalMatches === 0}
           title="Next match (Enter)"
           aria-label="Next match"
-        >
-          <ChevronDown size={14} />
-        </button>
-        <button
-          className="search-nav-btn close"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<X size={14} />}
+          iconOnly
           onClick={onClose}
           title="Close search (Esc)"
           aria-label="Close search"
-        >
-          <X size={14} />
-        </button>
+        />
       </div>
     </div>
   );

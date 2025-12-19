@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Check, Copy, Save } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import './TranscriptionToolbar.css';
 import type { OutputFormat } from '../../../../types';
 import { OUTPUT_FORMATS } from '../../../../config';
@@ -58,40 +59,37 @@ function TranscriptionToolbar({
       </div>
       {hasText && (
         <div className="output-actions">
-          <button
-            className={`btn-icon ${isSearchActive ? 'active' : ''}`}
+          <Button
+            variant="icon"
+            icon={<Search size={14} />}
             onClick={onToggleSearch}
             title="Search transcript (⌘F)"
             aria-label="Search transcript"
+            active={isSearchActive}
           >
-            <Search size={14} /> Search
-          </button>
-          <button
-            className={`btn-icon ${copySuccess ? 'success' : ''}`}
+            Search
+          </Button>
+          <Button
+            variant="icon"
+            icon={copySuccess ? <Check size={14} /> : <Copy size={14} />}
             onClick={onCopy}
             title="Copy to clipboard"
             aria-label="Copy transcription to clipboard"
+            className={copySuccess ? 'copied' : ''}
           >
-            {copySuccess ? (
-              <>
-                <Check size={14} /> Copied!
-              </>
-            ) : (
-              <>
-                <Copy size={14} /> Copy
-              </>
-            )}
-          </button>
+            {copySuccess ? 'Copied!' : 'Copy'}
+          </Button>
           <div className="save-dropdown" ref={saveMenuRef}>
-            <button
-              className="btn-icon"
+            <Button
+              variant="icon"
+              icon={<Save size={14} />}
               onClick={() => setShowSaveMenu(!showSaveMenu)}
               title="Save to file"
               aria-label="Save transcription to file"
               aria-expanded={showSaveMenu}
             >
-              <Save size={14} /> Save
-            </button>
+              Save
+            </Button>
             {showSaveMenu && (
               <div className="save-menu">
                 {OUTPUT_FORMATS.map((format) => (

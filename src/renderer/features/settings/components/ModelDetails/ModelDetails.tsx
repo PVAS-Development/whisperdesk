@@ -1,5 +1,6 @@
 import React from 'react';
 import { Download, Check, Trash2 } from 'lucide-react';
+import { Button } from '../../../../components/ui';
 import './ModelDetails.css';
 import type { ModelInfo, ModelDownloadProgress } from '../../../../types';
 import { QUALITY_STARS } from '../../../../config';
@@ -53,14 +54,17 @@ function ModelDetails({
               )}
             </div>
           ) : (
-            <button
-              className="btn-download"
+            <Button
+              size="sm"
+              icon={<Download size={14} />}
               onClick={() => onDownload(model.name)}
               disabled={disabled}
               aria-label={`Download ${model.name} model, size ${model.size}`}
+              fullWidth
+              className="accent"
             >
-              <Download size={14} aria-hidden="true" /> Download {model.size}
-            </button>
+              Download {model.size}
+            </Button>
           )}
         </div>
       )}
@@ -70,15 +74,17 @@ function ModelDetails({
           <div className="model-ready">
             <Check size={14} aria-hidden="true" /> Ready to use
           </div>
-          <button
-            className="btn-delete-model"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Trash2 size={16} />}
+            iconOnly
             onClick={() => onDelete(model.name)}
             disabled={disabled}
             title="Delete model"
             aria-label={`Delete ${model.name} model`}
-          >
-            <Trash2 size={16} aria-hidden="true" />
-          </button>
+            className="danger"
+          />
         </div>
       )}
     </div>
