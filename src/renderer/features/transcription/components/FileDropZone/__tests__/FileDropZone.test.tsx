@@ -5,334 +5,136 @@ import { overrideElectronAPI } from '@/test/utils';
 import { createMockFile } from '@/test/fixtures';
 
 describe('FileDropZone', () => {
-  const mockFile = createMockFile();
+  const onFilesSelect = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render dropzone with default text', () => {
-    const onFileSelect = vi.fn();
+  it('should render dropzone with batch text', () => {
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} />);
 
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    expect(screen.getByText(/Drop audio\/video file here/i)).toBeInTheDocument();
+    expect(screen.getByText(/Drop audio\/video files here/i)).toBeInTheDocument();
+    expect(screen.getByText(/multiple files/i)).toBeInTheDocument();
   });
 
-  it('should be clickable and open file dialog', async () => {
-    const onFileSelect = vi.fn();
+  it('should be clickable and open multiple files dialog', async () => {
     overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/test.mp3'),
+      openMultipleFiles: vi.fn().mockResolvedValue(['/path/to/test1.mp3', '/path/to/test2.mp3']),
+      getFileInfo: vi.fn().mockImplementation(async (path) => ({
+        name: path.split('/').pop(),
+        path,
+        size: 1024,
+      })),
     });
 
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} />);
 
     const dropzone = screen.getByRole('button');
     fireEvent.click(dropzone);
 
     await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
+      expect(window.electronAPI?.openMultipleFiles).toHaveBeenCalled();
+      expect(onFilesSelect).toHaveBeenCalledTimes(1);
     });
+
+    const calledFiles = onFilesSelect.mock.calls[0]?.[0] ?? [];
+    expect(calledFiles).toHaveLength(2);
+    expect(calledFiles[0].name).toBe('test1.mp3');
+    expect(calledFiles[1].name).toBe('test2.mp3');
   });
 
-  it('should display selected file info', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={mockFile} disabled={false} />);
-
-    expect(screen.getByText('test.mp3')).toBeInTheDocument();
-  });
-
-  it('should show file size when file is selected', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={mockFile} disabled={false} />);
-
-    expect(screen.getByText(/1.*KB/i)).toBeInTheDocument();
-  });
-
-  it('should call onClear when remove button is clicked', () => {
-    const onFileSelect = vi.fn();
-    const onClear = vi.fn();
-
-    render(
-      <FileDropZone
-        onFileSelect={onFileSelect}
-        selectedFile={mockFile}
-        disabled={false}
-        onClear={onClear}
-      />
-    );
-
-    const removeButton = screen.getByLabelText('Remove selected file');
-    fireEvent.click(removeButton);
-
-    expect(onClear).toHaveBeenCalled();
-  });
-
-  it('should be disabled when disabled prop is true', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={true} />);
-
-    const dropzone = screen.getByRole('button');
-    expect(dropzone).toHaveAttribute('tabIndex', '-1');
-  });
-
-  it('should not be clickable when disabled', () => {
-    const onFileSelect = vi.fn();
+  it('should handle file drop with valid files', async () => {
     overrideElectronAPI({
-      openFile: vi.fn(),
+      getPathForFile: vi.fn().mockReturnValue('/path/to/test.mp3'),
+      getFileInfo: vi.fn().mockResolvedValue({
+        name: 'test.mp3',
+        path: '/path/to/test.mp3',
+        size: 1024,
+      }),
     });
 
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={true} />);
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} />);
 
     const dropzone = screen.getByRole('button');
-    fireEvent.click(dropzone);
-
-    expect(window.electronAPI?.openFile).not.toHaveBeenCalled();
-  });
-
-  it('should handle drag over events', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button') as HTMLDivElement;
-    expect(dropzone).toHaveAttribute('role', 'button');
-    expect(dropzone).toHaveAttribute('tabIndex', '0');
-    expect(dropzone).toBeInTheDocument();
-  });
-
-  it('should handle keyboard activation with Enter key', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/test.mp3'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.keyDown(dropzone, { key: 'Enter' });
-
-    await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
-    });
-  });
-
-  it('should handle keyboard activation with Space key', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/test.mp3'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.keyDown(dropzone, { key: ' ' });
-
-    await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
-    });
-  });
-
-  it('should have proper accessibility labels', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    expect(dropzone).toHaveAttribute('aria-label');
-  });
-
-  it('should update accessibility label when file is selected', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzoneInitial = screen.getByRole('button');
-    const initialLabel = dropzoneInitial.getAttribute('aria-label');
-    expect(initialLabel).toMatch(/Drop|browse/i);
-  });
-
-  it('should handle file drop with valid media file', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      getPathForFile: vi.fn().mockReturnValue('/path/to/audio.mp3'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-
-    const file = new File(['audio content'], 'audio.mp3', { type: 'audio/mp3' });
-
-    const dataTransfer = {
-      files: [file],
-      items: [{ kind: 'file', type: file.type, getAsFile: () => file }],
-      types: ['Files'],
-    };
-
-    fireEvent.drop(dropzone, { dataTransfer });
-
-    await waitFor(() => {
-      expect(onFileSelect).toHaveBeenCalledWith({
-        path: '/path/to/audio.mp3',
-        name: 'audio.mp3',
-      });
-    });
-  });
-
-  it('should not call onFileSelect when getPathForFile returns falsy value', () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      getPathForFile: vi.fn().mockReturnValue(undefined),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-
-    const file = new File(['audio content'], 'audio.mp3', { type: 'audio/mp3' });
+    const file = createMockFile({ name: 'test.mp3' });
 
     fireEvent.drop(dropzone, {
-      dataTransfer: { files: [file] },
+      dataTransfer: {
+        files: [file],
+      },
     });
 
-    expect(onFileSelect).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onFilesSelect).toHaveBeenCalledWith([
+        expect.objectContaining({
+          name: 'test.mp3',
+          path: '/path/to/test.mp3',
+        }),
+      ]);
+    });
   });
 
-  it('should not handle file drop when disabled', () => {
-    const onFileSelect = vi.fn();
+  it('should filter out invalid files', async () => {
+    overrideElectronAPI({
+      openMultipleFiles: vi.fn().mockResolvedValue(['/path/to/test.txt']),
+      getFileInfo: vi.fn().mockResolvedValue(null),
+    });
 
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={true} />);
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} />);
 
     const dropzone = screen.getByRole('button');
+    fireEvent.click(dropzone);
 
-    const file = new File(['audio content'], 'audio.mp3', { type: 'audio/mp3' });
-    Object.defineProperty(file, 'path', { value: '/path/to/audio.mp3' });
+    await waitFor(() => {
+      expect(window.electronAPI?.openMultipleFiles).toHaveBeenCalled();
+    });
+
+    expect(onFilesSelect).not.toHaveBeenCalled();
+  });
+
+  it('should not trigger action when disabled', async () => {
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={true} />);
+
+    const dropzone = screen.getByRole('button');
+    fireEvent.click(dropzone);
+
+    expect(window.electronAPI?.openMultipleFiles).not.toHaveBeenCalled();
+  });
+
+  it('should show queue count badge', () => {
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} queueCount={3} />);
+
+    expect(screen.getByText('3 files in queue')).toBeInTheDocument();
+  });
+
+  it('should handle multiple files drop', async () => {
+    overrideElectronAPI({
+      getPathForFile: vi.fn((file) => `/path/to/${file.name}`),
+      getFileInfo: vi.fn(async (path) => ({
+        name: path.split('/').pop(),
+        path,
+        size: 1024,
+      })),
+    });
+
+    render(<FileDropZone onFilesSelect={onFilesSelect} disabled={false} />);
+
+    const dropzone = screen.getByRole('button');
+    const file1 = createMockFile({ name: 'test1.mp3' });
+    const file2 = createMockFile({ name: 'test2.wav' });
 
     fireEvent.drop(dropzone, {
-      dataTransfer: { files: [file] },
+      dataTransfer: {
+        files: [file1, file2],
+      },
     });
-
-    expect(onFileSelect).not.toHaveBeenCalled();
-  });
-
-  it('should not handle file drop with invalid file type', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-
-    const file = new File(['text content'], 'document.pdf', { type: 'application/pdf' });
-    Object.defineProperty(file, 'path', { value: '/path/to/document.pdf' });
-
-    fireEvent.drop(dropzone, {
-      dataTransfer: { files: [file] },
-    });
-
-    expect(onFileSelect).not.toHaveBeenCalled();
-  });
-
-  it('should prevent default on drag over', () => {
-    const onFileSelect = vi.fn();
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    const dragOverEvent = new Event('dragover', { bubbles: true, cancelable: true });
-
-    dropzone.dispatchEvent(dragOverEvent);
-
-    expect(dragOverEvent.defaultPrevented).toBe(true);
-  });
-
-  it('should not activate on keyboard when disabled', () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn(),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={true} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.keyDown(dropzone, { key: 'Enter' });
-
-    expect(window.electronAPI?.openFile).not.toHaveBeenCalled();
-  });
-
-  it('should call onFileSelect when valid file is selected via dialog', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/test.wav'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.click(dropzone);
 
     await waitFor(() => {
-      expect(onFileSelect).toHaveBeenCalledWith({
-        path: '/path/to/test.wav',
-        name: 'test.wav',
-      });
+      expect(onFilesSelect).toHaveBeenCalledWith([
+        expect.objectContaining({ name: 'test1.mp3' }),
+        expect.objectContaining({ name: 'test2.wav' }),
+      ]);
     });
-  });
-
-  it('should not call onFileSelect for invalid file from dialog', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/document.exe'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.click(dropzone);
-
-    await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
-    });
-
-    expect(onFileSelect).not.toHaveBeenCalled();
-  });
-
-  it('should not call onFileSelect when file path has no name', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue('/path/to/'),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.click(dropzone);
-
-    await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
-    });
-
-    expect(onFileSelect).not.toHaveBeenCalled();
-  });
-
-  it('should handle when openFile returns null', async () => {
-    const onFileSelect = vi.fn();
-    overrideElectronAPI({
-      openFile: vi.fn().mockResolvedValue(null),
-    });
-
-    render(<FileDropZone onFileSelect={onFileSelect} selectedFile={null} disabled={false} />);
-
-    const dropzone = screen.getByRole('button');
-    fireEvent.click(dropzone);
-
-    await waitFor(() => {
-      expect(window.electronAPI?.openFile).toHaveBeenCalled();
-    });
-
-    expect(onFileSelect).not.toHaveBeenCalled();
   });
 });

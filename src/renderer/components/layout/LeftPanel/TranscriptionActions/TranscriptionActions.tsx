@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Zap } from 'lucide-react';
 import { Button } from '../../../../components/ui';
 import { useAppTranscription } from '../../../../contexts';
@@ -8,14 +8,27 @@ export interface TranscriptionActionsProps {
 }
 
 function TranscriptionActions({ isFFmpegAvailable }: TranscriptionActionsProps): React.JSX.Element {
-  const { selectedFile, isTranscribing, modelDownloaded, handleTranscribe, handleCancel } =
+  const { isTranscribing, modelDownloaded, handleTranscribe, handleCancel, queue } =
     useAppTranscription();
 
-  const canTranscribe = selectedFile && modelDownloaded && isFFmpegAvailable === true;
+  const { retryableCount } = useMemo(() => {
+    let retryable = 0;
+    for (const item of queue) {
+      if (item.status === 'pending') {
+        retryable++;
+      } else if (item.status === 'cancelled' || item.status === 'error') {
+        retryable++;
+      }
+    }
+    return { retryableCount: retryable };
+  }, [queue]);
+
+  const canTranscribe = retryableCount > 0 && modelDownloaded && isFFmpegAvailable === true;
 
   const getDisabledReason = (): string => {
     if (!isFFmpegAvailable) return 'Please install FFmpeg first';
     if (!modelDownloaded) return 'Please download the selected model first';
+    if (retryableCount === 0) return 'Add files to queue to transcribe';
     return '';
   };
 
@@ -40,7 +53,6 @@ function TranscriptionActions({ isFFmpegAvailable }: TranscriptionActionsProps):
           size="lg"
           onClick={handleCancel}
           aria-label="Cancel ongoing transcription"
-          loading
           fullWidth
         >
           Cancel

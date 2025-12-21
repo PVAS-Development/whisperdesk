@@ -12,7 +12,7 @@ export interface TranscriptionHistoryProps {
   onClear: () => void;
   onClose: () => void;
   onSelect: (item: HistoryItem) => void;
-  onDelete: (itemId: number) => void;
+  onDelete: (itemId: string) => void;
 }
 
 function TranscriptionHistory({
@@ -28,7 +28,7 @@ function TranscriptionHistory({
     }
   };
 
-  const handleDelete = (event: React.MouseEvent, itemId: number, fileName: string): void => {
+  const handleDelete = (event: React.MouseEvent, itemId: string, fileName: string): void => {
     event.stopPropagation();
     if (window.confirm(`Are you sure you want to delete the transcription for "${fileName}"?`)) {
       onDelete(itemId);

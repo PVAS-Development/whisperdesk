@@ -6,6 +6,7 @@ Element.prototype.scrollIntoView = vi.fn();
 
 const mockElectronAPI: ElectronAPI = {
   openFile: vi.fn().mockResolvedValue(null),
+  openMultipleFiles: vi.fn().mockResolvedValue(null),
   saveFile: vi.fn().mockResolvedValue({ success: false, error: 'Not implemented' }),
   getFileInfo: vi.fn().mockResolvedValue(null),
   getPathForFile: vi.fn().mockReturnValue('/path/to/file'),

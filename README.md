@@ -16,7 +16,8 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 
 ## ✨ Features
 
-- **Drag & Drop** - Simply drag the audio/video file into the app
+- **Drag & Drop** - Drag single or multiple files to create a batch queue
+- **Batch Processing** - Process unlimited files sequentially with automatic queue management
 - **Multiple Formats** - Supports MP3, WAV, M4A, FLAC, OGG, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
 - **Multiple Models** - Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
 - **Output Formats** - Export as VTT subtitles, SRT subtitles, plain text, Word (`.docx`), PDF, or Markdown
@@ -98,9 +99,9 @@ npm run electron:build
 
 ## 🎮 Usage
 
-1. **Open a File** - Drag and drop an audio/video file into the app, or click to browse
+1. **Open Files** - Drag and drop audio/video files (single or batch) into the app, or click to browse
 2. **Configure Settings** - Choose your preferred model, language, and output format
-3. **Transcribe** - Click "Transcribe" and wait for the magic to happen
+3. **Transcribe** - Click "Transcribe" to process the entire queue sequentially
 4. **Save/Copy** - Save the transcription from the save dialog (choose from `.txt`, `.docx`, `.pdf`, `.md`, `.srt`, or `.vtt` formats) or copy to clipboard
 
 ### Keyboard Shortcuts

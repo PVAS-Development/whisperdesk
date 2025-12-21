@@ -33,7 +33,7 @@ describe('useHistory', () => {
     });
 
     expect(result.current.history).toHaveLength(1);
-    expect(result.current.history[0]).toEqual(expect.objectContaining({ id: 1 }));
+    expect(result.current.history[0]).toEqual(expect.objectContaining({ fileName: 'test.mp3' }));
   });
 
   it('should maintain MAX_HISTORY_ITEMS limit (20 items)', () => {
@@ -41,7 +41,7 @@ describe('useHistory', () => {
 
     act(() => {
       for (let i = 0; i < 25; i++) {
-        const item = createMockHistoryItem({ id: i, fileName: `file${i}.mp3` });
+        const item = createMockHistoryItem({ id: `item-${i}`, fileName: `file${i}.mp3` });
         result.current.addHistoryItem(item);
       }
     });
@@ -116,8 +116,8 @@ describe('useHistory', () => {
 
   it('should remove a history item and persist the change', () => {
     const { result } = renderHook(() => useHistory());
-    const firstItem = createMockHistoryItem({ id: 10, fileName: 'keep.mp3' });
-    const secondItem = createMockHistoryItem({ id: 11, fileName: 'remove.mp3' });
+    const firstItem = createMockHistoryItem({ id: 'item-10', fileName: 'keep.mp3' });
+    const secondItem = createMockHistoryItem({ id: 'item-11', fileName: 'remove.mp3' });
 
     act(() => {
       result.current.addHistoryItem(firstItem);
@@ -158,7 +158,7 @@ describe('useHistory', () => {
     let saved = JSON.parse(localStorage.getItem('whisperdesk_history') || '[]');
     expect(saved).toHaveLength(20);
 
-    const newItem = createMockHistoryItem({ id: 20, fileName: 'file20.mp3' });
+    const newItem = createMockHistoryItem({ id: 'item-20', fileName: 'file20.mp3' });
 
     act(() => {
       result.current.addHistoryItem(newItem);
@@ -166,8 +166,8 @@ describe('useHistory', () => {
 
     saved = JSON.parse(localStorage.getItem('whisperdesk_history') || '[]');
     expect(saved).toHaveLength(20);
-    expect(saved[0].id).toBe(20);
-    expect(saved.some((item: HistoryItem) => item.id === 0)).toBe(false);
+    expect(saved[0].id).toBe('item-20');
+    expect(saved.some((item: HistoryItem) => item.id === items[0]?.id)).toBe(false);
   });
 
   it('should call onSelect callback and hide history when selecting item', () => {

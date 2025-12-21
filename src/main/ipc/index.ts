@@ -39,6 +39,22 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
     return filePaths[0];
   });
 
+  ipcMain.handle('dialog:openMultipleFiles', async () => {
+    const mainWindow = getMainWindow();
+    if (!mainWindow) return null;
+
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile', 'multiSelections'],
+      filters: [
+        {
+          name: 'Audio/Video',
+          extensions: ['mp3', 'wav', 'm4a', 'mp4', 'mov', 'mkv', 'flac', 'ogg', 'webm'],
+        },
+      ],
+    });
+    return canceled ? null : filePaths;
+  });
+
   ipcMain.handle('dialog:saveFile', async (_event, options: SaveFileOptions) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) return { success: false, error: 'No window available' };

@@ -13,6 +13,7 @@ describe('SettingsPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   it('renders settings panel with model and language selects', async () => {

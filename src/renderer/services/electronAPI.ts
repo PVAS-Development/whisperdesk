@@ -24,6 +24,10 @@ export async function openFileDialog(): Promise<string | null> {
   return window.electronAPI?.openFile() ?? null;
 }
 
+export async function openMultipleFilesDialog(): Promise<string[] | null> {
+  return window.electronAPI?.openMultipleFiles() ?? null;
+}
+
 export async function getFileInfo(filePath: string): Promise<SelectedFile | null> {
   return window.electronAPI?.getFileInfo(filePath) ?? null;
 }

@@ -63,7 +63,7 @@ export function createHistoryItems(
 ): HistoryItem[] {
   return Array.from({ length: count }, (_, i) => ({
     ...baseItem,
-    id: i,
+    id: crypto.randomUUID(),
     fileName: `file${i}.mp3`,
   }));
 }

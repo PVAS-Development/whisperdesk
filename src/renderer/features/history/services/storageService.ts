@@ -22,14 +22,14 @@ export function addHistoryItem(
 ): HistoryItem[] {
   const newItem: HistoryItem = {
     ...item,
-    id: Date.now(),
+    id: crypto.randomUUID(),
   };
   const newHistory = [newItem, ...history];
   saveHistory(newHistory);
   return newHistory;
 }
 
-export function removeHistoryItem(history: HistoryItem[], itemId: number): HistoryItem[] {
+export function removeHistoryItem(history: HistoryItem[], itemId: string): HistoryItem[] {
   const newHistory = history.filter((item) => item.id !== itemId);
   saveHistory(newHistory);
   return newHistory;

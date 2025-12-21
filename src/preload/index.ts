@@ -9,6 +9,7 @@ import type {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: () => ipcRenderer.invoke('dialog:openFile'),
+  openMultipleFiles: () => ipcRenderer.invoke('dialog:openMultipleFiles'),
   saveFile: (options: SaveFileOptions) => ipcRenderer.invoke('dialog:saveFile', options),
 
   getFileInfo: (filePath: string) => ipcRenderer.invoke('file:getInfo', filePath),

@@ -13,15 +13,15 @@ describe('fixtures', () => {
   describe('createMockHistoryItem', () => {
     it('creates default history item', () => {
       const item = createMockHistoryItem();
-      expect(item.id).toBe(1);
+      expect(typeof item.id).toBe('string');
       expect(item.fileName).toBe('test.mp3');
       expect(item.model).toBe('base');
       expect(item.language).toBe('en');
     });
 
     it('allows overriding properties', () => {
-      const item = createMockHistoryItem({ id: 5, fileName: 'custom.mp3' });
-      expect(item.id).toBe(5);
+      const item = createMockHistoryItem({ id: 'custom-id-5', fileName: 'custom.mp3' });
+      expect(item.id).toBe('custom-id-5');
       expect(item.fileName).toBe('custom.mp3');
       expect(item.model).toBe('base');
     });

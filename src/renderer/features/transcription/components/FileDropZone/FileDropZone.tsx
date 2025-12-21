@@ -1,50 +1,55 @@
 import React, { useCallback, type DragEvent, type KeyboardEvent } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '../../../../components/ui';
-import { isValidMediaFile, formatFileSize } from '../../../../utils';
+import { Files } from 'lucide-react';
+import { isValidMediaFile, selectAndProcessFiles } from '../../../../utils';
 import type { SelectedFile } from '../../../../types';
-import { openFileDialog, getPathForFile } from '../../../../services/electronAPI';
+import { getPathForFile, getFileInfo } from '../../../../services/electronAPI';
 import './FileDropZone.css';
 
 export interface FileDropZoneProps {
-  onFileSelect: (file: SelectedFile) => void;
-  selectedFile: SelectedFile | null;
+  onFilesSelect: (files: SelectedFile[]) => void;
+  queueCount?: number;
   disabled: boolean;
-  onClear?: () => void;
 }
 
 function FileDropZone({
-  onFileSelect,
-  selectedFile,
+  onFilesSelect,
+  queueCount = 0,
   disabled,
-  onClear,
 }: FileDropZoneProps): React.JSX.Element {
   const handleClick = async (): Promise<void> => {
     if (disabled) return;
 
-    const filePath = await openFileDialog();
-    if (filePath) {
-      const fileName = filePath.split('/').pop();
-      if (fileName && isValidMediaFile(fileName)) {
-        onFileSelect({ path: filePath, name: fileName });
-      }
+    const files = await selectAndProcessFiles();
+    if (files.length > 0) {
+      onFilesSelect(files);
     }
   };
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>): void => {
+    async (e: DragEvent<HTMLDivElement>): Promise<void> => {
       e.preventDefault();
       if (disabled) return;
 
-      const file = e.dataTransfer.files[0];
-      if (file && isValidMediaFile(file.name)) {
-        const filePath = getPathForFile(file);
-        if (filePath) {
-          onFileSelect({ path: filePath, name: file.name });
+      const files = Array.from(e.dataTransfer.files);
+      const validFiles: SelectedFile[] = [];
+
+      for (const file of files) {
+        if (isValidMediaFile(file.name)) {
+          const filePath = getPathForFile(file);
+          if (filePath) {
+            const fileInfo = await getFileInfo(filePath);
+            if (fileInfo) {
+              validFiles.push(fileInfo);
+            }
+          }
         }
       }
+
+      if (validFiles.length > 0) {
+        onFilesSelect(validFiles);
+      }
     },
-    [disabled, onFileSelect]
+    [disabled, onFilesSelect]
   );
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>): void => {
@@ -58,57 +63,26 @@ function FileDropZone({
     }
   };
 
-  const handleRemoveClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.stopPropagation();
-    onClear?.();
-  };
-
   return (
     <div
-      className={`dropzone ${disabled ? 'disabled' : ''} ${selectedFile ? 'has-file' : ''}`}
+      className={`dropzone ${disabled ? 'disabled' : ''}`}
       onClick={handleClick}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label={
-        selectedFile
-          ? `Selected file: ${selectedFile.name}. Click to change file.`
-          : 'Drop audio or video file here, or click to browse'
-      }
+      aria-label="Drop audio or video files here, or click to browse. Multiple files supported."
       onKeyDown={handleKeyDown}
     >
-      {selectedFile ? (
-        <div className="file-info">
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<X size={16} />}
-            iconOnly
-            onClick={handleRemoveClick}
-            title="Remove file"
-            aria-label="Remove selected file"
-            className="file-remove"
-          />
-          <span className="file-icon">📁</span>
-          <div className="file-details">
-            <span className="file-name">{selectedFile.name}</span>
-            {selectedFile.size && (
-              <span className="file-size">{formatFileSize(selectedFile.size)}</span>
-            )}
-          </div>
-          <span className="file-change">Click to change</span>
-        </div>
-      ) : (
-        <div className="dropzone-content">
-          <span className="dropzone-icon">📂</span>
-          <span className="dropzone-text">Drop audio/video file here</span>
-          <span className="dropzone-subtext">or click to browse</span>
-          <span className="dropzone-formats">
-            MP3, WAV, M4A, FLAC, OGG, MP4, MOV, AVI, MKV, WEBM
-          </span>
-        </div>
-      )}
+      <div className="dropzone-content">
+        <Files size={40} className="dropzone-icon-svg" />
+        <span className="dropzone-text">Drop audio/video files here</span>
+        <span className="dropzone-subtext">or click to browse (multiple files)</span>
+        <span className="dropzone-formats">MP3, WAV, M4A, FLAC, OGG, MP4, MOV, AVI, MKV, WEBM</span>
+        {queueCount > 0 && (
+          <span className="dropzone-queue-badge">{queueCount} files in queue</span>
+        )}
+      </div>
     </div>
   );
 }

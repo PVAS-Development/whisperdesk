@@ -8,7 +8,7 @@ import type {
 } from '@/types';
 
 export const createMockHistoryItem = (overrides?: Partial<HistoryItem>): HistoryItem => ({
-  id: 1,
+  id: crypto.randomUUID(),
   fileName: 'test.mp3',
   filePath: '/path/to/test.mp3',
   model: 'base',
@@ -85,7 +85,7 @@ export const createHistoryItems = (
 ): HistoryItem[] => {
   return Array.from({ length: count }, (_, i) => ({
     ...baseItem,
-    id: i,
+    id: crypto.randomUUID(),
     fileName: `file${i}.mp3`,
   }));
 };

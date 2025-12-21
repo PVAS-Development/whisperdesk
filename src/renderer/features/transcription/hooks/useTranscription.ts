@@ -1,33 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import type {
-  SelectedFile,
-  TranscriptionSettings,
-  TranscriptionProgress,
-  HistoryItem,
-  OutputFormat,
-} from '../../../types';
-import { APP_CONFIG } from '../../../config';
-import {
-  openFileDialog,
-  getFileInfo,
-  startTranscription,
-  cancelTranscription,
-  onTranscriptionProgress,
-  saveFile,
-} from '../../../services/electronAPI';
+import { useState, useCallback } from 'react';
+import type { SelectedFile, TranscriptionSettings, OutputFormat } from '../../../types';
+import { saveFile } from '../../../services/electronAPI';
 import { logger } from '../../../services/logger';
 import { sanitizePath } from '../../../../shared/utils';
 
-interface UseTranscriptionOptions {
-  onHistoryAdd?: (item: HistoryItem) => void;
-}
-
-interface UseTranscriptionReturn {
+export interface UseTranscriptionReturn {
   selectedFile: SelectedFile | null;
   settings: TranscriptionSettings;
-  isTranscribing: boolean;
-  progress: TranscriptionProgress;
-  transcriptionStartTime: number | null;
   transcription: string;
   error: string | null;
   modelDownloaded: boolean;
@@ -36,203 +15,28 @@ interface UseTranscriptionReturn {
   setSettings: (settings: TranscriptionSettings) => void;
   setModelDownloaded: (downloaded: boolean) => void;
   setTranscription: (text: string) => void;
-  handleFileSelect: (file: SelectedFile) => void;
-  handleFileSelectFromMenu: () => Promise<void>;
-  handleTranscribe: () => Promise<void>;
-  handleCancel: () => Promise<void>;
+  setError: (error: string | null) => void;
+
   handleSave: (format?: OutputFormat) => Promise<void>;
   handleCopy: (copyToClipboard: (text: string) => Promise<boolean>) => Promise<boolean>;
   clearError: () => void;
 }
 
-export function useTranscription(options: UseTranscriptionOptions = {}): UseTranscriptionReturn {
-  const { onHistoryAdd } = options;
-
+export function useTranscription(): UseTranscriptionReturn {
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const [settings, setSettings] = useState<TranscriptionSettings>({
     model: 'base',
     language: 'auto',
   });
-  const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
-  const [progress, setProgress] = useState<TranscriptionProgress>({
-    percent: 0,
-    status: '',
-  });
-  const [transcriptionStartTime, setTranscriptionStartTime] = useState<number | null>(null);
   const [transcription, setTranscription] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [modelDownloaded, setModelDownloaded] = useState<boolean>(true);
-
-  const progressMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const clearProgressMessageTimeout = useCallback((): void => {
-    if (progressMessageTimeoutRef.current) {
-      clearTimeout(progressMessageTimeoutRef.current);
-      progressMessageTimeoutRef.current = null;
-    }
-  }, []);
-
-  const scheduleProgressReset = useCallback(
-    (delay: number): void => {
-      clearProgressMessageTimeout();
-      progressMessageTimeoutRef.current = setTimeout(() => {
-        setProgress({ percent: 0, status: '' });
-        setTranscriptionStartTime(null);
-        progressMessageTimeoutRef.current = null;
-      }, delay);
-    },
-    [clearProgressMessageTimeout]
-  );
-
-  useEffect(() => {
-    const unsubscribe = onTranscriptionProgress((data: TranscriptionProgress) => {
-      setProgress(data);
-    });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      clearProgressMessageTimeout();
-    };
-  }, [clearProgressMessageTimeout]);
-
-  const handleFileSelect = useCallback(
-    (file: SelectedFile): void => {
-      clearProgressMessageTimeout();
-      setSelectedFile(file);
-      setTranscription('');
-      setError(null);
-      setProgress({ percent: 0, status: '' });
-      setTranscriptionStartTime(null);
-
-      logger.info('File selected', {
-        name: file.name,
-        path: sanitizePath(file.path),
-
-        size: file.size,
-      });
-    },
-    [clearProgressMessageTimeout]
-  );
-
-  const handleFileSelectFromMenu = useCallback(async (): Promise<void> => {
-    const filePath = await openFileDialog();
-    if (filePath) {
-      const fileInfo = await getFileInfo(filePath);
-      if (fileInfo) {
-        handleFileSelect(fileInfo);
-      }
-    }
-  }, [handleFileSelect]);
-
-  const handleTranscribe = useCallback(async (): Promise<void> => {
-    if (!selectedFile) return;
-
-    clearProgressMessageTimeout();
-    setIsTranscribing(true);
-    setError(null);
-    setProgress({ percent: 0, status: 'Starting transcription...' });
-    setTranscriptionStartTime(Date.now());
-
-    logger.info('Starting transcription', {
-      file: sanitizePath(selectedFile.path),
-      model: settings.model,
-      language: settings.language,
-    });
-
-    const startTime = Date.now();
-
-    try {
-      const result = await startTranscription({
-        filePath: selectedFile.path,
-        model: settings.model,
-        language: settings.language,
-        outputFormat: 'vtt',
-      });
-
-      if (!result) {
-        throw new Error('No response from transcription service');
-      }
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      if (!result.success) {
-        throw new Error('Transcription failed with unknown error');
-      }
-
-      if (result.cancelled) {
-        setProgress({ percent: 0, status: 'Cancelled' });
-        logger.info('Transcription cancelled by service');
-        return;
-      }
-
-      if (!result.text) {
-        throw new Error(
-          'Transcription produced no output. The file may be silent or contain no audio stream.'
-        );
-      }
-
-      setTranscription(result.text);
-      setProgress({ percent: 100, status: 'Complete!' });
-
-      logger.info('Transcription complete', {
-        durationMs: Date.now() - startTime,
-        length: result.text.length,
-      });
-
-      const historyItem: HistoryItem = {
-        id: Date.now(),
-        fileName: selectedFile.name,
-        filePath: selectedFile.path,
-        model: settings.model,
-        language: settings.language,
-        date: new Date().toISOString(),
-        duration: Math.round((Date.now() - startTime) / 1000),
-        preview: result.text.substring(0, 100) + (result.text.length > 100 ? '...' : ''),
-        fullText: result.text,
-      };
-      onHistoryAdd?.(historyItem);
-      scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
-    } catch (err) {
-      const fullError = err instanceof Error ? err.message : 'Unknown error occurred';
-
-      const uiError =
-        fullError.includes('FFmpeg conversion failed') ||
-        fullError.includes('whisper process exited')
-          ? 'Transcription produced no output. The file may be invalid or missing audio. (See Debug Logs for details)'
-          : fullError;
-
-      setError(uiError);
-      logger.error('Transcription failed', { error: err, message: fullError });
-      setProgress({ percent: 0, status: '' });
-      setTranscriptionStartTime(null);
-      clearProgressMessageTimeout();
-    } finally {
-      setIsTranscribing(false);
-    }
-  }, [selectedFile, settings, onHistoryAdd, scheduleProgressReset, clearProgressMessageTimeout]);
-
-  const handleCancel = useCallback(async (): Promise<void> => {
-    await cancelTranscription();
-    clearProgressMessageTimeout();
-    setIsTranscribing(false);
-    setProgress({ percent: 0, status: 'Cancelled' });
-    logger.warn('Transcription cancelled by user');
-    setTranscriptionStartTime(null);
-    scheduleProgressReset(APP_CONFIG.TRANSCRIPTION_COMPLETE_MESSAGE_DURATION);
-  }, [clearProgressMessageTimeout, scheduleProgressReset]);
 
   const handleSave = useCallback(
     async (format: OutputFormat = 'vtt'): Promise<void> => {
       if (!transcription) return;
 
       const fileName = selectedFile?.name?.replace(/\.[^/.]+$/, '') || 'transcription';
-
       let content: string = transcription;
 
       if (format === 'txt') {
@@ -271,15 +75,13 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
       });
 
       if (result?.success && result.filePath) {
-        setProgress({ percent: 100, status: `Saved to ${result.filePath}` });
         logger.info('File saved', { path: sanitizePath(result.filePath), format });
-        scheduleProgressReset(APP_CONFIG.SAVE_SUCCESS_MESSAGE_DURATION);
       } else if (result?.error) {
         setError(`Failed to save: ${result.error}`);
         logger.error('Failed to save file', { error: result.error, format });
       }
     },
-    [transcription, selectedFile, scheduleProgressReset]
+    [transcription, selectedFile]
   );
 
   const handleCopy = useCallback(
@@ -304,9 +106,6 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
   return {
     selectedFile,
     settings,
-    isTranscribing,
-    progress,
-    transcriptionStartTime,
     transcription,
     error,
     modelDownloaded,
@@ -315,10 +114,7 @@ export function useTranscription(options: UseTranscriptionOptions = {}): UseTran
     setSettings,
     setModelDownloaded,
     setTranscription,
-    handleFileSelect,
-    handleFileSelectFromMenu,
-    handleTranscribe,
-    handleCancel,
+    setError,
     handleSave,
     handleCopy,
     clearError,

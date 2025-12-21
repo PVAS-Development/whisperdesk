@@ -45,7 +45,7 @@ describe('history storageService', () => {
       { length: APP_CONFIG.MAX_HISTORY_ITEMS + 5 },
       (_, i) => ({
         ...baseItem,
-        id: i,
+        id: `item-${i}`,
         fileName: `file${i}.mp3`,
       })
     );
@@ -57,29 +57,31 @@ describe('history storageService', () => {
   });
 
   it('addHistoryItem adds a new item with generated id and saves', () => {
-    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1234);
+    const uuidSpy = vi
+      .spyOn(crypto, 'randomUUID')
+      .mockReturnValue('12345678-1234-1234-1234-123456789012');
     const history: HistoryItem[] = [];
 
     const result = addHistoryItem(history, baseItem);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.id).toBe(1234);
+    expect(result[0]!.id).toBe('12345678-1234-1234-1234-123456789012');
     expect(result[0]!.fileName).toBe(baseItem.fileName);
     expect(storage.setStorageItem).toHaveBeenCalled();
 
-    nowSpy.mockRestore();
+    uuidSpy.mockRestore();
   });
 
   it('removeHistoryItem filters out removed id and saves', () => {
     const history: HistoryItem[] = [
-      { ...baseItem, id: 1 },
-      { ...baseItem, id: 2, fileName: 'other.mp3' },
+      { ...baseItem, id: 'item-1' },
+      { ...baseItem, id: 'item-2', fileName: 'other.mp3' },
     ];
 
-    const result = removeHistoryItem(history, 1);
+    const result = removeHistoryItem(history, 'item-1');
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.id).toBe(2);
+    expect(result[0]!.id).toBe('item-2');
     expect(storage.setStorageItem).toHaveBeenCalled();
   });
 

@@ -1,4 +1,4 @@
-export function sanitizePath(filePath: string): string {
+export function sanitizePath(filePath: string | null | undefined): string {
   if (!filePath) return '';
 
   const parts = filePath.split(/[/\\]/);

@@ -529,7 +529,7 @@ img {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
 }
 
@@ -582,6 +582,11 @@ img {
 .feature-icon.blue {
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
+}
+
+.feature-icon.orange {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
 .feature-title {

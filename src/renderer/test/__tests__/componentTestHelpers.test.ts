@@ -147,8 +147,8 @@ describe('componentTestHelpers', () => {
 
     it('sets up history mocks with custom items', () => {
       const customItems = [
-        createMockHistoryItem({ id: 1, fileName: 'custom1.mp3' }),
-        createMockHistoryItem({ id: 2, fileName: 'custom2.mp3' }),
+        createMockHistoryItem({ id: 'custom-id-1', fileName: 'custom1.mp3' }),
+        createMockHistoryItem({ id: 'custom-id-2', fileName: 'custom2.mp3' }),
       ];
       setupHistoryMocks(customItems);
       expect(window.electronAPI).toBeDefined();

@@ -1,5 +1,5 @@
 .model-details {
-  margin-top: 10px;
+  margin: 10px 0px;
   padding: 12px;
   background: var(--surface);
   border-radius: var(--radius-sm);

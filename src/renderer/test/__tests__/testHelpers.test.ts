@@ -63,9 +63,9 @@ describe('testHelpers', () => {
 
     it('creates items with correct id and fileName', () => {
       const items = createHistoryItems(2);
-      expect(items[0]?.id).toBe(0);
+      expect(typeof items[0]?.id).toBe('string');
       expect(items[0]?.fileName).toBe('file0.mp3');
-      expect(items[1]?.id).toBe(1);
+      expect(typeof items[1]?.id).toBe('string');
       expect(items[1]?.fileName).toBe('file1.mp3');
     });
 

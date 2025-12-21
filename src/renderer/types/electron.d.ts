@@ -33,6 +33,7 @@ export interface WhisperCheckResult {
 
 export interface ElectronAPI {
   openFile: () => Promise<string | null>;
+  openMultipleFiles: () => Promise<string[] | null>;
   saveFile: (options: SaveFileOptions) => Promise<SaveFileResult>;
   getFileInfo: (filePath: string) => Promise<SelectedFile | null>;
   getPathForFile: (file: File) => string;

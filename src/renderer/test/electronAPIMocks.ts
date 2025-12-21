@@ -4,6 +4,7 @@ import type { ModelInfo, ModelDownloadProgress } from '@/types';
 
 export const createDefaultElectronAPIMock = (): ElectronAPI => ({
   openFile: vi.fn().mockResolvedValue(null),
+  openMultipleFiles: vi.fn().mockResolvedValue(null),
   saveFile: vi.fn().mockResolvedValue({ success: false, error: 'Not implemented' }),
   getFileInfo: vi.fn().mockResolvedValue(null),
   getPathForFile: vi.fn().mockReturnValue('/path/to/file'),
@@ -47,6 +48,7 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
 
 export const createFullElectronAPIMock = (): ElectronAPI => ({
   openFile: vi.fn().mockResolvedValue('/path/file.mp3'),
+  openMultipleFiles: vi.fn().mockResolvedValue(['/path/file.mp3']),
   saveFile: vi.fn().mockResolvedValue({ success: true, filePath: '/saved.txt' }),
   getFileInfo: vi.fn().mockResolvedValue({ name: 'file.mp3', path: '/path/file.mp3', size: 10 }),
   getPathForFile: vi.fn().mockReturnValue('/path/file.mp3'),
