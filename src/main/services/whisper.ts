@@ -512,8 +512,7 @@ export function transcribe(
         outputBase,
       ];
 
-      // Add language if specified
-      if (language && language !== 'auto') {
+      if (language) {
         args.push('-l', language);
       }
 
