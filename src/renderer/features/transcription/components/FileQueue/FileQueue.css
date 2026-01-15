@@ -2,7 +2,7 @@
   background: var(--surface, #1a1a1f);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
   border-radius: var(--radius, 8px);
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
 }
