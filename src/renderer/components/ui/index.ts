@@ -6,3 +6,5 @@ export { ProgressBar } from './ProgressBar';
 export { SystemWarning } from './SystemWarning';
 export { DebugLogsModal } from './DebugLogsModal';
 export type { DebugLogsModalProps } from './DebugLogsModal';
+export { Select } from './Select';
+export type { SelectProps, SelectOption } from './Select';

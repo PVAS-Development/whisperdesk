@@ -1,12 +1,12 @@
-.setting-group {
+.select-group {
   margin-bottom: 14px;
 }
 
-.setting-group:last-child {
+.select-group:last-child {
   margin-bottom: 0;
 }
 
-.setting-group label {
+.select-group label {
   display: block;
   font-size: 0.85rem;
   font-weight: 500;
@@ -14,7 +14,7 @@
   color: var(--text-primary);
 }
 
-.setting-group select {
+.select-group select {
   width: 100%;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
@@ -31,12 +31,17 @@
   padding-right: 32px;
 }
 
-.setting-group select:hover {
+.select-group select:hover:not(:disabled) {
   border-color: var(--accent-border);
 }
 
-.setting-group select:focus {
+.select-group select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.select-group select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

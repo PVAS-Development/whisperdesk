@@ -1,5 +1,6 @@
-import React, { type ChangeEvent } from 'react';
-import '../ModelSelector/ModelSelector.css';
+import React from 'react';
+import { Select } from '../../../../components/ui';
+import type { SelectOption } from '../../../../components/ui';
 import type { LanguageCode } from '../../../../types';
 import { LANGUAGES } from '../../../../config';
 
@@ -14,27 +15,21 @@ function LanguageSelector({
   disabled,
   onChange,
 }: LanguageSelectorProps): React.JSX.Element {
-  const handleChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    onChange(e.target.value as LanguageCode);
-  };
+  const options: SelectOption[] = LANGUAGES.map((lang) => ({
+    value: lang.value,
+    label: lang.label,
+  }));
 
   return (
-    <div className="setting-group">
-      <label htmlFor="language-select">Language</label>
-      <select
-        id="language-select"
-        value={selectedLanguage}
-        onChange={handleChange}
-        disabled={disabled}
-        aria-label="Select transcription language"
-      >
-        {LANGUAGES.map((lang) => (
-          <option key={lang.value} value={lang.value}>
-            {lang.label}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Select
+      id="language-select"
+      label="Language"
+      value={selectedLanguage}
+      options={options}
+      onChange={(value) => onChange(value as LanguageCode)}
+      disabled={disabled}
+      ariaLabel="Select transcription language"
+    />
   );
 }
 

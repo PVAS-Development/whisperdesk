@@ -1,5 +1,6 @@
-import React, { type ChangeEvent } from 'react';
-import './ModelSelector.css';
+import React from 'react';
+import { Select } from '../../../../components/ui';
+import type { SelectOption } from '../../../../components/ui';
 import type { ModelInfo, WhisperModelName } from '../../../../types';
 
 export interface ModelSelectorProps {
@@ -19,29 +20,22 @@ function ModelSelector({
   onChange,
   ariaDescribedBy,
 }: ModelSelectorProps): React.JSX.Element {
-  const handleChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    onChange(e.target.value as WhisperModelName);
-  };
+  const options: SelectOption[] = models.map((model) => ({
+    value: model.name,
+    label: `${model.name.charAt(0).toUpperCase() + model.name.slice(1)} (${model.size})${model.downloaded ? ' ✓' : ''}`,
+  }));
 
   return (
-    <div className="setting-group">
-      <label htmlFor="model-select">Model</label>
-      <select
-        id="model-select"
-        value={selectedModel}
-        onChange={handleChange}
-        disabled={disabled || loading}
-        aria-label="Select Whisper model"
-        aria-describedby={ariaDescribedBy}
-      >
-        {models.map((model) => (
-          <option key={model.name} value={model.name}>
-            {model.name.charAt(0).toUpperCase() + model.name.slice(1)} ({model.size})
-            {model.downloaded ? ' ✓' : ''}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Select
+      id="model-select"
+      label="Model"
+      value={selectedModel}
+      options={options}
+      onChange={(value) => onChange(value as WhisperModelName)}
+      disabled={disabled || loading}
+      ariaLabel="Select Whisper model"
+      ariaDescribedBy={ariaDescribedBy}
+    />
   );
 }
 
