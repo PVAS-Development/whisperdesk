@@ -10,27 +10,20 @@ const SHORTCUT_MODES: { value: ShortcutMode; label: string }[] = [
   { value: 'toggle', label: 'Toggle (press twice)' },
 ];
 
-const HTT_MODELS: { value: WhisperModelName; label: string }[] = [
-  { value: 'tiny', label: 'Tiny (fastest)' },
-  { value: 'tiny.en', label: 'Tiny English' },
-  { value: 'base', label: 'Base (recommended)' },
-  { value: 'base.en', label: 'Base English' },
-  { value: 'small', label: 'Small' },
-  { value: 'small.en', label: 'Small English' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'large-v3-turbo', label: 'Large Turbo (best)' },
-];
-
 function HttSettings(): React.JSX.Element {
   const {
     settings,
     loading,
+    models,
     updateEnabled,
     updateShortcutMode,
     updateModel,
     updateLanguage,
     updateAutoPaste,
   } = useHttSettings();
+
+  const selectedModelInfo = models.find((m) => m.name === settings.model);
+  const isModelDownloaded = selectedModelInfo?.downloaded ?? false;
 
   if (loading) {
     return (
@@ -94,12 +87,19 @@ function HttSettings(): React.JSX.Element {
                 updateModel(e.target.value as WhisperModelName)
               }
             >
-              {HTT_MODELS.map((model) => (
-                <option key={model.value} value={model.value}>
-                  {model.label}
+              {models.map((model) => (
+                <option key={model.name} value={model.name}>
+                  {model.name.charAt(0).toUpperCase() + model.name.slice(1)} ({model.size})
+                  {model.downloaded ? ' \u2713' : ''}
                 </option>
               ))}
             </select>
+            {!isModelDownloaded && settings.model && (
+              <p className="htt-model-warning">
+                Model &quot;{settings.model}&quot; is not downloaded. Use the Model section above to
+                download it.
+              </p>
+            )}
           </div>
 
           <div className="setting-group">

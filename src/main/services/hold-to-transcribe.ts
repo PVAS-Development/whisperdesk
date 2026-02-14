@@ -2,22 +2,25 @@ import { clipboard, systemPreferences } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { exec } from 'child_process';
 import { GlobalShortcutService } from './global-shortcut';
-import { transcribe } from './whisper';
+import { transcribe, isModelDownloaded } from './whisper';
 import { cleanupTempAudio, saveTempAudio } from './audio-recorder';
 import { loadSettings } from './settings';
 import { updateTrayTooltip } from './tray';
 import { trackEvent, AnalyticsEvents } from './analytics';
+import { OverlayWindow } from './overlay';
 import type { TranscriptionOptions } from '../../shared/types';
 
 export class HoldToTranscribeService {
   private shortcutService: GlobalShortcutService;
   private getMainWindow: () => BrowserWindow | null;
+  private overlay: OverlayWindow;
   private isRecording = false;
   private isTranscribing = false;
 
   constructor(getMainWindow: () => BrowserWindow | null) {
     this.getMainWindow = getMainWindow;
     this.shortcutService = new GlobalShortcutService();
+    this.overlay = new OverlayWindow();
 
     this.shortcutService.on('shortcut-hold-start', () => this.onHoldStart());
     this.shortcutService.on('shortcut-hold-end', () => this.onHoldEnd());
@@ -26,6 +29,8 @@ export class HoldToTranscribeService {
   initialize(): void {
     const settings = loadSettings();
     if (!settings.holdToTranscribe.enabled) return;
+
+    this.overlay.create();
 
     if (settings.holdToTranscribe.shortcutMode === 'hold') {
       const isTrusted = systemPreferences.isTrustedAccessibilityClient(false);
@@ -60,8 +65,22 @@ export class HoldToTranscribeService {
   private onHoldStart(): void {
     if (this.isRecording || this.isTranscribing) return;
 
+    const settings = loadSettings();
+    if (!isModelDownloaded(settings.holdToTranscribe.model)) {
+      const model = settings.holdToTranscribe.model;
+      const win = this.getMainWindow();
+      win?.webContents.send('htt:modelNotDownloaded', { model });
+      updateTrayTooltip(`Model "${model}" not downloaded`);
+      this.overlay.updateState({
+        status: 'error',
+        message: `Model "${model}" not downloaded`,
+      });
+      return;
+    }
+
     this.isRecording = true;
     updateTrayTooltip('Recording...');
+    this.overlay.updateState({ status: 'recording', message: 'Recording...' });
     trackEvent(AnalyticsEvents.HTT_RECORDING_STARTED);
 
     const win = this.getMainWindow();
@@ -73,6 +92,7 @@ export class HoldToTranscribeService {
 
     this.isRecording = false;
     updateTrayTooltip('Processing...');
+    this.overlay.updateState({ status: 'processing', message: 'Transcribing...' });
     trackEvent(AnalyticsEvents.HTT_RECORDING_STOPPED);
 
     const win = this.getMainWindow();
@@ -111,20 +131,24 @@ export class HoldToTranscribeService {
         win?.webContents.send('htt:transcriptionResult', { text });
         trackEvent(AnalyticsEvents.HTT_TRANSCRIPTION_COMPLETED);
         updateTrayTooltip('Ready');
+        this.overlay.updateState({ status: 'success', message: 'Pasted' });
       } else {
         const error = result.error || 'Transcription failed';
         win?.webContents.send('htt:transcriptionResult', { text: '', error });
         trackEvent(AnalyticsEvents.HTT_TRANSCRIPTION_FAILED, { error: error.substring(0, 100) });
         updateTrayTooltip('Ready');
+        this.overlay.updateState({ status: 'error', message: error });
       }
     } catch (err) {
       console.error('HTT transcription error:', err);
       const win = this.getMainWindow();
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       win?.webContents.send('htt:transcriptionResult', {
         text: '',
-        error: err instanceof Error ? err.message : 'Unknown error',
+        error: errorMsg,
       });
       updateTrayTooltip('Ready');
+      this.overlay.updateState({ status: 'error', message: errorMsg });
     } finally {
       this.isTranscribing = false;
       cleanupTempAudio(tempPath);
@@ -149,6 +173,7 @@ export class HoldToTranscribeService {
 
   reloadSettings(): void {
     this.shortcutService.stop();
+    this.overlay.destroy();
     this.initialize();
   }
 
@@ -158,5 +183,6 @@ export class HoldToTranscribeService {
 
   destroy(): void {
     this.shortcutService.stop();
+    this.overlay.destroy();
   }
 }

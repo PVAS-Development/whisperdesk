@@ -96,6 +96,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('htt:accessibilityRequired', () => callback());
     return () => ipcRenderer.removeAllListeners('htt:accessibilityRequired');
   },
+  onHttModelNotDownloaded: (callback: (data: { model: string }) => void) => {
+    ipcRenderer.on('htt:modelNotDownloaded', (_event, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('htt:modelNotDownloaded');
+  },
   httSaveAudio: (buffer: ArrayBuffer) => ipcRenderer.invoke('htt:saveAudio', buffer),
   httRequestAccessibility: () => ipcRenderer.invoke('htt:requestAccessibility'),
   httUpdateSettings: () => ipcRenderer.invoke('htt:updateSettings'),

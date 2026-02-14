@@ -75,6 +75,7 @@ export interface ElectronAPI {
   onHttStopRecording: (callback: () => void) => Unsubscribe;
   onHttTranscriptionResult: (callback: (data: HttTranscriptionResult) => void) => Unsubscribe;
   onHttAccessibilityRequired: (callback: () => void) => Unsubscribe;
+  onHttModelNotDownloaded: (callback: (data: { model: string }) => void) => Unsubscribe;
   httSaveAudio: (buffer: ArrayBuffer) => Promise<{ success: boolean }>;
   httRequestAccessibility: () => Promise<{ success: boolean }>;
   httUpdateSettings: () => Promise<{ success: boolean }>;

@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
   HoldToTranscribeSettings,
+  ModelInfo,
   WhisperModelName,
   LanguageCode,
   ShortcutMode,
 } from '../../../types';
+import { listModels } from '../../../services';
 
 const DEFAULT_SETTINGS: HoldToTranscribeSettings = {
   enabled: true,
@@ -18,6 +20,7 @@ const DEFAULT_SETTINGS: HoldToTranscribeSettings = {
 export interface UseHttSettingsReturn {
   settings: HoldToTranscribeSettings;
   loading: boolean;
+  models: ModelInfo[];
   updateEnabled: (enabled: boolean) => void;
   updateShortcutMode: (mode: ShortcutMode) => void;
   updateModel: (model: WhisperModelName) => void;
@@ -28,11 +31,18 @@ export interface UseHttSettingsReturn {
 export function useHttSettings(): UseHttSettingsReturn {
   const [settings, setSettings] = useState<HoldToTranscribeSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [models, setModels] = useState<ModelInfo[]>([]);
 
   useEffect(() => {
-    window.electronAPI?.loadSettings().then((appSettings) => {
+    Promise.all([
+      window.electronAPI?.loadSettings(),
+      listModels().catch(() => ({ models: [] })),
+    ]).then(([appSettings, modelResult]) => {
       if (appSettings?.holdToTranscribe) {
         setSettings(appSettings.holdToTranscribe);
+      }
+      if (modelResult?.models) {
+        setModels(modelResult.models);
       }
       setLoading(false);
     });
@@ -73,6 +83,7 @@ export function useHttSettings(): UseHttSettingsReturn {
   return {
     settings,
     loading,
+    models,
     updateEnabled,
     updateShortcutMode,
     updateModel,

@@ -53,11 +53,17 @@ export function useHoldToTranscribe(): UseHoldToTranscribeReturn {
       window.electronAPI?.httRequestAccessibility();
     });
 
+    const unsubModelNotDownloaded = window.electronAPI?.onHttModelNotDownloaded((data) => {
+      setStatus('error');
+      setLastError(`Model "${data.model}" not downloaded. Open settings to download it.`);
+    });
+
     return () => {
       unsubStart?.();
       unsubStop?.();
       unsubResult?.();
       unsubAccessibility?.();
+      unsubModelNotDownloaded?.();
     };
   }, []);
 

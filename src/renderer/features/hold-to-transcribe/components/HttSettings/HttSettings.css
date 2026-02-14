@@ -47,3 +47,10 @@
   font-size: 0.7rem;
   font-family: inherit;
 }
+
+.htt-model-warning {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #e67e22;
+  line-height: 1.4;
+}

@@ -61,6 +61,7 @@ const mockElectronAPI: ElectronAPI = {
   onHttStopRecording: vi.fn().mockReturnValue(() => {}),
   onHttTranscriptionResult: vi.fn().mockReturnValue(() => {}),
   onHttAccessibilityRequired: vi.fn().mockReturnValue(() => {}),
+  onHttModelNotDownloaded: vi.fn().mockReturnValue(() => {}),
   httSaveAudio: vi.fn().mockResolvedValue({ success: true }),
   httRequestAccessibility: vi.fn().mockResolvedValue({ success: true }),
   httUpdateSettings: vi.fn().mockResolvedValue({ success: true }),
