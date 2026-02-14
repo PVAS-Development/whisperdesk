@@ -4,6 +4,15 @@ import type { ElectronAPI } from '../types/electron';
 
 Element.prototype.scrollIntoView = vi.fn();
 
+// Mock navigator.mediaDevices.enumerateDevices for audio device selection tests
+Object.defineProperty(navigator, 'mediaDevices', {
+  value: {
+    enumerateDevices: vi.fn().mockResolvedValue([]),
+    getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [] }),
+  },
+  writable: true,
+});
+
 const mockElectronAPI: ElectronAPI = {
   openFile: vi.fn().mockResolvedValue(null),
   openMultipleFiles: vi.fn().mockResolvedValue(null),
@@ -54,6 +63,8 @@ const mockElectronAPI: ElectronAPI = {
       model: 'base',
       language: 'auto',
       autoPaste: true,
+      audioDeviceId: '',
+      translateToEnglish: false,
     },
   }),
   saveSettings: vi.fn().mockResolvedValue({ success: true }),

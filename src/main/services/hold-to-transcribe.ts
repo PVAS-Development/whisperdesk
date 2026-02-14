@@ -91,8 +91,12 @@ export class HoldToTranscribeService {
     if (!this.isRecording) return;
 
     this.isRecording = false;
+    const processingSettings = loadSettings();
+    const translateMsg = processingSettings.holdToTranscribe.translateToEnglish
+      ? 'Translating to English...'
+      : 'Transcribing...';
     updateTrayTooltip('Processing...');
-    this.overlay.updateState({ status: 'processing', message: 'Transcribing...' });
+    this.overlay.updateState({ status: 'processing', message: translateMsg });
     trackEvent(AnalyticsEvents.HTT_RECORDING_STOPPED);
 
     const win = this.getMainWindow();
@@ -112,6 +116,7 @@ export class HoldToTranscribeService {
         model: settings.holdToTranscribe.model,
         language: settings.holdToTranscribe.language,
         outputFormat: 'txt',
+        translate: settings.holdToTranscribe.translateToEnglish,
       };
 
       const result = await transcribe(options);

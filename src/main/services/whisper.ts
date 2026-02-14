@@ -517,6 +517,10 @@ export function transcribe(
         args.push('-l', language);
       }
 
+      if (options.translate) {
+        args.push('--translate');
+      }
+
       const cpuCount = os.cpus().length;
       args.push('-t', String(Math.min(cpuCount, 8)));
 

@@ -11,6 +11,8 @@ const DEFAULT_HTT_SETTINGS: HoldToTranscribeSettings = {
   model: 'base',
   language: 'auto',
   autoPaste: true,
+  audioDeviceId: '',
+  translateToEnglish: false,
 };
 
 const DEFAULT_SETTINGS: AppSettings = {

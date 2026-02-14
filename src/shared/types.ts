@@ -76,6 +76,7 @@ export interface TranscriptionOptions {
   model: WhisperModelName;
   language: LanguageCode;
   outputFormat: OutputFormat;
+  translate?: boolean;
 }
 
 export interface TranscriptionResult {
@@ -197,6 +198,14 @@ export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
 
 export type ShortcutMode = 'hold' | 'toggle';
 
+export const TRANSLATE_INCOMPATIBLE_MODELS: readonly string[] = [
+  'tiny.en',
+  'base.en',
+  'small.en',
+  'medium.en',
+  'large-v3-turbo',
+] as const;
+
 export interface HoldToTranscribeSettings {
   enabled: boolean;
   shortcutMode: ShortcutMode;
@@ -204,6 +213,8 @@ export interface HoldToTranscribeSettings {
   model: WhisperModelName;
   language: LanguageCode;
   autoPaste: boolean;
+  audioDeviceId: string;
+  translateToEnglish: boolean;
 }
 
 export interface AppSettings {

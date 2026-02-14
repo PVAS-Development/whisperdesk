@@ -15,35 +15,43 @@ const DEFAULT_SETTINGS: HoldToTranscribeSettings = {
   model: 'base',
   language: 'auto',
   autoPaste: true,
+  audioDeviceId: '',
+  translateToEnglish: false,
 };
 
 export interface UseHttSettingsReturn {
   settings: HoldToTranscribeSettings;
   loading: boolean;
   models: ModelInfo[];
+  devices: MediaDeviceInfo[];
   updateEnabled: (enabled: boolean) => void;
   updateShortcutMode: (mode: ShortcutMode) => void;
   updateModel: (model: WhisperModelName) => void;
   updateLanguage: (language: LanguageCode) => void;
   updateAutoPaste: (autoPaste: boolean) => void;
+  updateAudioDevice: (deviceId: string) => void;
+  updateTranslateToEnglish: (translate: boolean) => void;
 }
 
 export function useHttSettings(): UseHttSettingsReturn {
   const [settings, setSettings] = useState<HoldToTranscribeSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [models, setModels] = useState<ModelInfo[]>([]);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
 
   useEffect(() => {
     Promise.all([
       window.electronAPI?.loadSettings(),
       listModels().catch(() => ({ models: [] })),
-    ]).then(([appSettings, modelResult]) => {
+      navigator.mediaDevices.enumerateDevices().catch(() => [] as MediaDeviceInfo[]),
+    ]).then(([appSettings, modelResult, allDevices]) => {
       if (appSettings?.holdToTranscribe) {
         setSettings(appSettings.holdToTranscribe);
       }
       if (modelResult?.models) {
         setModels(modelResult.models);
       }
+      setDevices(allDevices.filter((d) => d.kind === 'audioinput'));
       setLoading(false);
     });
   }, []);
@@ -80,14 +88,27 @@ export function useHttSettings(): UseHttSettingsReturn {
     [settings, save]
   );
 
+  const updateAudioDevice = useCallback(
+    (audioDeviceId: string) => save({ ...settings, audioDeviceId }),
+    [settings, save]
+  );
+
+  const updateTranslateToEnglish = useCallback(
+    (translateToEnglish: boolean) => save({ ...settings, translateToEnglish }),
+    [settings, save]
+  );
+
   return {
     settings,
     loading,
     models,
+    devices,
     updateEnabled,
     updateShortcutMode,
     updateModel,
     updateLanguage,
     updateAutoPaste,
+    updateAudioDevice,
+    updateTranslateToEnglish,
   };
 }

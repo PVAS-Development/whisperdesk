@@ -18,7 +18,9 @@ export function useHoldToTranscribe(): UseHoldToTranscribeReturn {
       try {
         setStatus('recording');
         setLastError(null);
-        await startRecording();
+        const appSettings = await window.electronAPI?.loadSettings();
+        const deviceId = appSettings?.holdToTranscribe?.audioDeviceId;
+        await startRecording(deviceId || undefined);
       } catch (err) {
         console.error('Failed to start recording:', err);
         setStatus('error');

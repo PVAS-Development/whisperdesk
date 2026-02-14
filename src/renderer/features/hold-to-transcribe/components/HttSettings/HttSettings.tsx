@@ -2,6 +2,7 @@ import React from 'react';
 import type { ChangeEvent } from 'react';
 import { useHttSettings } from '../../hooks/useHttSettings';
 import type { WhisperModelName, LanguageCode, ShortcutMode } from '../../../../types';
+import { TRANSLATE_INCOMPATIBLE_MODELS } from '../../../../types';
 import { LANGUAGES } from '../../../../config';
 import './HttSettings.css';
 
@@ -15,11 +16,14 @@ function HttSettings(): React.JSX.Element {
     settings,
     loading,
     models,
+    devices,
     updateEnabled,
     updateShortcutMode,
     updateModel,
     updateLanguage,
     updateAutoPaste,
+    updateAudioDevice,
+    updateTranslateToEnglish,
   } = useHttSettings();
 
   const selectedModelInfo = models.find((m) => m.name === settings.model);
@@ -128,6 +132,43 @@ function HttSettings(): React.JSX.Element {
               />
               <span>Auto-paste into focused input</span>
             </label>
+          </div>
+
+          <div className="setting-group">
+            <label htmlFor="htt-device-select">Audio Input Device</label>
+            <select
+              id="htt-device-select"
+              value={settings.audioDeviceId}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateAudioDevice(e.target.value)}
+            >
+              <option value="">System Default</option>
+              {devices.map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Device ${device.deviceId.slice(0, 8)}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="setting-group">
+            <label className="htt-toggle-label">
+              <input
+                type="checkbox"
+                checked={settings.translateToEnglish}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  updateTranslateToEnglish(e.target.checked)
+                }
+              />
+              <span>Translate to English</span>
+            </label>
+            <p className="htt-hint">Translates speech in any language to English text.</p>
+            {settings.translateToEnglish &&
+              TRANSLATE_INCOMPATIBLE_MODELS.includes(settings.model) && (
+                <p className="htt-model-warning">
+                  Translation is not supported with the &quot;{settings.model}&quot; model. Use a
+                  multilingual model (e.g., base, small, medium, large-v3).
+                </p>
+              )}
           </div>
         </>
       )}

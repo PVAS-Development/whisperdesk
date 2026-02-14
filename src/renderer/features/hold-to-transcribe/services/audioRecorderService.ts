@@ -2,16 +2,21 @@ let mediaRecorder: MediaRecorder | null = null;
 let audioChunks: Blob[] = [];
 let stream: MediaStream | null = null;
 
-export async function startRecording(): Promise<void> {
+export async function startRecording(deviceId?: string): Promise<void> {
   audioChunks = [];
 
+  const audioConstraints: MediaTrackConstraints = {
+    channelCount: 1,
+    sampleRate: 16000,
+    echoCancellation: true,
+    noiseSuppression: true,
+  };
+  if (deviceId) {
+    audioConstraints.deviceId = { exact: deviceId };
+  }
+
   stream = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      channelCount: 1,
-      sampleRate: 16000,
-      echoCancellation: true,
-      noiseSuppression: true,
-    },
+    audio: audioConstraints,
   });
 
   mediaRecorder = new MediaRecorder(stream, {
