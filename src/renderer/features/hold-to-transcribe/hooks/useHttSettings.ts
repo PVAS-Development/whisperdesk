@@ -57,7 +57,12 @@ export function useHttSettings(): UseHttSettingsReturn {
       navigator.mediaDevices.enumerateDevices().catch(() => [] as MediaDeviceInfo[]),
     ]).then(([appSettings, modelResult, allDevices]) => {
       if (appSettings?.holdToTranscribe) {
-        setSettings(appSettings.holdToTranscribe);
+        const htt = appSettings.holdToTranscribe;
+        setSettings({
+          ...DEFAULT_SETTINGS,
+          ...htt,
+          translation: { ...DEFAULT_SETTINGS.translation, ...htt.translation },
+        });
       }
       if (modelResult?.models) {
         setModels(modelResult.models);
