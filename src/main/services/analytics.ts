@@ -73,4 +73,12 @@ export const AnalyticsEvents = {
   UPDATE_DOWNLOADED: 'update_downloaded',
   UPDATE_ERROR: 'update_error',
   UPDATE_INSTALLED: 'update_installed',
+
+  // Hold-to-Transcribe events
+  HTT_RECORDING_STARTED: 'htt_recording_started',
+  HTT_RECORDING_STOPPED: 'htt_recording_stopped',
+  HTT_TRANSCRIPTION_COMPLETED: 'htt_transcription_completed',
+  HTT_TRANSCRIPTION_FAILED: 'htt_transcription_failed',
+  HTT_AUTO_PASTE: 'htt_auto_paste',
+  HTT_SETTINGS_CHANGED: 'htt_settings_changed',
 } as const;

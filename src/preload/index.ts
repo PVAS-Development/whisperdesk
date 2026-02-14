@@ -5,6 +5,8 @@ import type {
   ModelDownloadProgress,
   TranscriptionProgress,
   UpdateStatus,
+  AppSettings,
+  HttTranscriptionResult,
 } from '../shared/types';
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -72,4 +74,33 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('update:status', (_event, data) => callback(data));
     return () => ipcRenderer.removeAllListeners('update:status');
   },
+
+  // Settings
+  loadSettings: () => ipcRenderer.invoke('settings:load'),
+  saveSettings: (settings: AppSettings) => ipcRenderer.invoke('settings:save', settings),
+
+  // Hold-to-Transcribe
+  onHttStartRecording: (callback: () => void) => {
+    ipcRenderer.on('htt:startRecording', () => callback());
+    return () => ipcRenderer.removeAllListeners('htt:startRecording');
+  },
+  onHttStopRecording: (callback: () => void) => {
+    ipcRenderer.on('htt:stopRecording', () => callback());
+    return () => ipcRenderer.removeAllListeners('htt:stopRecording');
+  },
+  onHttTranscriptionResult: (callback: (data: HttTranscriptionResult) => void) => {
+    ipcRenderer.on('htt:transcriptionResult', (_event, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('htt:transcriptionResult');
+  },
+  onHttAccessibilityRequired: (callback: () => void) => {
+    ipcRenderer.on('htt:accessibilityRequired', () => callback());
+    return () => ipcRenderer.removeAllListeners('htt:accessibilityRequired');
+  },
+  onHttModelNotDownloaded: (callback: (data: { model: string }) => void) => {
+    ipcRenderer.on('htt:modelNotDownloaded', (_event, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('htt:modelNotDownloaded');
+  },
+  httSaveAudio: (buffer: ArrayBuffer) => ipcRenderer.invoke('htt:saveAudio', buffer),
+  httRequestAccessibility: () => ipcRenderer.invoke('htt:requestAccessibility'),
+  httUpdateSettings: () => ipcRenderer.invoke('htt:updateSettings'),
 });
