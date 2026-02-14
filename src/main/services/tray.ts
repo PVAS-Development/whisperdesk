@@ -15,11 +15,11 @@ export function createTray(getMainWindow: () => BrowserWindow | null): Tray {
   icon.setTemplateImage(true);
 
   tray = new Tray(icon);
-  tray.setToolTip('WhisperDesk');
+  tray.setToolTip('Speakly');
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show WhisperDesk',
+      label: 'Show Speakly',
       click: () => {
         const win = getMainWindow();
         if (win) {
@@ -30,7 +30,7 @@ export function createTray(getMainWindow: () => BrowserWindow | null): Tray {
     },
     { type: 'separator' },
     {
-      label: 'Quit WhisperDesk',
+      label: 'Quit Speakly',
       click: () => {
         app.quit();
       },
@@ -56,7 +56,7 @@ export function createTray(getMainWindow: () => BrowserWindow | null): Tray {
 
 export function updateTrayTooltip(status: string): void {
   if (tray) {
-    tray.setToolTip(`WhisperDesk — ${status}`);
+    tray.setToolTip(`Speakly — ${status}`);
   }
 }
 

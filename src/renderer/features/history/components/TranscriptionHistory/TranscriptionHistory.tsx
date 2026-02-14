@@ -10,7 +10,7 @@ import type { HistoryItem } from '../../../../types';
 export interface TranscriptionHistoryProps {
   history: HistoryItem[];
   onClear: () => void;
-  onClose: () => void;
+  onClose?: () => void;
   onSelect: (item: HistoryItem) => void;
   onDelete: (itemId: string) => void;
 }
@@ -58,9 +58,11 @@ function TranscriptionHistory({
               Clear All
             </Button>
           )}
-          <Button variant="icon" icon={<X size={16} />} onClick={onClose}>
-            Close
-          </Button>
+          {onClose && (
+            <Button variant="icon" icon={<X size={16} />} onClick={onClose}>
+              Close
+            </Button>
+          )}
         </div>
       </div>
 

@@ -128,7 +128,7 @@ function createMenu() {
       role: 'help',
       submenu: [
         {
-          label: 'About WhisperDesk',
+          label: 'About Speakly',
           click: async () => {
             const author = 'Pedro Siqueira';
             const githubUrl = 'https://github.com/pedrovsiqueira';
@@ -136,8 +136,8 @@ function createMenu() {
 
             const result = await dialog.showMessageBox({
               type: 'info',
-              title: 'About WhisperDesk',
-              message: `WhisperDesk ${appVersion}`,
+              title: 'About Speakly',
+              message: `Speakly ${appVersion}`,
               detail: `Author: ${author}`,
               buttons: ['Open GitHub', 'Open LinkedIn', 'Close'],
               cancelId: 2,

@@ -26,7 +26,7 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
   onTranscriptionProgress: vi.fn().mockReturnValue(() => {}),
   getAppInfo: vi.fn().mockResolvedValue({
     version: '1.0.0',
-    name: 'WhisperDesk',
+    name: 'Speakly',
   }),
   getMemoryUsage: vi.fn().mockResolvedValue({
     heapUsed: 100 * 1024 * 1024,

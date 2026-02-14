@@ -1,3 +1,6 @@
 export { AppHeader } from './AppHeader';
-export { LeftPanel } from './LeftPanel';
-export { RightPanel } from './RightPanel';
+export { TabBar } from './TabBar';
+export type { TabId, TabBarProps } from './TabBar';
+export { TranscribeTab } from './TranscribeTab';
+export { SettingsTab } from './SettingsTab';
+export { HistoryTab } from './HistoryTab';

@@ -22,7 +22,7 @@ describe('SystemWarning', () => {
   it('renders correctly', () => {
     render(<SystemWarning onRefresh={mockOnRefresh} />);
     expect(screen.getByText('FFmpeg Installation Required')).toBeInTheDocument();
-    expect(screen.getByText(/WhisperDesk relies on FFmpeg/)).toBeInTheDocument();
+    expect(screen.getByText(/Speakly relies on FFmpeg/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /I have installed FFmpeg/i })).toBeInTheDocument();
   });
 

@@ -73,21 +73,9 @@
 
 .app-main {
   flex: 1;
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 0;
+  display: flex;
   overflow: hidden;
   min-height: 0;
-}
-
-.left-panel {
-  background: var(--bg-secondary);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
 }
 
 .system-check-loading {
@@ -95,15 +83,6 @@
   text-align: center;
   color: var(--text-secondary);
   font-size: 0.9rem;
-}
-
-.right-panel {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-primary);
-  min-height: 0;
 }
 
 .actions {
@@ -194,29 +173,10 @@
   transition: all var(--transition-fast);
 }
 
-.left-panel > * {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.right-panel > * {
-  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 button:focus-visible,
 select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-@media (max-width: 900px) {
-  .app-main {
-    grid-template-columns: 1fr;
-  }
-
-  .left-panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
