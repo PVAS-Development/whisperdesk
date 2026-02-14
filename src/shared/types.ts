@@ -194,6 +194,28 @@ export const SUPPORTED_EXTENSIONS = [
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
 
+export type ShortcutMode = 'hold' | 'toggle';
+
+export interface HoldToTranscribeSettings {
+  enabled: boolean;
+  shortcutMode: ShortcutMode;
+  shortcutKeyCode: number;
+  model: WhisperModelName;
+  language: LanguageCode;
+  autoPaste: boolean;
+}
+
+export interface AppSettings {
+  holdToTranscribe: HoldToTranscribeSettings;
+}
+
+export type HttStatus = 'idle' | 'recording' | 'processing' | 'error';
+
+export interface HttTranscriptionResult {
+  text: string;
+  error?: string;
+}
+
 export type Unsubscribe = () => void;
 
 export type RequireFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
