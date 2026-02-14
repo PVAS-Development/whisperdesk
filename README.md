@@ -1,49 +1,42 @@
-# 🎙️ WhisperDesk
+# Speakly
 
-[![Downloads](https://img.shields.io/github/downloads/PVAS-Development/whisperdesk/total.svg)](https://github.com/PVAS-Development/whisperdesk/releases)
-[![Release Version](https://img.shields.io/github/v/release/PVAS-Development/whisperdesk?label=release&logo=github)](https://github.com/PVAS-Development/whisperdesk/releases)
-[![Lint](https://img.shields.io/badge/lint-passing-brightgreen.svg?logo=eslint&logoColor=white)](https://github.com/PVAS-Development/whisperdesk/actions/workflows/ci.yml)
-[![Stars](https://img.shields.io/github/stars/PVAS-Development/whisperdesk?style=social)](https://github.com/PVAS-Development/whisperdesk/stargazers)
-[![Forks](https://img.shields.io/github/forks/PVAS-Development/whisperdesk?style=social)](https://github.com/PVAS-Development/whisperdesk/network/members)
-[![Good First Issue](https://img.shields.io/github/issues-raw/PVAS-Development/whisperdesk/good%20first%20issue)](https://github.com/PVAS-Development/whisperdesk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg?logo=github)](https://github.com/PVAS-Development/whisperdesk/blob/main/CONTRIBUTING.md)
+[![Release Version](https://img.shields.io/github/v/release/Jonathan-Asher/speakly?label=release&logo=github)](https://github.com/Jonathan-Asher/speakly/releases)
+[![Downloads](https://img.shields.io/github/downloads/Jonathan-Asher/speakly/total.svg)](https://github.com/Jonathan-Asher/speakly/releases)
+[![Stars](https://img.shields.io/github/stars/Jonathan-Asher/speakly?style=social)](https://github.com/Jonathan-Asher/speakly/stargazers)
 
-A beautiful, native macOS desktop application for transcribing audio and video files using [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
+Speech to text, instantly — a native macOS desktop application powered by [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 
-🌐 **[Visit our website](https://pvas-development.github.io/whisperdesk/)** | 📥 **[Download Latest Release](https://github.com/PVAS-Development/whisperdesk/releases/latest)**
+📥 **[Download Latest Release](https://github.com/Jonathan-Asher/speakly/releases/latest)**
 
-![WhisperDesk Screenshot](src/docs/screenshot.png)
+## Features
 
-## ✨ Features
+- **Tab-Based Layout** — Transcribe, Settings, and History in clean separate tabs
+- **Drag & Drop** — Drag single or multiple files to create a batch queue
+- **Batch Processing** — Process unlimited files sequentially with automatic queue management
+- **Hold-to-Transcribe** — Global shortcut to record and transcribe from any app
+- **Multi-Provider Translation** — Translate transcriptions via Google Translate, OpenAI, Groq, Anthropic, or custom endpoints
+- **Multiple Formats** — Supports MP3, WAV, M4A, FLAC, OGG, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
+- **Multiple Models** — Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
+- **Output Formats** — Export as VTT, SRT, plain text, Word (`.docx`), PDF, or Markdown
+- **Language Support** — Auto-detect or select from 12+ languages
+- **Apple Silicon Optimized** — Native Metal GPU acceleration on M1/M2/M3/M4 Macs
+- **System Tray** — Minimize to tray, stays running in the background
+- **Dark Mode** — Beautiful dark theme with indigo accent color
+- **Auto Updates** — Automatic update notifications
+- **Transcription History** — Browse and revisit past transcriptions
+- **Native Performance** — Uses whisper.cpp for fast, efficient transcription
 
-- **Drag & Drop** - Drag single or multiple files to create a batch queue
-- **Batch Processing** - Process unlimited files sequentially with automatic queue management
-- **Multiple Formats** - Supports MP3, WAV, M4A, FLAC, OGG, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
-- **Multiple Models** - Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
-- **Output Formats** - Export as VTT subtitles, SRT subtitles, plain text, Word (`.docx`), PDF, or Markdown
-- **Language Support** - Auto-detect or select from 12+ languages
-- **Apple Silicon Optimized** - Native Metal GPU acceleration on M1/M2/M3/M4 Macs
-- **Dark Mode** - Beautiful dark theme that respects your system preference
-- **Auto Updates** - Automatic update notifications when new versions are available
-- **Keyboard Shortcuts** - Full keyboard navigation support
-- **Transcription History** - Keep track of your recent transcriptions
-- **Native Performance** - Uses whisper.cpp for fast, efficient transcription
-- **TypeScript** - Fully typed codebase for better maintainability
-- **Feature-Driven Architecture** - Modular codebase organized by feature domains
-
-## 📋 Requirements
+## Requirements
 
 - **macOS** 10.15 (Catalina) or later
-- **FFmpeg** (Required for audio processing)
+- **FFmpeg** (required for audio processing)
 - ~500MB disk space (for whisper.cpp and models)
 
-> **Note:** WhisperDesk requires FFmpeg to process audio files. The app will check for it on startup and guide you if it's missing.
+> Speakly requires FFmpeg to process audio files. The app will check for it on startup and guide you if it's missing.
 
-## 🚀 Installation
+## Installation
 
 ### 1. Install Prerequisites
-
-WhisperDesk requires **FFmpeg** to be installed on your system to process audio and video files.
 
 #### Install Homebrew (if not already installed)
 
@@ -63,22 +56,22 @@ brew install ffmpeg
 brew install cmake
 ```
 
-### 2. Install WhisperDesk
+### 2. Install Speakly
 
 #### Option A: Download DMG (Recommended)
 
-1. Download the latest `WhisperDesk-x.x.x.dmg` from [Releases](https://github.com/PVAS-Development/whisperdesk/releases)
+1. Download the latest `Speakly-x.x.x.dmg` from [Releases](https://github.com/Jonathan-Asher/speakly/releases)
 2. Open the DMG file
-3. Drag WhisperDesk to your Applications folder
-4. **Important:** Ensure you have FFmpeg installed (see [Prerequisites](#1-install-prerequisites))
-5. Launch WhisperDesk from Applications
+3. Drag Speakly to your Applications folder
+4. Ensure you have FFmpeg installed (see [Prerequisites](#1-install-prerequisites))
+5. Launch Speakly from Applications
 
 #### Option B: Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/PVAS-Development/whisperdesk.git
-cd whisperdesk
+git clone https://github.com/Jonathan-Asher/speakly.git
+cd speakly
 
 # Install dependencies
 npm install
@@ -97,12 +90,12 @@ npm run electron:dev
 npm run electron:build
 ```
 
-## 🎮 Usage
+## Usage
 
-1. **Open Files** - Drag and drop audio/video files (single or batch) into the app, or click to browse
-2. **Configure Settings** - Choose your preferred model, language, and output format
-3. **Transcribe** - Click "Transcribe" to process the entire queue sequentially
-4. **Save/Copy** - Save the transcription from the save dialog (choose from `.txt`, `.docx`, `.pdf`, `.md`, `.srt`, or `.vtt` formats) or copy to clipboard
+1. **Open Files** — Drag and drop audio/video files into the Transcribe tab, or click to browse
+2. **Configure Settings** — Switch to Settings tab to choose model, language, and output format
+3. **Transcribe** — Click "Transcribe" to process the queue
+4. **Save/Copy** — Save the transcription (`.txt`, `.docx`, `.pdf`, `.md`, `.srt`, `.vtt`) or copy to clipboard
 
 ### Keyboard Shortcuts
 
@@ -115,7 +108,7 @@ npm run electron:build
 | `Cmd+H`      | Toggle history       |
 | `Escape`     | Cancel transcription |
 
-## 🧠 Whisper Models
+## Whisper Models
 
 | Model            | Size   | Speed | Quality | Best For               |
 | ---------------- | ------ | ----- | ------- | ---------------------- |
@@ -131,9 +124,9 @@ English-only variants (`.en`) are available for tiny, base, small, and medium mo
 Models are downloaded automatically on first use and cached in:
 
 - **Development**: `PROJECT_ROOT/models/`
-- **Production**: `~/Library/Application Support/WhisperDesk/models/`
+- **Production**: `~/Library/Application Support/Speakly/models/`
 
-## 🔧 Development
+## Development
 
 ### Prerequisites
 
@@ -144,15 +137,10 @@ Models are downloaded automatically on first use and cached in:
 ### Setup
 
 ```bash
-# Clone and install
-git clone https://github.com/PVAS-Development/whisperdesk.git
-cd whisperdesk
+git clone https://github.com/Jonathan-Asher/speakly.git
+cd speakly
 npm install
-
-# Build whisper.cpp and download base model
 npm run setup:whisper
-
-# Run development server
 npm run electron:dev
 ```
 
@@ -166,51 +154,10 @@ npm run electron:build:mac
 npm run electron:build:dir
 ```
 
-### Contributing
-
-This project uses **conventional commits** for consistent commit messages.
-
-#### Development Flow
-
-1. **Create a feature branch** from `main`:
-
-   ```bash
-   git checkout -b feat/my-feature
-   ```
-
-2. **Make changes** with conventional commits and create PR to `main`
-
-#### Commit Message Convention
-
-Use [Conventional Commits](https://www.conventionalcommits.org/) for clear history:
-
-| Commit Type | Example                    | Description             |
-| ----------- | -------------------------- | ----------------------- |
-| `feat:`     | `feat: add PDF export`     | New feature             |
-| `fix:`      | `fix: crash on startup`    | Bug fix                 |
-| `perf:`     | `perf: faster loading`     | Performance improvement |
-| `refactor:` | `refactor: simplify logic` | Code refactoring        |
-| `docs:`     | `docs: update README`      | Documentation           |
-| `chore:`    | `chore: update deps`       | Maintenance             |
-| `style:`    | `style: format code`       | Code style              |
-| `test:`     | `test: add unit tests`     | Tests                   |
-| `ci:`       | `ci: fix workflow`         | CI/CD changes           |
-| `build:`    | `build: update config`     | Build changes           |
-
-#### Issues & Discussions
-
-- **Bug report?** Open an issue via the built-in [bug report template](https://github.com/PVAS-Development/whisperdesk/issues/new/choose) so we collect macOS version, WhisperDesk version, reproduction steps, and relevant logs automatically.
-- **Feature idea?** Start a thread in [Discussions](https://github.com/PVAS-Development/whisperdesk/discussions). We prefer to explore new ideas there and will only create an issue once we understand the scope.
-- **Before you post**: search the existing issues and discussions to avoid duplicates and help us respond faster.
-
 ### Testing
 
-WhisperDesk has a comprehensive test suite with **335+ tests** covering utilities, services, hooks, and React components.
-
-#### Run Tests
-
 ```bash
-# Run all tests once (CI mode)
+# Run all tests once
 npm run test:run
 
 # Run tests with watch mode
@@ -223,24 +170,6 @@ npm run test:ui
 npm run test:coverage
 ```
 
-#### Test Coverage
-
-- **Unit Tests** - Utilities, formatters, validators, storage, and services
-- **Component Tests** - SettingsPanel, FileDropZone, OutputDisplay
-- **Service Tests** - Electron API, transcription service, model service, history storage
-- Test Framework: [Vitest](https://vitest.dev/) with jsdom
-- Component Testing: [@testing-library/react](https://testing-library.com/react)
-- **Pre-commit Hooks** - Lint and format checks run automatically before every commit (via husky + lint-staged)
-
-#### CI/CD Pipeline
-
-Tests run automatically in GitHub Actions on every PR and push:
-
-- ✅ Linting & formatting checks
-- ✅ TypeScript type checking
-- ✅ Unit & component tests (335+ tests)
-- ✅ Production build validation
-
 ### Available Scripts
 
 | Script                            | Description                              |
@@ -249,17 +178,15 @@ Tests run automatically in GitHub Actions on every PR and push:
 | `npm run electron:dev`            | Start app in development mode            |
 | `npm run setup:whisper`           | Build whisper.cpp (current architecture) |
 | `npm run setup:whisper:universal` | Build whisper.cpp (universal binary)     |
-| `npm run electron:build`          | Builds macOS DMG (with universal binary) |
-| `npm run electron:build:mac`      | Builds macOS DMG (with universal binary) |
+| `npm run electron:build`          | Build macOS DMG (universal binary)       |
+| `npm run electron:build:mac`      | Build macOS DMG (universal binary)       |
 | `npm run electron:build:dir`      | Build directory only (faster, testing)   |
 | `npm run icons`                   | Generate app icons from SVG              |
 | `npm run lint`                    | Run ESLint                               |
 | `npm run lint:fix`                | Run ESLint with auto-fix                 |
 | `npm run typecheck`               | Run TypeScript type checking             |
 | `npm run format`                  | Format code with Prettier                |
-| `npm run format:check`            | Check code formatting                    |
 | `npm run test`                    | Run tests with watch mode                |
-| `npm run test:ui`                 | Run tests with dashboard UI              |
 | `npm run test:run`                | Run tests once (CI mode)                 |
 | `npm run test:coverage`           | Run tests with coverage report           |
 
@@ -267,48 +194,16 @@ Tests run automatically in GitHub Actions on every PR and push:
 
 This project follows a modern Electron architecture with strict separation of concerns:
 
-- **`src/main/`**: Electron Main process (TypeScript). Handles OS integration, window management, and native services.
-- **`src/preload/`**: Preload scripts (TypeScript). Exposes a secure, typed API to the renderer via `contextBridge`.
-- **`src/renderer/`**: React application (TypeScript). The UI layer, built with Vite.
-- **`src/shared/`**: Shared types and constants used by both Main and Renderer processes.
+- **`src/main/`** — Electron Main process. Handles OS integration, window management, and native services.
+- **`src/preload/`** — Preload scripts. Exposes a secure, typed API to the renderer via `contextBridge`.
+- **`src/renderer/`** — React application. The UI layer, built with Vite.
+- **`src/shared/`** — Shared types and constants used by both processes.
 
-**Security Features:**
+**Security:** Context isolation enabled, sandbox enabled, all communication via typed IPC channels.
 
-- **Context Isolation**: Enabled. Renderer cannot access Node.js primitives directly.
-- **Sandbox**: Enabled. Renderer runs in a sandboxed environment.
-- **IPC**: All communication happens via typed IPC channels defined in `src/main/ipc/`.
-
-### Project Structure
-
-```
-whisperdesk/
-├── src/
-│   ├── main/                # Electron Main process (TypeScript)
-│   │   ├── index.ts         # Entry point
-│   │   ├── ipc/             # IPC Handlers
-│   │   ├── services/        # Business logic (Whisper, FileSystem)
-│   │   └── utils/           # Utilities
-│   ├── preload/             # Preload scripts (TypeScript)
-│   │   └── index.ts         # Secure API exposure
-│   ├── renderer/            # React frontend (TypeScript)
-│   │   ├── App.tsx          # Main app component
-│   │   ├── main.tsx         # React entry point
-│   │   ├── components/      # Shared UI components
-│   │   ├── features/        # Feature-based modules
-│   │   └── ...
-│   └── shared/              # Shared types and constants
-├── dist-electron/           # Output folder for main process build
-├── dist/                    # Output folder for renderer build
-├── scripts/                 # Build and setup scripts
-├── bin/                     # whisper-cli binary (built)
-└── models/                  # Downloaded GGML models (dev)
-```
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "whisper.cpp not found" error
-
-Run the setup script to build whisper.cpp:
 
 ```bash
 npm run setup:whisper
@@ -316,71 +211,37 @@ npm run setup:whisper
 
 ### "FFmpeg not found" error
 
-Install FFmpeg via Homebrew:
-
 ```bash
 brew install ffmpeg
 ```
 
-### Slow transcription
-
-- Use a smaller model (tiny or base) for faster results
-- Ensure you're using GPU acceleration (shown in app settings)
-- Close other resource-intensive applications
-
 ### App won't open (macOS Gatekeeper)
 
-The app is **code-signed and notarized** by Apple, so it should open normally. If you still see a warning:
+The app is code-signed and notarized. If you still see a warning:
 
 1. Right-click the app and select "Open"
-2. Click "Open" in the dialog that appears
+2. Click "Open" in the dialog
 
-For builds from source (unsigned), you may need to run:
+For unsigned builds from source:
 
 ```bash
-xattr -cr /Applications/WhisperDesk.app
+xattr -cr /Applications/Speakly.app
 ```
 
-## 🤝 Contributing
+## Privacy
 
-Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+All audio/video processing happens **locally** on your device. Your files never leave your computer. We collect minimal, anonymous usage data (app launches, feature usage) to improve the app — no personal data or file content is collected.
 
-- Setting up your development environment
-- Code style and commit conventions
-- Submitting pull requests
+## License
 
-## 🔒 Privacy & Security
+MIT License — see [LICENSE](LICENSE) for details.
 
-- **Local Processing**: All audio/video processing happens **locally** on your device. Your files never leave your computer.
-- **No Cloud Uploads**: We do not upload your media files or transcriptions to any server.
-- **Anonymous Analytics**: We collect minimal, anonymous usage data (e.g., app launches, feature usage) to improve the app. No personal data or file content is collected.
-- **Code Signing**: The app is **code-signed and notarized** by Apple for your safety.
+## Acknowledgments
 
-For more details, please read our [Privacy Policy](https://whisperdesk.org/privacy.html).
-
-## ☕ Support the Project
-
-WhisperDesk is free and open-source software. If you find it useful, please consider supporting its development:
-
-- [**Donate via PayPal**](https://www.paypal.com/donate/?hosted_button_id=HTJXGMEGMWWD6)
-- [**Buy me a coffee**](https://www.buymeacoffee.com/pedrovsiqueira)
-
-Your support helps cover the costs of Apple Developer Program fees and keeps the project alive!
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## 🙏 Acknowledgments
-
-- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) - High-performance C++ port of OpenAI Whisper
-- [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
-- [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
-- [React](https://react.dev/) - UI framework
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- [Vite](https://vitejs.dev/) - Build tool
-- [Vitest](https://vitest.dev/) - Fast unit testing framework
-
----
-
-Made with ❤️ for the transcription community
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) — High-performance C++ port of OpenAI Whisper
+- [OpenAI Whisper](https://github.com/openai/whisper) — Speech recognition model
+- [Electron](https://www.electronjs.org/) — Cross-platform desktop apps
+- [React](https://react.dev/) — UI framework
+- [TypeScript](https://www.typescriptlang.org/) — Type-safe JavaScript
+- [Vite](https://vitejs.dev/) — Build tool
+- [Vitest](https://vitest.dev/) — Testing framework

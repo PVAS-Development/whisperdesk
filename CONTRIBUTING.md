@@ -1,14 +1,14 @@
-# Contributing to WhisperDesk
+# Contributing to Speakly
 
-Thank you for your interest in contributing to WhisperDesk! We welcome contributions from the community to help make this the best desktop transcription app for macOS.
+Thank you for your interest in contributing to Speakly! We welcome contributions from the community.
 
 ## Development Setup
 
-WhisperDesk is an Electron app that uses a native C++ binary (`whisper.cpp`) for transcription. Because of this native dependency, the setup process has one extra step compared to a standard web project.
+Speakly is an Electron app that uses a native C++ binary (`whisper.cpp`) for transcription.
 
 ### Prerequisites
 
-- **Node.js** (v18 or later recommended)
+- **Node.js** (v22.12 or later)
 - **macOS** (Required for Metal GPU acceleration support)
 - **Xcode Command Line Tools** (for compiling whisper.cpp)
   ```bash
@@ -28,8 +28,8 @@ WhisperDesk is an Electron app that uses a native C++ binary (`whisper.cpp`) for
 1.  **Clone the repository**
 
     ```bash
-    git clone https://github.com/pedrovsiqueira/whisperdesk.git
-    cd whisperdesk
+    git clone https://github.com/Jonathan-Asher/speakly.git
+    cd speakly
     ```
 
 2.  **Install dependencies**
@@ -39,25 +39,15 @@ WhisperDesk is an Electron app that uses a native C++ binary (`whisper.cpp`) for
     ```
 
 3.  **Setup whisper.cpp**
-    This script downloads the `whisper.cpp` source code and compiles the `whisper-cli` binary with Metal support. It places the binary in the `bin/` directory.
 
     ```bash
     npm run setup:whisper
     ```
 
 4.  **Run in Development Mode**
-    This starts both the Vite dev server (renderer) and the Electron main process.
     ```bash
     npm run electron:dev
     ```
-
-## Project Structure
-
-- **`electron/`**: Main process code (Node.js). Handles native OS integration and spawning the whisper binary.
-- **`src/`**: Renderer process code (React + TypeScript).
-  - **`features/`**: Feature-based architecture. Most UI logic lives here.
-  - **`services/`**: Shared services, including the `electronAPI` bridge.
-- **`scripts/`**: Build and setup scripts.
 
 ## Code Style
 
@@ -81,14 +71,14 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) t
 
 ## Pull Request Process
 
-1.  Fork the repository and create your branch from `main`.
-2.  If you've added code that should be tested, add tests.
-3.  Ensure the test suite passes (`npm test`).
-4.  Make sure your code lints (`npm run lint`).
-5.  Issue that Pull Request!
+1. Fork the repository and create your branch from `main`.
+2. If you've added code that should be tested, add tests.
+3. Ensure the test suite passes (`npm test`).
+4. Make sure your code lints (`npm run lint`).
+5. Submit your Pull Request!
 
 ## Reporting & Feedback
 
-- **Bugs:** open a GitHub issue (use the bug report template) so we have macOS and WhisperDesk version info plus reproduction steps ready to go.
-- **Feature ideas:** start a conversation in [Discussions](https://github.com/pedrovsiqueira/whisperdesk/discussions); we keep idea validation there and only convert posts into issues once the scope is clear.
-- **Search first:** browse existing issues + discussions before posting to avoid duplicates.
+- **Bugs:** Open a GitHub issue using the bug report template.
+- **Feature ideas:** Start a conversation in [Discussions](https://github.com/Jonathan-Asher/speakly/discussions).
+- **Search first:** Browse existing issues and discussions before posting to avoid duplicates.

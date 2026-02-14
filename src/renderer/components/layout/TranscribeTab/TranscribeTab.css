@@ -1,50 +1,48 @@
 .transcribe-tab {
   display: flex;
-  gap: 0;
+  flex-direction: column;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-}
-
-.transcribe-tab-controls {
-  width: 380px;
-  min-width: 380px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  padding: 20px 24px;
   gap: 16px;
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  background: var(--bg-secondary);
 }
 
-.transcribe-tab-controls > * {
+.transcribe-tab-top {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.transcribe-tab-dropzone {
+  flex: 1;
+  min-width: 0;
+}
+
+.transcribe-tab-action {
+  display: flex;
+  align-items: stretch;
+  min-width: 160px;
+}
+
+.transcribe-tab-action .actions {
+  flex: 1;
+  display: flex;
+}
+
+.transcribe-tab-action .actions button {
+  height: 100%;
+}
+
+.transcribe-tab-queue {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .transcribe-tab-output {
   flex: 1;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg-primary);
   min-height: 0;
-}
-
-.transcribe-tab-output > * {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (max-width: 900px) {
-  .transcribe-tab {
-    flex-direction: column;
-  }
-
-  .transcribe-tab-controls {
-    width: 100%;
-    min-width: 0;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
 }

@@ -6,19 +6,18 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PVAS-Development/whisperdesk.git"
+    "url": "https://github.com/Jonathan-Asher/speakly.git"
   },
   "bugs": {
-    "url": "https://github.com/PVAS-Development/whisperdesk/issues"
+    "url": "https://github.com/Jonathan-Asher/speakly/issues"
   },
-  "homepage": "https://github.com/PVAS-Development/whisperdesk#readme",
+  "homepage": "https://github.com/Jonathan-Asher/speakly#readme",
   "engines": {
     "node": ">=22.12.0"
   },
   "main": "dist-electron/main.cjs",
   "author": {
-    "name": "Pedro Siqueira",
-    "email": "pedro.v.siqueira@gmail.com"
+    "name": "Jonathan Ashurov"
   },
   "scripts": {
     "dev": "vite",
@@ -181,8 +180,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "PVAS-Development",
-      "repo": "whisperdesk"
+      "owner": "Jonathan-Asher",
+      "repo": "speakly"
     }
   }
 }

@@ -38,14 +38,21 @@ function TranscribeTab(): React.JSX.Element {
       )}
       {isFFmpegAvailable === false && <SystemWarning onRefresh={recheckStatus} />}
 
-      <div className="transcribe-tab-controls">
-        <FileDropZone
-          onFilesSelect={handleFilesSelect}
-          queueCount={queue.length}
-          disabled={isTranscribing}
-        />
+      <div className="transcribe-tab-top">
+        <div className="transcribe-tab-dropzone">
+          <FileDropZone
+            onFilesSelect={handleFilesSelect}
+            queueCount={queue.length}
+            disabled={isTranscribing}
+          />
+        </div>
+        <div className="transcribe-tab-action">
+          <TranscriptionActions isFFmpegAvailable={isFFmpegAvailable} />
+        </div>
+      </div>
 
-        {queue.length > 0 && (
+      {queue.length > 0 && (
+        <div className="transcribe-tab-queue">
           <FileQueue
             queue={queue}
             onRemove={removeFromQueue}
@@ -54,11 +61,10 @@ function TranscribeTab(): React.JSX.Element {
             selectedItemId={selectedQueueItemId}
             disabled={isTranscribing}
           />
-        )}
+        </div>
+      )}
 
-        <TranscriptionActions isFFmpegAvailable={isFFmpegAvailable} />
-        <ErrorMessage />
-      </div>
+      <ErrorMessage />
 
       <div className="transcribe-tab-output">
         <OutputDisplay

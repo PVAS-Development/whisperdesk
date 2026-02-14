@@ -8,7 +8,7 @@ assignees: ''
 
 - [ ] This is a new bug that hasn't been documented in a closed issue or in the README
       macOS version:
-      WhisperDesk version (menu → WhisperDesk → About WhisperDesk):
+      Speakly version (menu → Speakly → About Speakly):
       Steps to reproduce:
       Expected result:
       Actual result:

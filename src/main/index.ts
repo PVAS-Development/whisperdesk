@@ -130,23 +130,20 @@ function createMenu() {
         {
           label: 'About Speakly',
           click: async () => {
-            const author = 'Pedro Siqueira';
-            const githubUrl = 'https://github.com/pedrovsiqueira';
-            const linkedinUrl = 'https://www.linkedin.com/in/pedrovsiqueira';
+            const author = 'Jonathan Ashurov';
+            const githubUrl = 'https://github.com/Jonathan-Asher';
 
             const result = await dialog.showMessageBox({
               type: 'info',
               title: 'About Speakly',
               message: `Speakly ${appVersion}`,
               detail: `Author: ${author}`,
-              buttons: ['Open GitHub', 'Open LinkedIn', 'Close'],
-              cancelId: 2,
+              buttons: ['Open GitHub', 'Close'],
+              cancelId: 1,
             });
 
             if (result.response === 0) {
               await shell.openExternal(githubUrl);
-            } else if (result.response === 1) {
-              await shell.openExternal(linkedinUrl);
             }
           },
         },
@@ -164,7 +161,7 @@ function createMenu() {
         {
           label: 'Learn More',
           click: async () => {
-            await shell.openExternal('https://github.com/pedrovsiqueira/whisperdesk');
+            await shell.openExternal('https://github.com/Jonathan-Asher/speakly');
           },
         },
       ],
