@@ -23,7 +23,6 @@ import { GpuStatus } from '../GpuStatus';
 import { ModelSelector } from '../ModelSelector';
 import { ModelDetails } from '../ModelDetails';
 import { LanguageSelector } from '../LanguageSelector';
-import { HttSettings } from '../../../hold-to-transcribe';
 
 export interface SettingsPanelProps {
   settings: TranscriptionSettings;
@@ -174,8 +173,6 @@ function SettingsPanel({
         disabled={disabled}
         onChange={handleLanguageChange}
       />
-
-      <HttSettings />
     </div>
   );
 }
