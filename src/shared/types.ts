@@ -206,6 +206,18 @@ export const TRANSLATE_INCOMPATIBLE_MODELS: readonly string[] = [
   'large-v3-turbo',
 ] as const;
 
+export type TranslationProvider = 'google' | 'openai' | 'groq' | 'anthropic' | 'custom';
+
+export interface TranslationConfig {
+  enabled: boolean;
+  provider: TranslationProvider;
+  targetLanguage: string;
+  apiKey: string;
+  customEndpoint: string;
+  customModel: string;
+  systemPrompt: string;
+}
+
 export interface HoldToTranscribeSettings {
   enabled: boolean;
   shortcutMode: ShortcutMode;
@@ -215,6 +227,7 @@ export interface HoldToTranscribeSettings {
   autoPaste: boolean;
   audioDeviceId: string;
   translateToEnglish: boolean;
+  translation: TranslationConfig;
 }
 
 export interface AppSettings {

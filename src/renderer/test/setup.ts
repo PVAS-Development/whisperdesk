@@ -65,6 +65,15 @@ const mockElectronAPI: ElectronAPI = {
       autoPaste: true,
       audioDeviceId: '',
       translateToEnglish: false,
+      translation: {
+        enabled: false,
+        provider: 'google',
+        targetLanguage: 'English',
+        apiKey: '',
+        customEndpoint: '',
+        customModel: '',
+        systemPrompt: '',
+      },
     },
   }),
   saveSettings: vi.fn().mockResolvedValue({ success: true }),
@@ -76,6 +85,7 @@ const mockElectronAPI: ElectronAPI = {
   httSaveAudio: vi.fn().mockResolvedValue({ success: true }),
   httRequestAccessibility: vi.fn().mockResolvedValue({ success: true }),
   httUpdateSettings: vi.fn().mockResolvedValue({ success: true }),
+  testTranslation: vi.fn().mockResolvedValue({ success: true }),
 };
 
 Object.defineProperty(window, 'electronAPI', {

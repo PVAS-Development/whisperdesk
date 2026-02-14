@@ -1,8 +1,18 @@
 import { app } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import type { AppSettings, HoldToTranscribeSettings } from '../../shared/types';
+import type { AppSettings, HoldToTranscribeSettings, TranslationConfig } from '../../shared/types';
 import { UiohookKey } from 'uiohook-napi';
+
+const DEFAULT_TRANSLATION_CONFIG: TranslationConfig = {
+  enabled: false,
+  provider: 'google',
+  targetLanguage: 'English',
+  apiKey: '',
+  customEndpoint: '',
+  customModel: '',
+  systemPrompt: '',
+};
 
 const DEFAULT_HTT_SETTINGS: HoldToTranscribeSettings = {
   enabled: true,
@@ -13,6 +23,7 @@ const DEFAULT_HTT_SETTINGS: HoldToTranscribeSettings = {
   autoPaste: true,
   audioDeviceId: '',
   translateToEnglish: false,
+  translation: DEFAULT_TRANSLATION_CONFIG,
 };
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -29,10 +40,15 @@ export function loadSettings(): AppSettings {
     if (fs.existsSync(settingsPath)) {
       const data = fs.readFileSync(settingsPath, 'utf-8');
       const parsed = JSON.parse(data) as Partial<AppSettings>;
+      const htt = parsed.holdToTranscribe;
       return {
         holdToTranscribe: {
           ...DEFAULT_HTT_SETTINGS,
-          ...parsed.holdToTranscribe,
+          ...htt,
+          translation: {
+            ...DEFAULT_TRANSLATION_CONFIG,
+            ...htt?.translation,
+          },
         },
       };
     }

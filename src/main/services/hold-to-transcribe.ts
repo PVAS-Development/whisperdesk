@@ -8,6 +8,7 @@ import { loadSettings } from './settings';
 import { updateTrayTooltip } from './tray';
 import { trackEvent, AnalyticsEvents } from './analytics';
 import { OverlayWindow } from './overlay';
+import { translateText } from './translation';
 import type { TranscriptionOptions } from '../../shared/types';
 
 export class HoldToTranscribeService {
@@ -123,7 +124,17 @@ export class HoldToTranscribeService {
       const win = this.getMainWindow();
 
       if (result.success && result.text) {
-        const text = result.text.trim();
+        let text = result.text.trim();
+
+        if (settings.holdToTranscribe.translation.enabled) {
+          this.overlay.updateState({ status: 'processing', message: 'Translating...' });
+          try {
+            text = await translateText(text, settings.holdToTranscribe.translation);
+          } catch (err) {
+            console.error('Translation failed:', err);
+          }
+        }
+
         clipboard.writeText(text);
 
         if (settings.holdToTranscribe.autoPaste) {

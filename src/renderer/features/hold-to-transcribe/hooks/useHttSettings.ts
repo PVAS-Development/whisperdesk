@@ -5,6 +5,7 @@ import type {
   WhisperModelName,
   LanguageCode,
   ShortcutMode,
+  TranslationConfig,
 } from '../../../types';
 import { listModels } from '../../../services';
 
@@ -17,6 +18,15 @@ const DEFAULT_SETTINGS: HoldToTranscribeSettings = {
   autoPaste: true,
   audioDeviceId: '',
   translateToEnglish: false,
+  translation: {
+    enabled: false,
+    provider: 'google',
+    targetLanguage: 'English',
+    apiKey: '',
+    customEndpoint: '',
+    customModel: '',
+    systemPrompt: '',
+  },
 };
 
 export interface UseHttSettingsReturn {
@@ -31,6 +41,7 @@ export interface UseHttSettingsReturn {
   updateAutoPaste: (autoPaste: boolean) => void;
   updateAudioDevice: (deviceId: string) => void;
   updateTranslateToEnglish: (translate: boolean) => void;
+  updateTranslation: (translation: Partial<TranslationConfig>) => void;
 }
 
 export function useHttSettings(): UseHttSettingsReturn {
@@ -94,7 +105,25 @@ export function useHttSettings(): UseHttSettingsReturn {
   );
 
   const updateTranslateToEnglish = useCallback(
-    (translateToEnglish: boolean) => save({ ...settings, translateToEnglish }),
+    (translateToEnglish: boolean) => {
+      const updated = { ...settings, translateToEnglish };
+      if (translateToEnglish && settings.translation.enabled) {
+        updated.translation = { ...settings.translation, enabled: false };
+      }
+      save(updated);
+    },
+    [settings, save]
+  );
+
+  const updateTranslation = useCallback(
+    (partial: Partial<TranslationConfig>) => {
+      const translation = { ...settings.translation, ...partial };
+      const updated = { ...settings, translation };
+      if (translation.enabled && settings.translateToEnglish) {
+        updated.translateToEnglish = false;
+      }
+      save(updated);
+    },
     [settings, save]
   );
 
@@ -110,5 +139,6 @@ export function useHttSettings(): UseHttSettingsReturn {
     updateAutoPaste,
     updateAudioDevice,
     updateTranslateToEnglish,
+    updateTranslation,
   };
 }

@@ -7,6 +7,7 @@ import type {
   UpdateStatus,
   AppSettings,
   HttTranscriptionResult,
+  TranslationConfig,
 } from '../shared/types';
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -103,4 +104,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   httSaveAudio: (buffer: ArrayBuffer) => ipcRenderer.invoke('htt:saveAudio', buffer),
   httRequestAccessibility: () => ipcRenderer.invoke('htt:requestAccessibility'),
   httUpdateSettings: () => ipcRenderer.invoke('htt:updateSettings'),
+
+  // Translation
+  testTranslation: (config: TranslationConfig) => ipcRenderer.invoke('translation:test', config),
 });

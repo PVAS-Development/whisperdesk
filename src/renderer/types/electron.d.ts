@@ -14,6 +14,7 @@ import type {
   UpdateStatus,
   AppSettings,
   HttTranscriptionResult,
+  TranslationConfig,
 } from './index';
 
 export interface ModelsListResponse {
@@ -79,6 +80,9 @@ export interface ElectronAPI {
   httSaveAudio: (buffer: ArrayBuffer) => Promise<{ success: boolean }>;
   httRequestAccessibility: () => Promise<{ success: boolean }>;
   httUpdateSettings: () => Promise<{ success: boolean }>;
+
+  // Translation
+  testTranslation: (config: TranslationConfig) => Promise<{ success: boolean; error?: string }>;
 }
 
 declare global {

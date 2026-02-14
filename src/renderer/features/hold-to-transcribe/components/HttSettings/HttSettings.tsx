@@ -1,7 +1,12 @@
 import React from 'react';
 import type { ChangeEvent } from 'react';
 import { useHttSettings } from '../../hooks/useHttSettings';
-import type { WhisperModelName, LanguageCode, ShortcutMode } from '../../../../types';
+import type {
+  WhisperModelName,
+  LanguageCode,
+  ShortcutMode,
+  TranslationProvider,
+} from '../../../../types';
 import { TRANSLATE_INCOMPATIBLE_MODELS } from '../../../../types';
 import { LANGUAGES } from '../../../../config';
 import './HttSettings.css';
@@ -9,6 +14,14 @@ import './HttSettings.css';
 const SHORTCUT_MODES: { value: ShortcutMode; label: string }[] = [
   { value: 'hold', label: 'Hold to record' },
   { value: 'toggle', label: 'Toggle (press twice)' },
+];
+
+const TRANSLATION_PROVIDERS: { value: TranslationProvider; label: string }[] = [
+  { value: 'google', label: 'Google Translate (Free)' },
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'groq', label: 'Groq' },
+  { value: 'anthropic', label: 'Anthropic' },
+  { value: 'custom', label: 'Custom (OpenAI-compatible)' },
 ];
 
 function HttSettings(): React.JSX.Element {
@@ -24,7 +37,17 @@ function HttSettings(): React.JSX.Element {
     updateAutoPaste,
     updateAudioDevice,
     updateTranslateToEnglish,
+    updateTranslation,
   } = useHttSettings();
+
+  const [testingConnection, setTestingConnection] = React.useState(false);
+  const [testResult, setTestResult] = React.useState<{
+    success: boolean;
+    error?: string;
+  } | null>(null);
+
+  const needsApiKey = settings.translation.provider !== 'google';
+  const isCustomProvider = settings.translation.provider === 'custom';
 
   const selectedModelInfo = models.find((m) => m.name === settings.model);
   const isModelDownloaded = selectedModelInfo?.downloaded ?? false;
@@ -170,6 +193,140 @@ function HttSettings(): React.JSX.Element {
                 </p>
               )}
           </div>
+
+          <div className="setting-group">
+            <label className="htt-toggle-label">
+              <input
+                type="checkbox"
+                checked={settings.translation.enabled}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  updateTranslation({ enabled: e.target.checked })
+                }
+              />
+              <span>Post-transcription translation</span>
+            </label>
+            <p className="htt-hint">
+              Translate transcribed text to any language using Google Translate or an LLM API.
+            </p>
+          </div>
+
+          {settings.translation.enabled && (
+            <>
+              <div className="setting-group">
+                <label htmlFor="htt-translation-provider">Provider</label>
+                <select
+                  id="htt-translation-provider"
+                  value={settings.translation.provider}
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                    updateTranslation({ provider: e.target.value as TranslationProvider })
+                  }
+                >
+                  {TRANSLATION_PROVIDERS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="setting-group">
+                <label htmlFor="htt-target-language">Target Language</label>
+                <input
+                  id="htt-target-language"
+                  type="text"
+                  value={settings.translation.targetLanguage}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateTranslation({ targetLanguage: e.target.value })
+                  }
+                  placeholder="e.g., Hebrew, English, French"
+                />
+              </div>
+
+              {needsApiKey && (
+                <div className="setting-group">
+                  <label htmlFor="htt-api-key">API Key</label>
+                  <input
+                    id="htt-api-key"
+                    type="password"
+                    value={settings.translation.apiKey}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateTranslation({ apiKey: e.target.value })
+                    }
+                    placeholder="Enter API key"
+                  />
+                </div>
+              )}
+
+              {isCustomProvider && (
+                <>
+                  <div className="setting-group">
+                    <label htmlFor="htt-custom-endpoint">API Endpoint</label>
+                    <input
+                      id="htt-custom-endpoint"
+                      type="text"
+                      value={settings.translation.customEndpoint}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        updateTranslation({ customEndpoint: e.target.value })
+                      }
+                      placeholder="https://api.example.com/v1/chat/completions"
+                    />
+                  </div>
+                  <div className="setting-group">
+                    <label htmlFor="htt-custom-model">Model</label>
+                    <input
+                      id="htt-custom-model"
+                      type="text"
+                      value={settings.translation.customModel}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        updateTranslation({ customModel: e.target.value })
+                      }
+                      placeholder="e.g., gpt-4o-mini"
+                    />
+                  </div>
+                </>
+              )}
+
+              {needsApiKey && (
+                <div className="setting-group">
+                  <label htmlFor="htt-system-prompt">System Prompt</label>
+                  <textarea
+                    id="htt-system-prompt"
+                    value={settings.translation.systemPrompt}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      updateTranslation({ systemPrompt: e.target.value })
+                    }
+                    placeholder="Translate the following text to {targetLanguage}. Output only the translated text, nothing else."
+                    rows={3}
+                  />
+                  <p className="htt-hint">
+                    Use &#123;targetLanguage&#125; as a placeholder. Leave empty for default.
+                  </p>
+                </div>
+              )}
+
+              <div className="setting-group">
+                <button
+                  type="button"
+                  className="htt-test-button"
+                  disabled={testingConnection}
+                  onClick={async () => {
+                    setTestingConnection(true);
+                    setTestResult(null);
+                    const result = await window.electronAPI?.testTranslation(settings.translation);
+                    setTestResult(result ?? { success: false, error: 'No response' });
+                    setTestingConnection(false);
+                  }}
+                >
+                  {testingConnection ? 'Testing...' : 'Test Connection'}
+                </button>
+                {testResult && (
+                  <p className={testResult.success ? 'htt-hint' : 'htt-model-warning'}>
+                    {testResult.success ? 'Connection successful!' : `Error: ${testResult.error}`}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

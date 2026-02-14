@@ -54,3 +54,36 @@
   color: #e67e22;
   line-height: 1.4;
 }
+
+.htt-settings input[type='text'],
+.htt-settings input[type='password'],
+.htt-settings textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-hover);
+  color: inherit;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.htt-test-button {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-hover);
+  color: inherit;
+  cursor: pointer;
+}
+
+.htt-test-button:hover {
+  opacity: 0.8;
+}
+
+.htt-test-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

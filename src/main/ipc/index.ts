@@ -18,8 +18,14 @@ import {
 } from '../utils/export-helper';
 import { trackEvent, AnalyticsEvents } from '../services/analytics';
 import { loadSettings, saveSettings } from '../services/settings';
+import { testTranslationConnection } from '../services/translation';
 import type { HoldToTranscribeService } from '../services/hold-to-transcribe';
-import type { TranscriptionOptions, SaveFileOptions, AppSettings } from '../../shared/types';
+import type {
+  TranscriptionOptions,
+  SaveFileOptions,
+  AppSettings,
+  TranslationConfig,
+} from '../../shared/types';
 
 export function registerIpcHandlers(
   getMainWindow: () => BrowserWindow | null,
@@ -261,5 +267,10 @@ export function registerIpcHandlers(
     const httService = getHttService?.();
     httService?.reloadSettings();
     return { success: true };
+  });
+
+  // Translation
+  ipcMain.handle('translation:test', async (_event, config: TranslationConfig) => {
+    return testTranslationConnection(config);
   });
 }
