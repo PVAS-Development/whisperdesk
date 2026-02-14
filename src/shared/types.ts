@@ -29,6 +29,7 @@ export type LanguageCode =
   | 'ko'
   | 'ru'
   | 'ar'
+  | 'he'
   | 'hi';
 
 export type OutputFormat = 'vtt' | 'srt' | 'txt' | 'json' | 'docx' | 'pdf' | 'md';
@@ -75,6 +76,7 @@ export interface TranscriptionOptions {
   model: WhisperModelName;
   language: LanguageCode;
   outputFormat: OutputFormat;
+  translate?: boolean;
 }
 
 export interface TranscriptionResult {
@@ -193,6 +195,51 @@ export const SUPPORTED_EXTENSIONS = [
 ] as const;
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
+
+export type ShortcutMode = 'hold' | 'toggle';
+
+export const TRANSLATE_INCOMPATIBLE_MODELS: readonly string[] = [
+  'tiny.en',
+  'base.en',
+  'small.en',
+  'medium.en',
+  'large-v3-turbo',
+] as const;
+
+export type TranslationProvider = 'google' | 'openai' | 'groq' | 'anthropic' | 'custom';
+
+export interface TranslationConfig {
+  enabled: boolean;
+  provider: TranslationProvider;
+  targetLanguage: string;
+  apiKey: string;
+  customEndpoint: string;
+  customModel: string;
+  systemPrompt: string;
+}
+
+export interface HoldToTranscribeSettings {
+  enabled: boolean;
+  shortcutMode: ShortcutMode;
+  shortcutKeyCode: number;
+  model: WhisperModelName;
+  language: LanguageCode;
+  autoPaste: boolean;
+  audioDeviceId: string;
+  translateToEnglish: boolean;
+  translation: TranslationConfig;
+}
+
+export interface AppSettings {
+  holdToTranscribe: HoldToTranscribeSettings;
+}
+
+export type HttStatus = 'idle' | 'recording' | 'processing' | 'error';
+
+export interface HttTranscriptionResult {
+  text: string;
+  error?: string;
+}
 
 export type Unsubscribe = () => void;
 

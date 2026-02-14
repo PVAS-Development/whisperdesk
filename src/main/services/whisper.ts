@@ -512,9 +512,13 @@ export function transcribe(
         outputBase,
       ];
 
-      // Add language if specified
-      if (language && language !== 'auto') {
+      // Add language ('auto' enables auto-detect, whisper-cli defaults to 'en' if omitted)
+      if (language) {
         args.push('-l', language);
+      }
+
+      if (options.translate) {
+        args.push('--translate');
       }
 
       const cpuCount = os.cpus().length;

@@ -224,7 +224,9 @@ describe('SettingsPanel', () => {
     fireEvent.click(downloadButton);
 
     await waitFor(() => {
-      expect(listModels).toHaveBeenCalledTimes(2);
+      // SettingsPanel calls listModels on mount, HttSettings calls it on mount,
+      // and SettingsPanel calls it again after download completes
+      expect(listModels).toHaveBeenCalledTimes(3);
     });
   });
 

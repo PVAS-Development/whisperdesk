@@ -12,6 +12,9 @@ import type {
   MemoryUsage,
   Unsubscribe,
   UpdateStatus,
+  AppSettings,
+  HttTranscriptionResult,
+  TranslationConfig,
 } from './index';
 
 export interface ModelsListResponse {
@@ -63,6 +66,23 @@ export interface ElectronAPI {
   downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
   installUpdate: () => void;
   onUpdateStatus: (callback: (data: UpdateStatus) => void) => Unsubscribe;
+
+  // Settings
+  loadSettings: () => Promise<AppSettings>;
+  saveSettings: (settings: AppSettings) => Promise<{ success: boolean }>;
+
+  // Hold-to-Transcribe
+  onHttStartRecording: (callback: () => void) => Unsubscribe;
+  onHttStopRecording: (callback: () => void) => Unsubscribe;
+  onHttTranscriptionResult: (callback: (data: HttTranscriptionResult) => void) => Unsubscribe;
+  onHttAccessibilityRequired: (callback: () => void) => Unsubscribe;
+  onHttModelNotDownloaded: (callback: (data: { model: string }) => void) => Unsubscribe;
+  httSaveAudio: (buffer: ArrayBuffer) => Promise<{ success: boolean }>;
+  httRequestAccessibility: () => Promise<{ success: boolean }>;
+  httUpdateSettings: () => Promise<{ success: boolean }>;
+
+  // Translation
+  testTranslation: (config: TranslationConfig) => Promise<{ success: boolean; error?: string }>;
 }
 
 declare global {

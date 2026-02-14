@@ -4,6 +4,15 @@ import type { ElectronAPI } from '../types/electron';
 
 Element.prototype.scrollIntoView = vi.fn();
 
+// Mock navigator.mediaDevices.enumerateDevices for audio device selection tests
+Object.defineProperty(navigator, 'mediaDevices', {
+  value: {
+    enumerateDevices: vi.fn().mockResolvedValue([]),
+    getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [] }),
+  },
+  writable: true,
+});
+
 const mockElectronAPI: ElectronAPI = {
   openFile: vi.fn().mockResolvedValue(null),
   openMultipleFiles: vi.fn().mockResolvedValue(null),
@@ -46,6 +55,37 @@ const mockElectronAPI: ElectronAPI = {
   downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
   installUpdate: vi.fn(),
   onUpdateStatus: vi.fn().mockReturnValue(() => {}),
+  loadSettings: vi.fn().mockResolvedValue({
+    holdToTranscribe: {
+      enabled: true,
+      shortcutMode: 'hold',
+      shortcutKeyCode: 3640,
+      model: 'base',
+      language: 'auto',
+      autoPaste: true,
+      audioDeviceId: '',
+      translateToEnglish: false,
+      translation: {
+        enabled: false,
+        provider: 'google',
+        targetLanguage: 'English',
+        apiKey: '',
+        customEndpoint: '',
+        customModel: '',
+        systemPrompt: '',
+      },
+    },
+  }),
+  saveSettings: vi.fn().mockResolvedValue({ success: true }),
+  onHttStartRecording: vi.fn().mockReturnValue(() => {}),
+  onHttStopRecording: vi.fn().mockReturnValue(() => {}),
+  onHttTranscriptionResult: vi.fn().mockReturnValue(() => {}),
+  onHttAccessibilityRequired: vi.fn().mockReturnValue(() => {}),
+  onHttModelNotDownloaded: vi.fn().mockReturnValue(() => {}),
+  httSaveAudio: vi.fn().mockResolvedValue({ success: true }),
+  httRequestAccessibility: vi.fn().mockResolvedValue({ success: true }),
+  httUpdateSettings: vi.fn().mockResolvedValue({ success: true }),
+  testTranslation: vi.fn().mockResolvedValue({ success: true }),
 };
 
 Object.defineProperty(window, 'electronAPI', {
