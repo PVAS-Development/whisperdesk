@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     main: 'src/main/index.ts',
     preload: 'src/preload/index.ts',
+    overlayPreload: 'src/overlay/preload.ts',
   },
   outDir: 'dist-electron',
   format: ['cjs'],

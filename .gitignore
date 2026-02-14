@@ -6,10 +6,12 @@ dist/
 dist-electron/
 out/
 
-# Build folder (except icon.svg and entitlements)
+# Build folder (except icon.svg, entitlements, and tray icons)
 build/*
 !build/icon.svg
 !build/entitlements.mac.plist
+!build/tray-iconTemplate.png
+!build/tray-iconTemplate@2x.png
 
 # Electron
 release/

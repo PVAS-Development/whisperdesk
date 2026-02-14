@@ -44,6 +44,25 @@ export const createDefaultElectronAPIMock = (): ElectronAPI => ({
   downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
   installUpdate: vi.fn(),
   onUpdateStatus: vi.fn().mockReturnValue(() => {}),
+  loadSettings: vi.fn().mockResolvedValue({
+    holdToTranscribe: {
+      enabled: true,
+      shortcutMode: 'hold',
+      shortcutKeyCode: 3640,
+      model: 'base',
+      language: 'auto',
+      autoPaste: true,
+    },
+  }),
+  saveSettings: vi.fn().mockResolvedValue({ success: true }),
+  onHttStartRecording: vi.fn().mockReturnValue(() => {}),
+  onHttStopRecording: vi.fn().mockReturnValue(() => {}),
+  onHttTranscriptionResult: vi.fn().mockReturnValue(() => {}),
+  onHttAccessibilityRequired: vi.fn().mockReturnValue(() => {}),
+  onHttModelNotDownloaded: vi.fn().mockReturnValue(() => {}),
+  httSaveAudio: vi.fn().mockResolvedValue({ success: true }),
+  httRequestAccessibility: vi.fn().mockResolvedValue({ success: true }),
+  httUpdateSettings: vi.fn().mockResolvedValue({ success: true }),
 });
 
 export const createFullElectronAPIMock = (): ElectronAPI => ({
@@ -77,6 +96,25 @@ export const createFullElectronAPIMock = (): ElectronAPI => ({
   downloadUpdate: vi.fn().mockResolvedValue({ success: true }),
   installUpdate: vi.fn(),
   onUpdateStatus: vi.fn().mockReturnValue(() => {}),
+  loadSettings: vi.fn().mockResolvedValue({
+    holdToTranscribe: {
+      enabled: true,
+      shortcutMode: 'hold',
+      shortcutKeyCode: 3640,
+      model: 'base',
+      language: 'auto',
+      autoPaste: true,
+    },
+  }),
+  saveSettings: vi.fn().mockResolvedValue({ success: true }),
+  onHttStartRecording: vi.fn().mockReturnValue(() => {}),
+  onHttStopRecording: vi.fn().mockReturnValue(() => {}),
+  onHttTranscriptionResult: vi.fn().mockReturnValue(() => {}),
+  onHttAccessibilityRequired: vi.fn().mockReturnValue(() => {}),
+  onHttModelNotDownloaded: vi.fn().mockReturnValue(() => {}),
+  httSaveAudio: vi.fn().mockResolvedValue({ success: true }),
+  httRequestAccessibility: vi.fn().mockResolvedValue({ success: true }),
+  httUpdateSettings: vi.fn().mockResolvedValue({ success: true }),
 });
 
 export class ElectronAPIMockBuilder {

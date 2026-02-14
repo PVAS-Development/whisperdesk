@@ -17,9 +17,14 @@ import {
   generateMarkdownDocument,
 } from '../utils/export-helper';
 import { trackEvent, AnalyticsEvents } from '../services/analytics';
-import type { TranscriptionOptions, SaveFileOptions } from '../../shared/types';
+import { loadSettings, saveSettings } from '../services/settings';
+import type { HoldToTranscribeService } from '../services/hold-to-transcribe';
+import type { TranscriptionOptions, SaveFileOptions, AppSettings } from '../../shared/types';
 
-export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
+export function registerIpcHandlers(
+  getMainWindow: () => BrowserWindow | null,
+  getHttService?: () => HoldToTranscribeService | null
+) {
   ipcMain.handle('dialog:openFile', async () => {
     const mainWindow = getMainWindow();
     if (!mainWindow) return null;
@@ -226,5 +231,35 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       throw new Error('Invalid URL protocol. Only HTTPS is allowed.');
     }
     await shell.openExternal(url);
+  });
+
+  // Settings
+  ipcMain.handle('settings:load', () => loadSettings());
+
+  ipcMain.handle('settings:save', (_event, settings: AppSettings) => {
+    saveSettings(settings);
+    trackEvent(AnalyticsEvents.HTT_SETTINGS_CHANGED);
+    return { success: true };
+  });
+
+  // Hold-to-Transcribe
+  ipcMain.handle('htt:saveAudio', async (_event, buffer: ArrayBuffer) => {
+    const httService = getHttService?.();
+    if (httService) {
+      httService.handleAudioBuffer(buffer);
+    }
+    return { success: true };
+  });
+
+  ipcMain.handle('htt:requestAccessibility', () => {
+    const httService = getHttService?.();
+    httService?.requestAccessibility();
+    return { success: true };
+  });
+
+  ipcMain.handle('htt:updateSettings', () => {
+    const httService = getHttService?.();
+    httService?.reloadSettings();
+    return { success: true };
   });
 }

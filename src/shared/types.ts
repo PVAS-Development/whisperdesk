@@ -29,6 +29,7 @@ export type LanguageCode =
   | 'ko'
   | 'ru'
   | 'ar'
+  | 'he'
   | 'hi';
 
 export type OutputFormat = 'vtt' | 'srt' | 'txt' | 'json' | 'docx' | 'pdf' | 'md';
@@ -193,6 +194,28 @@ export const SUPPORTED_EXTENSIONS = [
 ] as const;
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
+
+export type ShortcutMode = 'hold' | 'toggle';
+
+export interface HoldToTranscribeSettings {
+  enabled: boolean;
+  shortcutMode: ShortcutMode;
+  shortcutKeyCode: number;
+  model: WhisperModelName;
+  language: LanguageCode;
+  autoPaste: boolean;
+}
+
+export interface AppSettings {
+  holdToTranscribe: HoldToTranscribeSettings;
+}
+
+export type HttStatus = 'idle' | 'recording' | 'processing' | 'error';
+
+export interface HttTranscriptionResult {
+  text: string;
+  error?: string;
+}
 
 export type Unsubscribe = () => void;
 
