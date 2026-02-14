@@ -4,12 +4,14 @@ import path from 'path';
 import { registerIpcHandlers } from './ipc';
 import { initAnalytics, trackEvent, AnalyticsEvents } from './services/analytics';
 import { initAutoUpdater, checkForUpdates } from './services/auto-updater';
+import { createTray, destroyTray } from './services/tray';
 import packageJson from '../../package.json';
 
 initAnalytics();
 
 let mainWindow: BrowserWindow | null = null;
 let ipcHandlersRegistered = false;
+let isQuitting = false;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const appVersion = packageJson.version;
@@ -204,6 +206,13 @@ const createWindow = () => {
     trafficLightPosition: { x: 20, y: 20 },
   });
 
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
+
   if (!ipcHandlersRegistered) {
     registerIpcHandlers(() => mainWindow);
     ipcHandlersRegistered = true;
@@ -234,6 +243,7 @@ const createWindow = () => {
 
 app.on('ready', () => {
   createWindow();
+  createTray(() => mainWindow);
 
   if (!isDev) {
     initAutoUpdater(() => mainWindow);
@@ -241,6 +251,8 @@ app.on('ready', () => {
 });
 
 app.on('before-quit', () => {
+  isQuitting = true;
+  destroyTray();
   trackEvent(AnalyticsEvents.APP_CLOSED);
 });
 
@@ -253,5 +265,8 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  } else if (mainWindow && !mainWindow.isVisible()) {
+    mainWindow.show();
+    mainWindow.focus();
   }
 });
