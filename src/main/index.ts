@@ -5,6 +5,7 @@ import { registerIpcHandlers } from './ipc';
 import { initAnalytics, trackEvent, AnalyticsEvents } from './services/analytics';
 import { initAutoUpdater, checkForUpdates } from './services/auto-updater';
 import { createTray, destroyTray } from './services/tray';
+import { HoldToTranscribeService } from './services/hold-to-transcribe';
 import packageJson from '../../package.json';
 
 initAnalytics();
@@ -12,6 +13,7 @@ initAnalytics();
 let mainWindow: BrowserWindow | null = null;
 let ipcHandlersRegistered = false;
 let isQuitting = false;
+let httService: HoldToTranscribeService | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const appVersion = packageJson.version;
@@ -214,7 +216,10 @@ const createWindow = () => {
   });
 
   if (!ipcHandlersRegistered) {
-    registerIpcHandlers(() => mainWindow);
+    registerIpcHandlers(
+      () => mainWindow,
+      () => httService
+    );
     ipcHandlersRegistered = true;
   }
 
@@ -245,6 +250,9 @@ app.on('ready', () => {
   createWindow();
   createTray(() => mainWindow);
 
+  httService = new HoldToTranscribeService(() => mainWindow);
+  httService.initialize();
+
   if (!isDev) {
     initAutoUpdater(() => mainWindow);
   }
@@ -252,6 +260,7 @@ app.on('ready', () => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  httService?.destroy();
   destroyTray();
   trackEvent(AnalyticsEvents.APP_CLOSED);
 });
