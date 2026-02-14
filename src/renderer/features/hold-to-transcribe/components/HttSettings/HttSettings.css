@@ -1,0 +1,313 @@
+/* ── Panel card (matches .settings-panel) ── */
+
+.htt-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--border);
+  transition: all var(--transition-base);
+}
+
+.htt-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.htt-panel-header h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ── Status badge ── */
+
+.htt-status-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.htt-badge-active {
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.htt-badge-inactive {
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Toggle switch ── */
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: all var(--transition-fast);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent-light);
+  border-color: var(--accent-border);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+  background: var(--accent);
+}
+
+.toggle-switch input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Small toggle variant */
+.toggle-switch-sm {
+  width: 30px;
+  height: 16px;
+}
+
+.toggle-switch-sm .toggle-slider::before {
+  height: 10px;
+  width: 10px;
+  left: 2px;
+  bottom: 2px;
+}
+
+.toggle-switch-sm input:checked + .toggle-slider::before {
+  transform: translateX(14px);
+}
+
+/* ── Toggle row (label + switch) ── */
+
+.htt-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.htt-toggle-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.htt-toggle-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.htt-toggle-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ── Sub-sections ── */
+
+.htt-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.htt-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+}
+
+/* ── Collapsible section ── */
+
+.htt-section-collapsible {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  padding: 0;
+}
+
+.htt-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  user-select: none;
+}
+
+.htt-section-header:hover {
+  background: var(--surface-hover);
+}
+
+.htt-section-header .htt-section-title {
+  margin-bottom: 0;
+}
+
+.htt-section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.htt-chevron {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+  line-height: 1;
+}
+
+.htt-chevron-open {
+  transform: rotate(180deg);
+}
+
+.htt-section-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-slow);
+}
+
+.htt-section-body-open {
+  max-height: 600px;
+}
+
+.htt-section-body-inner {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Inputs (normalized to match selects) ── */
+
+.htt-panel input[type='text'],
+.htt-panel input[type='password'],
+.htt-panel textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  resize: vertical;
+}
+
+.htt-panel input[type='text']:hover,
+.htt-panel input[type='password']:hover,
+.htt-panel textarea:hover {
+  border-color: var(--accent-border);
+}
+
+.htt-panel input[type='text']:focus,
+.htt-panel input[type='password']:focus,
+.htt-panel textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* ── Hints and warnings ── */
+
+.htt-hint {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.htt-hint kbd {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.7rem;
+  font-family: inherit;
+}
+
+.htt-model-warning {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #e67e22;
+  line-height: 1.4;
+}
+
+/* ── Test button ── */
+
+.htt-test-button {
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  background: var(--accent-light);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.htt-test-button:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.htt-test-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Loading state ── */
+
+.htt-loading {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

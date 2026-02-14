@@ -23,6 +23,7 @@ export const LANGUAGES: readonly LanguageOption[] = [
   { value: 'ko', label: 'Korean' },
   { value: 'ru', label: 'Russian' },
   { value: 'ar', label: 'Arabic' },
+  { value: 'he', label: 'Hebrew' },
   { value: 'hi', label: 'Hindi' },
 ] as const;
 

@@ -70,10 +70,12 @@
     "dompurify": "^3.3.0",
     "electron-log": "^5.4.3",
     "electron-updater": "^6.6.2",
+    "google-translate-api-x": "^10.7.2",
     "jspdf": "^2.5.2",
     "lucide-react": "^0.556.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "uiohook-napi": "^1.5.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
@@ -130,7 +132,8 @@
       "!**/node_modules/.bin"
     ],
     "asarUnpack": [
-      "bin/**/*"
+      "bin/**/*",
+      "node_modules/uiohook-napi/**/*"
     ],
     "mac": {
       "category": "public.app-category.productivity",

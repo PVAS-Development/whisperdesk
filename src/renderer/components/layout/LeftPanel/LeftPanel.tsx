@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileDropZone, FileQueue } from '../../../features/transcription';
 import { SettingsPanel } from '../../../features/settings';
+import { HttSettings } from '../../../features/hold-to-transcribe';
 import { useAppTranscription } from '../../../contexts';
 import { useFFmpegStatus } from '../../../hooks';
 import { TranscriptionActions } from './TranscriptionActions';
@@ -56,6 +57,8 @@ function LeftPanel(): React.JSX.Element {
         disabled={isTranscribing}
         onModelStatusChange={setModelDownloaded}
       />
+
+      <HttSettings />
 
       <TranscriptionActions isFFmpegAvailable={isFFmpegAvailable} />
 

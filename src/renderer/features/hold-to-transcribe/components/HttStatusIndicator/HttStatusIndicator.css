@@ -1,0 +1,69 @@
+.htt-status-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 1000;
+  pointer-events: none;
+  animation: htt-fade-in 0.2s ease-out;
+}
+
+.htt-status-recording {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.htt-status-processing {
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+}
+
+.htt-status-error {
+  background: rgba(245, 158, 11, 0.9);
+  color: white;
+}
+
+.htt-icon-recording {
+  animation: htt-pulse 1s ease-in-out infinite;
+}
+
+.htt-icon-processing {
+  animation: htt-spin 1s linear infinite;
+}
+
+@keyframes htt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes htt-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes htt-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
