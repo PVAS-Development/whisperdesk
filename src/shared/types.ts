@@ -29,6 +29,7 @@ export type LanguageCode =
   | 'ko'
   | 'ru'
   | 'ar'
+  | 'he'
   | 'hi';
 
 export type OutputFormat = 'vtt' | 'srt' | 'txt' | 'json' | 'docx' | 'pdf' | 'md';
