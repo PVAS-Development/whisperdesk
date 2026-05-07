@@ -1,11 +1,16 @@
 import type * as fs from 'fs';
+import { Readable } from 'stream';
+import type { ReadableStream as NodeReadableStream } from 'stream/web';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { handleMock, registerSchemesAsPrivilegedMock, statMock } = vi.hoisted(() => ({
-  handleMock: vi.fn(),
-  registerSchemesAsPrivilegedMock: vi.fn(),
-  statMock: vi.fn(),
-}));
+const { createReadStreamMock, handleMock, registerSchemesAsPrivilegedMock, statMock } = vi.hoisted(
+  () => ({
+    createReadStreamMock: vi.fn(),
+    handleMock: vi.fn(),
+    registerSchemesAsPrivilegedMock: vi.fn(),
+    statMock: vi.fn(),
+  })
+);
 
 vi.mock('electron', () => ({
   protocol: {
@@ -21,11 +26,13 @@ vi.mock('fs', async () => {
     ...actual,
     default: {
       ...actual,
+      createReadStream: createReadStreamMock,
       promises: {
         ...actual.promises,
         stat: statMock,
       },
     },
+    createReadStream: createReadStreamMock,
     promises: {
       ...actual.promises,
       stat: statMock,
@@ -35,6 +42,7 @@ vi.mock('fs', async () => {
 
 async function loadMediaProtocolModule() {
   vi.resetModules();
+  createReadStreamMock.mockReset();
   handleMock.mockReset();
   registerSchemesAsPrivilegedMock.mockReset();
   statMock.mockReset();
@@ -52,11 +60,20 @@ function getRegisteredHandler(): (request: Request) => Promise<Response> {
   return handler as (request: Request) => Promise<Response>;
 }
 
-function createProtocolRequest(url: string): Request {
+function createProtocolRequest(
+  url: string,
+  options?: { method?: 'GET' | 'HEAD'; range?: string }
+): Request {
+  const headers = new Headers();
+
+  if (options?.range) {
+    headers.set('range', options.range);
+  }
+
   return {
     url,
-    method: 'GET',
-    headers: new Headers(),
+    method: options?.method ?? 'GET',
+    headers,
   } as Request;
 }
 
@@ -68,6 +85,7 @@ describe('media-protocol', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('registers the privileged media protocol scheme', async () => {
@@ -124,6 +142,47 @@ describe('media-protocol', () => {
     expect(await response.text()).toBe('Unable to load media source');
   });
 
+  it.each(['ENOTDIR', 'EACCES', 'EPERM'])('returns 404 for %s file access errors', async (code) => {
+    const { createMediaProtocolUrl, registerMediaProtocolHandler } =
+      await loadMediaProtocolModule();
+    const url = createMediaProtocolUrl('/tmp/audio.mp3');
+
+    statMock.mockRejectedValue(Object.assign(new Error('missing'), { code }));
+    registerMediaProtocolHandler();
+
+    const response = await getRegisteredHandler()(createProtocolRequest(url));
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe('Media source not found');
+  });
+
+  it('registers the handler once and resolves tokens from the pathname when needed', async () => {
+    const { createMediaProtocolUrl, registerMediaProtocolHandler, MEDIA_PROTOCOL } =
+      await loadMediaProtocolModule();
+    const url = createMediaProtocolUrl('/tmp/audio.bin');
+    const token = new URL(url).hostname;
+    const pathnameUrl = `${MEDIA_PROTOCOL}:///${token}`;
+    const webStream = new ReadableStream() as unknown as NodeReadableStream;
+
+    statMock.mockResolvedValue({ size: 12 });
+    createReadStreamMock.mockReturnValue({} as fs.ReadStream);
+    vi.spyOn(Readable, 'toWeb').mockReturnValue(webStream);
+
+    registerMediaProtocolHandler();
+    registerMediaProtocolHandler();
+
+    expect(handleMock).toHaveBeenCalledTimes(1);
+
+    const response = await getRegisteredHandler()(createProtocolRequest(pathnameUrl));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toBe('application/octet-stream');
+    expect(response.headers.get('Content-Length')).toBe('12');
+    expect(response.headers.get('Content-Range')).toBeNull();
+    expect(createReadStreamMock).toHaveBeenCalledWith('/tmp/audio.bin', { start: 0, end: 11 });
+    expect(Readable.toWeb).toHaveBeenCalledOnce();
+  });
+
   it('expires old media tokens before resolving them', async () => {
     const { createMediaProtocolUrl, registerMediaProtocolHandler } =
       await loadMediaProtocolModule();
@@ -160,5 +219,78 @@ describe('media-protocol', () => {
 
     expect(newestResponse.status).toBe(404);
     expect(statMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports valid range requests and head requests', async () => {
+    const { createMediaProtocolUrl, registerMediaProtocolHandler } =
+      await loadMediaProtocolModule();
+    const url = createMediaProtocolUrl('/tmp/audio.mp4');
+    const webStream = new ReadableStream() as unknown as NodeReadableStream;
+
+    statMock.mockResolvedValue({ size: 10 });
+    createReadStreamMock.mockReturnValue({} as fs.ReadStream);
+    vi.spyOn(Readable, 'toWeb').mockReturnValue(webStream);
+    registerMediaProtocolHandler();
+
+    const handler = getRegisteredHandler();
+    const explicitRangeResponse = await handler(createProtocolRequest(url, { range: 'bytes=2-4' }));
+
+    expect(explicitRangeResponse.status).toBe(206);
+    expect(explicitRangeResponse.headers.get('Content-Type')).toBe('video/mp4');
+    expect(explicitRangeResponse.headers.get('Content-Length')).toBe('3');
+    expect(explicitRangeResponse.headers.get('Content-Range')).toBe('bytes 2-4/10');
+
+    const openEndedRangeResponse = await handler(createProtocolRequest(url, { range: 'bytes=5-' }));
+
+    expect(openEndedRangeResponse.status).toBe(206);
+    expect(openEndedRangeResponse.headers.get('Content-Length')).toBe('5');
+    expect(openEndedRangeResponse.headers.get('Content-Range')).toBe('bytes 5-9/10');
+
+    const suffixRangeResponse = await handler(createProtocolRequest(url, { range: 'bytes=-3' }));
+
+    expect(suffixRangeResponse.status).toBe(206);
+    expect(suffixRangeResponse.headers.get('Content-Length')).toBe('3');
+    expect(suffixRangeResponse.headers.get('Content-Range')).toBe('bytes 7-9/10');
+
+    statMock.mockResolvedValue({ size: 0 });
+
+    const headResponse = await handler(createProtocolRequest(url, { method: 'HEAD' }));
+
+    expect(headResponse.status).toBe(200);
+    expect(headResponse.headers.get('Content-Length')).toBe('0');
+    expect(createReadStreamMock).toHaveBeenNthCalledWith(1, '/tmp/audio.mp4', { start: 2, end: 4 });
+    expect(createReadStreamMock).toHaveBeenNthCalledWith(2, '/tmp/audio.mp4', { start: 5, end: 9 });
+    expect(createReadStreamMock).toHaveBeenNthCalledWith(3, '/tmp/audio.mp4', { start: 7, end: 9 });
+    expect(createReadStreamMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('returns 416 for invalid range requests', async () => {
+    const { createMediaProtocolUrl, registerMediaProtocolHandler } =
+      await loadMediaProtocolModule();
+    const url = createMediaProtocolUrl('/tmp/audio.mp3');
+
+    statMock.mockResolvedValue({ size: 10 });
+    registerMediaProtocolHandler();
+
+    const handler = getRegisteredHandler();
+    const missingRangeBoundsResponse = await handler(
+      createProtocolRequest(url, { range: 'bytes=-' })
+    );
+
+    expect(missingRangeBoundsResponse.status).toBe(416);
+    expect(missingRangeBoundsResponse.headers.get('Content-Range')).toBe('bytes */10');
+
+    const invalidSuffixRangeResponse = await handler(
+      createProtocolRequest(url, { range: 'bytes=-0' })
+    );
+
+    expect(invalidSuffixRangeResponse.status).toBe(416);
+
+    const outOfBoundsRangeResponse = await handler(
+      createProtocolRequest(url, { range: 'bytes=10-12' })
+    );
+
+    expect(outOfBoundsRangeResponse.status).toBe(416);
+    expect(createReadStreamMock).not.toHaveBeenCalled();
   });
 });
