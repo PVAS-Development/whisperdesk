@@ -124,6 +124,15 @@ export interface SaveFileResult {
   error?: string;
 }
 
+export type MediaSourceType = 'audio' | 'video';
+
+export interface MediaSourceResult {
+  success: boolean;
+  url?: string;
+  mediaType?: MediaSourceType;
+  error?: string;
+}
+
 export interface AppInfo {
   isDev: boolean;
   version: string;

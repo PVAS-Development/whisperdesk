@@ -71,9 +71,10 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
   } = useBatchQueue({
     settings,
     onHistoryAdd: addHistoryItem,
-    onFirstComplete: (id, text) => {
+    onFirstComplete: (id, text, file) => {
       setSelectedQueueItemId(id);
       setTranscription(text);
+      setSelectedFile(file);
     },
   });
 

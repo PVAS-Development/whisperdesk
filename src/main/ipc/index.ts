@@ -17,12 +17,21 @@ import {
   generateMarkdownDocument,
 } from '../utils/export-helper';
 import { generateFileFingerprint } from '../utils/media-info';
+import { createMediaProtocolUrl } from '../utils/media-protocol';
 import { safeSend } from '../utils/safe-send';
 import { trackEvent, AnalyticsEvents } from '../services/analytics';
 import { SUPPORTED_EXTENSIONS } from '../../shared/types';
 import type { TranscriptionOptions, SaveFileOptions } from '../../shared/types';
 
 const OPEN_DIALOG_MEDIA_EXTENSIONS = [...SUPPORTED_EXTENSIONS];
+const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v']);
+
+function getSupportedMediaExtension(filePath: string): string | null {
+  const extension = path.extname(filePath).replace('.', '').toLowerCase();
+  return SUPPORTED_EXTENSIONS.includes(extension as (typeof SUPPORTED_EXTENSIONS)[number])
+    ? extension
+    : null;
+}
 
 export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
   ipcMain.handle('dialog:openFile', async () => {
@@ -112,6 +121,38 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       };
     } catch {
       return null;
+    }
+  });
+
+  ipcMain.handle('file:getMediaSource', async (_event, filePath: string) => {
+    try {
+      if (typeof filePath !== 'string' || filePath.trim().length === 0) {
+        return { success: false, error: 'Invalid file path' };
+      }
+
+      if (!path.isAbsolute(filePath)) {
+        return { success: false, error: 'Invalid file path' };
+      }
+
+      const resolvedPath = path.resolve(filePath);
+      const extension = getSupportedMediaExtension(resolvedPath);
+      if (!extension) {
+        return { success: false, error: 'Unsupported media file' };
+      }
+
+      try {
+        await fs.promises.access(resolvedPath, fs.constants.R_OK);
+      } catch {
+        return { success: false, error: 'File not found' };
+      }
+
+      return {
+        success: true,
+        url: createMediaProtocolUrl(resolvedPath),
+        mediaType: VIDEO_EXTENSIONS.has(extension) ? 'video' : 'audio',
+      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   });
 

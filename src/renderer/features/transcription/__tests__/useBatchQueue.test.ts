@@ -606,7 +606,11 @@ describe('useBatchQueue', () => {
       expect(mockOnFirstComplete).toHaveBeenCalledTimes(1);
       expect(mockOnFirstComplete).toHaveBeenCalledWith(
         result.current.queue[0]!.id,
-        'Transcribed text'
+        'Transcribed text',
+        expect.objectContaining({
+          name: 'audio1.mp3',
+          path: '/path/to/audio1.mp3',
+        })
       );
     });
 

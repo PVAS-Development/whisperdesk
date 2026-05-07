@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import './OutputDisplay.css';
-import type { OutputFormat } from '../../../../types';
+import type { OutputFormat, SelectedFile } from '../../../../types';
 
 import { TranscriptionToolbar } from '../TranscriptionToolbar';
 import { TranscriptionSearch } from '../TranscriptionSearch';
 import { TranscriptionContent } from '../TranscriptionContent';
+import { TranscriptMediaPlayer } from '../TranscriptMediaPlayer';
+import { parseTranscriptSegments, type TranscriptSegment } from '../../utils/transcriptSegments';
 
 export interface OutputDisplayProps {
   text: string;
   onSave: (format: OutputFormat) => void;
   onCopy: () => void;
   copySuccess: boolean;
+  selectedFile?: SelectedFile | null;
 }
 
 interface SearchMatch {
@@ -23,33 +26,56 @@ function OutputDisplay({
   onSave,
   onCopy,
   copySuccess,
+  selectedFile = null,
 }: OutputDisplayProps): React.JSX.Element {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const mediaRef = useRef<HTMLMediaElement | null>(null);
 
   const hasText = text.length > 0;
   const wordCount = hasText ? text.trim().split(/\s+/).length : 0;
   const charCount = hasText ? text.length : 0;
+  const segments = useMemo(() => parseTranscriptSegments(text), [text]);
+  const hasSegments = segments.length > 0;
+  const searchableText = hasSegments ? segments.map((segment) => segment.text).join('\n') : text;
 
   const matches = useMemo((): SearchMatch[] => {
-    if (!searchQuery || !text) return [];
+    if (!searchQuery || !searchableText) return [];
 
     const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedQuery, 'gi');
     const results: SearchMatch[] = [];
 
     let match: RegExpExecArray | null;
-    while ((match = regex.exec(text)) !== null) {
+    while ((match = regex.exec(searchableText)) !== null) {
       results.push({ start: match.index, end: match.index + match[0].length });
     }
 
     return results;
-  }, [searchQuery, text]);
+  }, [searchQuery, searchableText]);
 
   useEffect(() => {
     setCurrentMatchIndex(0);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (currentMatchIndex >= matches.length) {
+      setCurrentMatchIndex(0);
+    }
+  }, [currentMatchIndex, matches.length]);
+
+  const activeSegmentIndex = useMemo((): number | null => {
+    if (!hasSegments) {
+      return null;
+    }
+
+    const activeSegment = segments.find(
+      (segment) => playbackTime >= segment.startSec && playbackTime < segment.endSec
+    );
+    return activeSegment?.index ?? null;
+  }, [hasSegments, playbackTime, segments]);
 
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
@@ -96,7 +122,7 @@ function OutputDisplay({
   };
 
   const highlightedText = useMemo((): React.JSX.Element[] | null => {
-    if (!searchQuery || !text || matches.length === 0) return null;
+    if (hasSegments || !searchQuery || !text || matches.length === 0) return null;
 
     const parts: React.JSX.Element[] = [];
     let lastIndex = 0;
@@ -122,7 +148,18 @@ function OutputDisplay({
     }
 
     return parts;
-  }, [text, searchQuery, matches, currentMatchIndex]);
+  }, [hasSegments, text, searchQuery, matches, currentMatchIndex]);
+
+  const handleSegmentClick = useCallback((segment: TranscriptSegment): void => {
+    const media = mediaRef.current;
+    if (!media) {
+      return;
+    }
+
+    media.currentTime = segment.startSec;
+    setPlaybackTime(segment.startSec);
+    void media.play().catch(() => {});
+  }, []);
 
   return (
     <div className="output-container">
@@ -149,12 +186,24 @@ function OutputDisplay({
         />
       )}
 
+      {hasText && hasSegments && selectedFile && (
+        <TranscriptMediaPlayer
+          selectedFile={selectedFile}
+          mediaRef={mediaRef}
+          onPlaybackTimeChange={setPlaybackTime}
+        />
+      )}
+
       <TranscriptionContent
         hasText={hasText}
         text={text}
         highlightedText={highlightedText}
         currentMatchIndex={currentMatchIndex}
         matchCount={matches.length}
+        segments={segments}
+        activeSegmentIndex={activeSegmentIndex}
+        searchQuery={searchQuery}
+        onSegmentClick={handleSegmentClick}
       />
     </div>
   );

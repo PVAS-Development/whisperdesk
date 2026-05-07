@@ -5,6 +5,7 @@ import type {
   ModelDownloadProgress,
   SaveFileOptions,
   SaveFileResult,
+  MediaSourceResult,
   GpuInfo,
   ModelInfo,
   SelectedFile,
@@ -37,6 +38,7 @@ export interface ElectronAPI {
   saveFile: (options: SaveFileOptions) => Promise<SaveFileResult>;
   getFileInfo: (filePath: string) => Promise<SelectedFile | null>;
   getPathForFile: (file: File) => string;
+  getMediaSource: (filePath: string) => Promise<MediaSourceResult>;
   listModels: () => Promise<ModelsListResponse>;
   deleteModel: (modelName: string) => Promise<{ success: boolean; error?: string }>;
   getGpuStatus: () => Promise<GpuInfo>;

@@ -93,6 +93,8 @@ const MODEL_ALIASES: Record<string, string> = {
   turbo: 'large-v3-turbo',
 };
 
+const SUBTITLE_MAX_SEGMENT_CHARS = 80;
+
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 export function getWhisperBinaryPath(): string {
@@ -508,6 +510,9 @@ export function transcribe(
         '--output-txt', // Output plain text
         '--output-vtt', // Output VTT subtitles
         '--no-timestamps', // Don't print timestamps in main output (we use VTT)
+        '--max-len',
+        String(SUBTITLE_MAX_SEGMENT_CHARS),
+        '--split-on-word',
         '-pp', // Print progress
         '-of',
         outputBase,

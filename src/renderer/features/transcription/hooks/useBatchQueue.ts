@@ -19,7 +19,7 @@ import { toUserFriendlyTranscriptionError } from '../utils/errorMessages';
 interface UseBatchQueueOptions {
   settings: TranscriptionSettings;
   onHistoryAdd?: (item: HistoryItem) => void;
-  onFirstComplete?: (id: string, text: string) => void;
+  onFirstComplete?: (id: string, text: string, file: SelectedFile) => void;
 }
 
 interface UseBatchQueueReturn {
@@ -537,7 +537,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
 
         if (!hasCalledFirstCompleteRef.current && onFirstComplete && result.text) {
           hasCalledFirstCompleteRef.current = true;
-          onFirstComplete(item.id, result.text);
+          onFirstComplete(item.id, result.text, item.file);
         }
 
         return {

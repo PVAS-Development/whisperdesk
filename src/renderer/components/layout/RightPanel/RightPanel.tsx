@@ -12,7 +12,8 @@ function RightPanel(): React.JSX.Element {
     selectHistoryItem,
     removeHistoryItem,
   } = useAppHistory();
-  const { transcription, copySuccess, handleSave, handleCopy } = useAppTranscription();
+  const { transcription, selectedFile, copySuccess, handleSave, handleCopy } =
+    useAppTranscription();
 
   if (showHistory) {
     return (
@@ -32,6 +33,7 @@ function RightPanel(): React.JSX.Element {
     <div className="right-panel">
       <OutputDisplay
         text={transcription}
+        selectedFile={selectedFile}
         onSave={handleSave}
         onCopy={handleCopy}
         copySuccess={copySuccess}
