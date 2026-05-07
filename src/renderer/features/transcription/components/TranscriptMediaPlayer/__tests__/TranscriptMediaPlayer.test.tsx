@@ -1,9 +1,22 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TranscriptMediaPlayer } from '../TranscriptMediaPlayer';
 import { createFullElectronAPIMock } from '@/test/electronAPIMocks';
 import type { ElectronAPI } from '@/types/electron';
+
+function createMediaElementChangeHandler(): {
+  mediaElement: { current: HTMLMediaElement | null };
+  onMediaElementChange: (element: HTMLMediaElement | null) => void;
+} {
+  const mediaElement = { current: null as HTMLMediaElement | null };
+
+  return {
+    mediaElement,
+    onMediaElementChange: (element) => {
+      mediaElement.current = element;
+    },
+  };
+}
 
 describe('TranscriptMediaPlayer', () => {
   beforeEach(() => {
@@ -12,13 +25,13 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('renders nothing without a selected file', () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     const onPlaybackTimeChange = vi.fn();
 
     const { container } = render(
       <TranscriptMediaPlayer
         selectedFile={null}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={onPlaybackTimeChange}
       />
     );
@@ -28,7 +41,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('shows a loading state while resolving the media source', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     const onPlaybackTimeChange = vi.fn();
     let resolveSource: (value: { success: boolean; url: string; mediaType: 'audio' }) => void;
     window.electronAPI = {
@@ -44,7 +57,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={onPlaybackTimeChange}
       />
     );
@@ -59,7 +72,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('renders unavailable state for missing media sources', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     window.electronAPI = {
       ...createFullElectronAPIMock(),
       getMediaSource: vi.fn().mockResolvedValue({ success: false }),
@@ -68,7 +81,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'missing.mp3', path: '/path/missing.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -77,12 +90,12 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('handles files without a usable path', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
 
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'missing-path.mp3', path: '' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -91,7 +104,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('shows media source errors when source resolution rejects', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     window.electronAPI = {
       ...createFullElectronAPIMock(),
       getMediaSource: vi.fn().mockRejectedValue(new Error('Preview blocked')),
@@ -100,7 +113,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -109,7 +122,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('stringifies non-error media source rejections', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     window.electronAPI = {
       ...createFullElectronAPIMock(),
       getMediaSource: vi.fn().mockRejectedValue('Preview unavailable'),
@@ -118,7 +131,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -127,7 +140,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('renders video preview and updates duration from metadata', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     window.electronAPI = {
       ...createFullElectronAPIMock(),
       getMediaSource: vi.fn().mockResolvedValue({
@@ -140,7 +153,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp4', path: '/path/file.mp4' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -153,7 +166,7 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('supports play, pause, seeking, time updates, and ended state', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     const onPlaybackTimeChange = vi.fn();
     const playSpy = vi
       .spyOn(window.HTMLMediaElement.prototype, 'play')
@@ -165,7 +178,7 @@ describe('TranscriptMediaPlayer', () => {
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={onPlaybackTimeChange}
       />
     );
@@ -206,17 +219,19 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('supports volume, mute, and playback speed controls', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { mediaElement, onMediaElementChange } = createMediaElementChangeHandler();
 
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
 
     const audio = await screen.findByLabelText('Selected audio preview');
+    expect(mediaElement.current).toBe(audio);
+
     const volumeSlider = screen.getByLabelText('Volume');
     const speedSelect = screen.getByLabelText('Playback speed');
 
@@ -244,13 +259,13 @@ describe('TranscriptMediaPlayer', () => {
   });
 
   it('handles play rejections and invalid metadata values', async () => {
-    const mediaRef = React.createRef<HTMLMediaElement>();
+    const { onMediaElementChange } = createMediaElementChangeHandler();
     vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockRejectedValue(new Error('blocked'));
 
     render(
       <TranscriptMediaPlayer
         selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
-        mediaRef={mediaRef}
+        onMediaElementChange={onMediaElementChange}
         onPlaybackTimeChange={vi.fn()}
       />
     );
@@ -263,5 +278,24 @@ describe('TranscriptMediaPlayer', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Play preview' })).toBeInTheDocument();
     });
+  });
+
+  it('clears the external media element when the player unmounts', async () => {
+    const { mediaElement, onMediaElementChange } = createMediaElementChangeHandler();
+
+    const { unmount } = render(
+      <TranscriptMediaPlayer
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onMediaElementChange={onMediaElementChange}
+        onPlaybackTimeChange={vi.fn()}
+      />
+    );
+
+    await screen.findByLabelText('Selected audio preview');
+    expect(mediaElement.current).toBeInstanceOf(window.HTMLAudioElement);
+
+    unmount();
+
+    expect(mediaElement.current).toBeNull();
   });
 });

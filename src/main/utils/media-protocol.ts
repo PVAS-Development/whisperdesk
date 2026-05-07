@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { protocol } from 'electron';
 import fs from 'fs';
 import path from 'path';
@@ -5,12 +6,83 @@ import { Readable } from 'stream';
 
 export const MEDIA_PROTOCOL = 'whisperdesk-media';
 
-const mediaSources = new Map<string, string>();
+const MEDIA_SOURCE_TTL_MS = 30 * 60 * 1000;
+const MAX_MEDIA_SOURCES = 100;
+
+interface MediaSourceEntry {
+  filePath: string;
+  expiresAt: number;
+}
+
+const mediaSources = new Map<string, MediaSourceEntry>();
 let protocolHandlerRegistered = false;
 
 interface ByteRange {
   start: number;
   end: number;
+}
+
+function getMediaSourceExpiration(now = Date.now()): number {
+  return now + MEDIA_SOURCE_TTL_MS;
+}
+
+function purgeExpiredMediaSources(now = Date.now()): void {
+  for (const [token, entry] of mediaSources) {
+    if (entry.expiresAt > now) {
+      continue;
+    }
+
+    mediaSources.delete(token);
+  }
+}
+
+function evictLeastRecentlyUsedMediaSources(): void {
+  while (mediaSources.size >= MAX_MEDIA_SOURCES) {
+    const oldestToken = mediaSources.keys().next().value;
+
+    if (!oldestToken) {
+      break;
+    }
+
+    mediaSources.delete(oldestToken);
+  }
+}
+
+function getMediaSourceEntry(token: string): MediaSourceEntry | null {
+  const entry = mediaSources.get(token);
+
+  if (!entry) {
+    return null;
+  }
+
+  if (entry.expiresAt <= Date.now()) {
+    mediaSources.delete(token);
+    return null;
+  }
+
+  const refreshedEntry: MediaSourceEntry = {
+    filePath: entry.filePath,
+    expiresAt: getMediaSourceExpiration(),
+  };
+  mediaSources.delete(token);
+  mediaSources.set(token, refreshedEntry);
+  return refreshedEntry;
+}
+
+function createMediaErrorResponse(error: unknown): Response {
+  const errorCode =
+    typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : null;
+
+  if (
+    errorCode === 'ENOENT' ||
+    errorCode === 'ENOTDIR' ||
+    errorCode === 'EACCES' ||
+    errorCode === 'EPERM'
+  ) {
+    return new Response('Media source not found', { status: 404 });
+  }
+
+  return new Response('Unable to load media source', { status: 500 });
 }
 
 function getContentType(filePath: string): string {
@@ -145,21 +217,32 @@ export function registerMediaProtocolHandler(): void {
   protocol.handle(MEDIA_PROTOCOL, async (request) => {
     const url = new URL(request.url);
     const token = url.hostname || url.pathname.replace(/^\//, '');
-    const filePath = mediaSources.get(token);
+    const entry = getMediaSourceEntry(token);
 
-    if (!filePath) {
+    if (!entry) {
       return new Response('Media source not found', { status: 404 });
     }
 
-    return createMediaResponse(request, filePath);
+    try {
+      return await createMediaResponse(request, entry.filePath);
+    } catch (error) {
+      mediaSources.delete(token);
+      return createMediaErrorResponse(error);
+    }
   });
 
   protocolHandlerRegistered = true;
 }
 
 export function createMediaProtocolUrl(filePath: string): string {
+  purgeExpiredMediaSources();
+  evictLeastRecentlyUsedMediaSources();
+
   const resolvedPath = path.resolve(filePath);
-  const token = crypto.randomUUID();
-  mediaSources.set(token, resolvedPath);
+  const token = randomUUID();
+  mediaSources.set(token, {
+    filePath: resolvedPath,
+    expiresAt: getMediaSourceExpiration(),
+  });
   return `${MEDIA_PROTOCOL}://${token}`;
 }

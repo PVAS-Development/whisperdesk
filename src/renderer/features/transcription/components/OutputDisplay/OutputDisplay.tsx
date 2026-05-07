@@ -161,6 +161,10 @@ function OutputDisplay({
     void media.play().catch(() => {});
   }, []);
 
+  const handleMediaElementChange = useCallback((element: HTMLMediaElement | null): void => {
+    mediaRef.current = element;
+  }, []);
+
   return (
     <div className="output-container">
       <TranscriptionToolbar
@@ -189,7 +193,7 @@ function OutputDisplay({
       {hasText && hasSegments && selectedFile && (
         <TranscriptMediaPlayer
           selectedFile={selectedFile}
-          mediaRef={mediaRef}
+          onMediaElementChange={handleMediaElementChange}
           onPlaybackTimeChange={setPlaybackTime}
         />
       )}

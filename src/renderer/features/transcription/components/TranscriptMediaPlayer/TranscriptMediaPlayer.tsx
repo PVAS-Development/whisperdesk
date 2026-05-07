@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type RefObject } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AlertCircle, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '../../../../components/ui';
 import { getMediaSource } from '../../../../services/electronAPI';
@@ -7,7 +7,7 @@ import './TranscriptMediaPlayer.css';
 
 export interface TranscriptMediaPlayerProps {
   selectedFile: SelectedFile | null;
-  mediaRef: RefObject<HTMLMediaElement | null>;
+  onMediaElementChange?: (element: HTMLMediaElement | null) => void;
   onPlaybackTimeChange: (timeSec: number) => void;
 }
 
@@ -36,9 +36,10 @@ function formatPlaybackTime(value: number): string {
 
 function TranscriptMediaPlayer({
   selectedFile,
-  mediaRef,
+  onMediaElementChange,
   onPlaybackTimeChange,
 }: TranscriptMediaPlayerProps): React.JSX.Element | null {
+  const mediaRef = useRef<HTMLMediaElement | null>(null);
   const [source, setSource] = useState<MediaSourceResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -182,6 +183,8 @@ function TranscriptMediaPlayer({
 
   const setMediaElement = (element: HTMLMediaElement | null): void => {
     mediaRef.current = element;
+    onMediaElementChange?.(element);
+
     if (element) {
       applyVolume(element, volume, isMuted);
       element.playbackRate = playbackRate;
