@@ -205,6 +205,44 @@ describe('TranscriptMediaPlayer', () => {
     pauseSpy.mockRestore();
   });
 
+  it('supports volume, mute, and playback speed controls', async () => {
+    const mediaRef = React.createRef<HTMLMediaElement>();
+
+    render(
+      <TranscriptMediaPlayer
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        mediaRef={mediaRef}
+        onPlaybackTimeChange={vi.fn()}
+      />
+    );
+
+    const audio = await screen.findByLabelText('Selected audio preview');
+    const volumeSlider = screen.getByLabelText('Volume');
+    const speedSelect = screen.getByLabelText('Playback speed');
+
+    fireEvent.change(volumeSlider, { target: { value: '0.35' } });
+    expect(audio).toHaveProperty('volume', 0.35);
+    expect(audio).toHaveProperty('muted', false);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mute preview' }));
+    expect(audio).toHaveProperty('muted', true);
+    expect(screen.getByRole('button', { name: 'Unmute preview' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Unmute preview' }));
+    expect(audio).toHaveProperty('muted', false);
+
+    fireEvent.change(volumeSlider, { target: { value: '0' } });
+    expect(audio).toHaveProperty('volume', 0);
+    expect(audio).toHaveProperty('muted', true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Unmute preview' }));
+    expect(audio).toHaveProperty('volume', 0.8);
+    expect(audio).toHaveProperty('muted', false);
+
+    fireEvent.change(speedSelect, { target: { value: '1.5' } });
+    expect(audio).toHaveProperty('playbackRate', 1.5);
+  });
+
   it('handles play rejections and invalid metadata values', async () => {
     const mediaRef = React.createRef<HTMLMediaElement>();
     vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockRejectedValue(new Error('blocked'));

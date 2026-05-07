@@ -1,5 +1,5 @@
 import React, { useEffect, useState, type RefObject } from 'react';
-import { AlertCircle, Pause, Play } from 'lucide-react';
+import { AlertCircle, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '../../../../components/ui';
 import { getMediaSource } from '../../../../services/electronAPI';
 import type { MediaSourceResult, SelectedFile } from '../../../../types';
@@ -10,6 +10,10 @@ export interface TranscriptMediaPlayerProps {
   mediaRef: RefObject<HTMLMediaElement | null>;
   onPlaybackTimeChange: (timeSec: number) => void;
 }
+
+const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2] as const;
+const DEFAULT_VOLUME = 1;
+const RESTORED_VOLUME = 0.8;
 
 function formatPlaybackTime(value: number): string {
   if (!Number.isFinite(value) || value < 0) {
@@ -40,6 +44,9 @@ function TranscriptMediaPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
@@ -111,6 +118,53 @@ function TranscriptMediaPlayer({
     onPlaybackTimeChange(media.currentTime);
   };
 
+  const applyVolume = (media: HTMLMediaElement, nextVolume: number, nextMuted: boolean): void => {
+    media.volume = nextVolume;
+    media.muted = nextMuted;
+  };
+
+  const handleMuteToggle = (): void => {
+    const media = mediaRef.current;
+    const shouldUnmute = isMuted || volume === 0;
+    const nextVolume = shouldUnmute && volume === 0 ? RESTORED_VOLUME : volume;
+    const nextMuted = !shouldUnmute;
+
+    setVolume(nextVolume);
+    setIsMuted(nextMuted);
+
+    if (media) {
+      applyVolume(media, nextVolume, nextMuted);
+    }
+  };
+
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const media = mediaRef.current;
+    const nextVolume = Math.min(1, Math.max(0, Number(event.target.value)));
+    const nextMuted = nextVolume === 0;
+
+    setVolume(nextVolume);
+    setIsMuted(nextMuted);
+
+    if (media) {
+      applyVolume(media, nextVolume, nextMuted);
+    }
+  };
+
+  const handlePlaybackRateChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    const media = mediaRef.current;
+    const nextPlaybackRate = Number(event.target.value);
+
+    if (!Number.isFinite(nextPlaybackRate)) {
+      return;
+    }
+
+    setPlaybackRate(nextPlaybackRate);
+
+    if (media) {
+      media.playbackRate = nextPlaybackRate;
+    }
+  };
+
   const handleTimeUpdate = (event: React.SyntheticEvent<HTMLMediaElement>): void => {
     const nextTime = event.currentTarget.currentTime;
     setCurrentTime(nextTime);
@@ -128,6 +182,10 @@ function TranscriptMediaPlayer({
 
   const setMediaElement = (element: HTMLMediaElement | null): void => {
     mediaRef.current = element;
+    if (element) {
+      applyVolume(element, volume, isMuted);
+      element.playbackRate = playbackRate;
+    }
   };
 
   if (isLoading) {
@@ -194,6 +252,40 @@ function TranscriptMediaPlayer({
           disabled={safeDuration === 0}
         />
         <span className="transcript-media-time">{formatPlaybackTime(safeDuration)}</span>
+        <div className="transcript-media-volume">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={isMuted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            iconOnly
+            onClick={handleMuteToggle}
+            title={isMuted || volume === 0 ? 'Unmute preview' : 'Mute preview'}
+            aria-label={isMuted || volume === 0 ? 'Unmute preview' : 'Mute preview'}
+          />
+          <input
+            className="transcript-media-volume-slider"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={isMuted ? 0 : volume}
+            onChange={handleVolumeChange}
+            aria-label="Volume"
+          />
+        </div>
+        <select
+          className="transcript-media-speed"
+          value={playbackRate}
+          onChange={handlePlaybackRateChange}
+          aria-label="Playback speed"
+          title="Playback speed"
+        >
+          {PLAYBACK_SPEEDS.map((speed) => (
+            <option key={speed} value={speed}>
+              {speed}x
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
