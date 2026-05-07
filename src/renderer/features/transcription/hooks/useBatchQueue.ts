@@ -248,6 +248,8 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
   const activeRunItemIdsRef = useRef<Set<string>>(new Set());
   const currentItemStartTimeRef = useRef<number | null>(null);
   const remainingPendingCountRef = useRef(0);
+  const lastProgressPercentRef = useRef<number>(0);
+  const etaIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const restoredCount = initialQueueLengthRef.current;
@@ -292,8 +294,48 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         progressUnsubscribeRef.current();
         progressUnsubscribeRef.current = null;
       }
+      if (etaIntervalRef.current !== null) {
+        clearInterval(etaIntervalRef.current);
+        etaIntervalRef.current = null;
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isProcessing) {
+      if (etaIntervalRef.current !== null) {
+        clearInterval(etaIntervalRef.current);
+        etaIntervalRef.current = null;
+      }
+      return;
+    }
+
+    etaIntervalRef.current = setInterval(() => {
+      const startTimeMs = currentItemStartTimeRef.current;
+      const progressPercent = lastProgressPercentRef.current;
+
+      if (isCancelledRef.current || startTimeMs === null || progressPercent <= 0) {
+        return;
+      }
+
+      const elapsedMs = Date.now() - startTimeMs;
+      if (elapsedMs <= 0) return;
+
+      const projectedItemDurationMs = elapsedMs / (progressPercent / 100);
+      const remainingCurrentMs = Math.max(0, projectedItemDurationMs - elapsedMs);
+      const remainingMs =
+        remainingCurrentMs + projectedItemDurationMs * remainingPendingCountRef.current;
+
+      setEstimatedTimeRemainingSec(Math.max(1, Math.round(remainingMs / 1000)));
+    }, 1000);
+
+    return () => {
+      if (etaIntervalRef.current !== null) {
+        clearInterval(etaIntervalRef.current);
+        etaIntervalRef.current = null;
+      }
+    };
+  }, [isProcessing]);
 
   const addFiles = useCallback((files: SelectedFile[]) => {
     const existingKeys = new Set(queueRef.current.map((item) => getFileIdentityKey(item.file)));
@@ -385,6 +427,8 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         progressUnsubscribeRef.current = null;
       }
 
+      lastProgressPercentRef.current = 0;
+
       progressUnsubscribeRef.current = onTranscriptionProgress((progress) => {
         setQueue((prev) => prev.map((q) => (q.id === item.id ? { ...q, progress } : q)));
 
@@ -401,18 +445,17 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
           return;
         }
 
+        lastProgressPercentRef.current = progressPercent;
+
         const elapsedMs = Date.now() - startTimeMs;
-        if (elapsedMs <= 0) {
-          return;
-        }
+        if (elapsedMs <= 0) return;
 
         const projectedItemDurationMs = elapsedMs / (progressPercent / 100);
         const remainingCurrentMs = Math.max(0, projectedItemDurationMs - elapsedMs);
         const remainingMs =
           remainingCurrentMs + projectedItemDurationMs * remainingPendingCountRef.current;
 
-        const estimatedSeconds = Math.max(1, Math.round(remainingMs / 1000));
-        setEstimatedTimeRemainingSec(estimatedSeconds);
+        setEstimatedTimeRemainingSec(Math.max(1, Math.round(remainingMs / 1000)));
       });
 
       logger.info('Processing batch item', {
