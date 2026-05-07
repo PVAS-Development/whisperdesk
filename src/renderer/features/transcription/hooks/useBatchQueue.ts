@@ -68,7 +68,143 @@ interface PersistedQueueItem {
   error?: string;
 }
 
+interface EtaSample {
+  durationMs: number;
+  fileSize?: number;
+}
+
 const QUEUE_STORAGE_KEY = STORAGE_KEYS.QUEUE;
+const MIN_PROGRESS_FOR_ETA_PERCENT = 5;
+
+function getPositiveNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function getAverageDurationMs(samples: EtaSample[]): number | null {
+  if (samples.length === 0) {
+    return null;
+  }
+
+  const totalMs = samples.reduce((total, sample) => total + sample.durationMs, 0);
+  return totalMs / samples.length;
+}
+
+function getDurationPerByteMs(samples: EtaSample[]): number | null {
+  const sizedSamples = samples.filter(
+    (sample) =>
+      getPositiveNumber(sample.durationMs) !== null && getPositiveNumber(sample.fileSize) !== null
+  );
+
+  if (sizedSamples.length === 0) {
+    return null;
+  }
+
+  const totalMs = sizedSamples.reduce((total, sample) => total + sample.durationMs, 0);
+  const totalBytes = sizedSamples.reduce((total, sample) => total + (sample.fileSize ?? 0), 0);
+
+  return totalBytes > 0 ? totalMs / totalBytes : null;
+}
+
+function estimateFileDurationMs(
+  file: SelectedFile,
+  samples: EtaSample[],
+  fallbackDurationMs: number | null = null,
+  fallbackFile: SelectedFile | null = null
+): number | null {
+  const fileSize = getPositiveNumber(file.size);
+  const durationPerByteMs = getDurationPerByteMs(samples);
+
+  if (fileSize !== null && durationPerByteMs !== null) {
+    return fileSize * durationPerByteMs;
+  }
+
+  const fallbackFileSize = getPositiveNumber(fallbackFile?.size);
+  if (fileSize !== null && fallbackFileSize !== null && fallbackDurationMs !== null) {
+    return (fallbackDurationMs / fallbackFileSize) * fileSize;
+  }
+
+  return getAverageDurationMs(samples) ?? fallbackDurationMs;
+}
+
+function estimateCurrentItemDurationMs(
+  currentItem: QueueItem,
+  startTimeMs: number,
+  progressPercent: number,
+  samples: EtaSample[],
+  nowMs: number
+): number | null {
+  const elapsedMs = Math.max(0, nowMs - startTimeMs);
+  const progressRatio = progressPercent / 100;
+  const progressEstimateMs =
+    progressPercent >= MIN_PROGRESS_FOR_ETA_PERCENT && progressPercent <= 100 && elapsedMs > 0
+      ? elapsedMs / progressRatio
+      : null;
+  const sampleEstimateMs = estimateFileDurationMs(currentItem.file, samples);
+
+  if (progressEstimateMs !== null && sampleEstimateMs !== null) {
+    const progressWeight = Math.min(0.85, Math.max(0.35, progressRatio));
+    return progressEstimateMs * progressWeight + sampleEstimateMs * (1 - progressWeight);
+  }
+
+  return progressEstimateMs ?? sampleEstimateMs;
+}
+
+function calculateEtaMs({
+  currentItem,
+  currentItemStartTimeMs,
+  progressPercent,
+  remainingItems,
+  samples,
+  nowMs,
+}: {
+  currentItem: QueueItem | null;
+  currentItemStartTimeMs: number | null;
+  progressPercent: number;
+  remainingItems: QueueItem[];
+  samples: EtaSample[];
+  nowMs: number;
+}): number | null {
+  let currentEstimateMs: number | null = null;
+  let currentRemainingMs = 0;
+
+  if (currentItem && currentItemStartTimeMs !== null) {
+    currentEstimateMs = estimateCurrentItemDurationMs(
+      currentItem,
+      currentItemStartTimeMs,
+      progressPercent,
+      samples,
+      nowMs
+    );
+
+    if (currentEstimateMs !== null) {
+      currentRemainingMs = Math.max(
+        0,
+        currentEstimateMs - Math.max(0, nowMs - currentItemStartTimeMs)
+      );
+    }
+  }
+
+  const queuedEstimateMs = remainingItems.reduce((total, item) => {
+    const estimateMs = estimateFileDurationMs(
+      item.file,
+      samples,
+      currentEstimateMs,
+      currentItem?.file ?? null
+    );
+    return estimateMs === null ? total : total + estimateMs;
+  }, 0);
+
+  const totalMs = currentRemainingMs + queuedEstimateMs;
+  return totalMs > 0 ? totalMs : null;
+}
+
+function toEstimatedSeconds(remainingMs: number | null): number | null {
+  if (remainingMs === null) {
+    return null;
+  }
+
+  return Math.max(1, Math.round(remainingMs / 1000));
+}
 
 function isPersistedQueueStatus(status: unknown): status is PersistedQueueStatus {
   return (
@@ -247,7 +383,9 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
   const lastPersistedQueueSnapshotRef = useRef<string | null>(null);
   const activeRunItemIdsRef = useRef<Set<string>>(new Set());
   const currentItemStartTimeRef = useRef<number | null>(null);
-  const remainingPendingCountRef = useRef(0);
+  const currentProcessingItemRef = useRef<QueueItem | null>(null);
+  const remainingItemsRef = useRef<QueueItem[]>([]);
+  const etaSamplesRef = useRef<EtaSample[]>([]);
   const lastProgressPercentRef = useRef<number>(0);
   const etaIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -301,6 +439,23 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
     };
   }, []);
 
+  const updateEstimatedTimeRemaining = useCallback(() => {
+    if (isCancelledRef.current) {
+      return;
+    }
+
+    const remainingMs = calculateEtaMs({
+      currentItem: currentProcessingItemRef.current,
+      currentItemStartTimeMs: currentItemStartTimeRef.current,
+      progressPercent: lastProgressPercentRef.current,
+      remainingItems: remainingItemsRef.current,
+      samples: etaSamplesRef.current,
+      nowMs: Date.now(),
+    });
+
+    setEstimatedTimeRemainingSec(toEstimatedSeconds(remainingMs));
+  }, []);
+
   useEffect(() => {
     if (!isProcessing) {
       if (etaIntervalRef.current !== null) {
@@ -311,22 +466,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
     }
 
     etaIntervalRef.current = setInterval(() => {
-      const startTimeMs = currentItemStartTimeRef.current;
-      const progressPercent = lastProgressPercentRef.current;
-
-      if (isCancelledRef.current || startTimeMs === null || progressPercent <= 0) {
-        return;
-      }
-
-      const elapsedMs = Date.now() - startTimeMs;
-      if (elapsedMs <= 0) return;
-
-      const projectedItemDurationMs = elapsedMs / (progressPercent / 100);
-      const remainingCurrentMs = Math.max(0, projectedItemDurationMs - elapsedMs);
-      const remainingMs =
-        remainingCurrentMs + projectedItemDurationMs * remainingPendingCountRef.current;
-
-      setEstimatedTimeRemainingSec(Math.max(1, Math.round(remainingMs / 1000)));
+      updateEstimatedTimeRemaining();
     }, 1000);
 
     return () => {
@@ -335,7 +475,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         etaIntervalRef.current = null;
       }
     };
-  }, [isProcessing]);
+  }, [isProcessing, updateEstimatedTimeRemaining]);
 
   const addFiles = useCallback((files: SelectedFile[]) => {
     const existingKeys = new Set(queueRef.current.map((item) => getFileIdentityKey(item.file)));
@@ -420,6 +560,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         )
       );
       setCurrentItemId(item.id);
+      currentProcessingItemRef.current = item;
       currentItemStartTimeRef.current = startTime;
 
       if (progressUnsubscribeRef.current) {
@@ -428,6 +569,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
       }
 
       lastProgressPercentRef.current = 0;
+      updateEstimatedTimeRemaining();
 
       progressUnsubscribeRef.current = onTranscriptionProgress((progress) => {
         setQueue((prev) => prev.map((q) => (q.id === item.id ? { ...q, progress } : q)));
@@ -446,16 +588,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         }
 
         lastProgressPercentRef.current = progressPercent;
-
-        const elapsedMs = Date.now() - startTimeMs;
-        if (elapsedMs <= 0) return;
-
-        const projectedItemDurationMs = elapsedMs / (progressPercent / 100);
-        const remainingCurrentMs = Math.max(0, projectedItemDurationMs - elapsedMs);
-        const remainingMs =
-          remainingCurrentMs + projectedItemDurationMs * remainingPendingCountRef.current;
-
-        setEstimatedTimeRemainingSec(Math.max(1, Math.round(remainingMs / 1000)));
+        updateEstimatedTimeRemaining();
       });
 
       logger.info('Processing batch item', {
@@ -565,7 +698,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         }
       }
     },
-    [settings, onHistoryAdd, onFirstComplete]
+    [settings, onHistoryAdd, onFirstComplete, updateEstimatedTimeRemaining]
   );
 
   const runProcessing = useCallback(
@@ -581,6 +714,11 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
 
       const activeIds = new Set(itemsToProcess.map((item) => item.id));
       activeRunItemIdsRef.current = activeIds;
+      etaSamplesRef.current = [];
+      remainingItemsRef.current = itemsToProcess;
+      currentProcessingItemRef.current = null;
+      currentItemStartTimeRef.current = null;
+      lastProgressPercentRef.current = 0;
       setEstimatedTimeRemainingSec(null);
 
       shouldPersistQueueRef.current = true;
@@ -603,7 +741,6 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
 
       logger.info('Starting batch processing', { count: itemsToProcess.length });
 
-      const processedDurationsMs: number[] = [];
       const processedItems: QueueItem[] = [];
 
       for (let index = 0; index < itemsToProcess.length; index++) {
@@ -623,34 +760,31 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
         }
 
         const resetItem = { ...item, status: 'pending' as QueueItemStatus, error: undefined };
-        remainingPendingCountRef.current = itemsToProcess.length - (index + 1);
+        remainingItemsRef.current = itemsToProcess.slice(index + 1);
         const processedItem = await processItem(resetItem);
+        currentProcessingItemRef.current = null;
         currentItemStartTimeRef.current = null;
+        lastProgressPercentRef.current = 0;
         processedItems.push(processedItem);
         shouldPersistQueueRef.current = true;
         setQueue((prev) => prev.map((q) => (q.id === processedItem.id ? processedItem : q)));
 
         if (
+          processedItem.status === 'completed' &&
           typeof processedItem.startTime === 'number' &&
           typeof processedItem.endTime === 'number' &&
           processedItem.endTime >= processedItem.startTime
         ) {
-          processedDurationsMs.push(processedItem.endTime - processedItem.startTime);
+          etaSamplesRef.current = [
+            ...etaSamplesRef.current,
+            {
+              durationMs: processedItem.endTime - processedItem.startTime,
+              fileSize: getPositiveNumber(processedItem.file.size) ?? undefined,
+            },
+          ];
         }
 
-        const remainingItemsCount = itemsToProcess.length - (index + 1);
-        if (remainingItemsCount <= 0) {
-          setEstimatedTimeRemainingSec(0);
-        } else if (processedDurationsMs.length > 0) {
-          const averageDurationMs =
-            processedDurationsMs.reduce((total, value) => total + value, 0) /
-            processedDurationsMs.length;
-          const estimatedSeconds = Math.max(
-            1,
-            Math.round((averageDurationMs * remainingItemsCount) / 1000)
-          );
-          setEstimatedTimeRemainingSec(estimatedSeconds);
-        }
+        updateEstimatedTimeRemaining();
       }
 
       const wasCancelled = isCancelledRef.current;
@@ -658,7 +792,9 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
       setCurrentItemId(null);
       activeRunItemIdsRef.current = new Set();
       currentItemStartTimeRef.current = null;
-      remainingPendingCountRef.current = 0;
+      currentProcessingItemRef.current = null;
+      remainingItemsRef.current = [];
+      lastProgressPercentRef.current = 0;
       setEstimatedTimeRemainingSec(null);
 
       if (!wasCancelled) {
@@ -667,7 +803,7 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
 
       logger.info('Batch processing complete');
     },
-    [isProcessing, queue, processItem]
+    [isProcessing, queue, processItem, updateEstimatedTimeRemaining]
   );
 
   const startProcessing = useCallback(async () => {
@@ -693,7 +829,9 @@ export function useBatchQueue(options: UseBatchQueueOptions): UseBatchQueueRetur
     setIsProcessing(false);
     setCurrentItemId(null);
     currentItemStartTimeRef.current = null;
-    remainingPendingCountRef.current = 0;
+    currentProcessingItemRef.current = null;
+    remainingItemsRef.current = [];
+    lastProgressPercentRef.current = 0;
     setEstimatedTimeRemainingSec(null);
 
     shouldPersistQueueRef.current = true;
