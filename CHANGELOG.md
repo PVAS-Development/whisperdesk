@@ -1,3 +1,20 @@
+## [1.10.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.9.0...v1.10.0) (2026-05-08)
+
+### ✨ Features
+
+- add media player toggle functionality and update related UI components ([ec8d489](https://github.com/PVAS-Development/whisperdesk/commit/ec8d48906a5a6d9f933629b980dcea8c55b014ab))
+- add TranscriptMediaPlayer component and related functionality ([a461994](https://github.com/PVAS-Development/whisperdesk/commit/a461994c00ccf97f66ca76cc1138e4cb864d161d))
+- add volume, mute, and playback speed controls to TranscriptMediaPlayer ([69afff1](https://github.com/PVAS-Development/whisperdesk/commit/69afff196044420dafb329424ccacbcde6cd9552))
+- enhance ETA calculation for batch processing in useBatchQueue ([ba14a4b](https://github.com/PVAS-Development/whisperdesk/commit/ba14a4b74335e91b929e9011b354189e248813e0))
+- enhance TranscriptMediaPlayer with media source state management and loading behavior tests ([939b0bd](https://github.com/PVAS-Development/whisperdesk/commit/939b0bdc94c5d99b2aaffc2dee4ffbcb982a90e7))
+- implement media file validation and approval process with associated tests ([d8eab8e](https://github.com/PVAS-Development/whisperdesk/commit/d8eab8e41a680650274895926a5ffe9e093caa52))
+
+### 🐛 Bug Fixes
+
+- add estimated time remaining calculation for batch processing ([80f6b54](https://github.com/PVAS-Development/whisperdesk/commit/80f6b544b958c72aeac443ce8d4b1d2211e88862))
+- enhance media protocol tests with range request handling and error responses ([1a7e844](https://github.com/PVAS-Development/whisperdesk/commit/1a7e8449bd9405f6d79686e97b82fc9d461cbdc1))
+- implement media protocol handling with expiration and eviction logic ([2994a0c](https://github.com/PVAS-Development/whisperdesk/commit/2994a0c56e6ddfa8766641ea7a376f3cebdda50b))
+
 ## [1.9.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.8.0...v1.9.0) (2026-02-20)
 
 ### ✨ Features
