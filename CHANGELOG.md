@@ -1,3 +1,9 @@
+## [1.10.1](https://github.com/PVAS-Development/whisperdesk/compare/v1.10.0...v1.10.1) (2026-05-08)
+
+### 🐛 Bug Fixes
+
+- update readme and site for new information regarding media preview ([acdf1a0](https://github.com/PVAS-Development/whisperdesk/commit/acdf1a0c56e00d5a6152a089fd53214881cd644e))
+
 ## [1.10.0](https://github.com/PVAS-Development/whisperdesk/compare/v1.9.0...v1.10.0) (2026-05-08)
 
 ### ✨ Features
