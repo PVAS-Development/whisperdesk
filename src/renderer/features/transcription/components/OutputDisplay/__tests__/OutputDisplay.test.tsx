@@ -2,12 +2,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OutputDisplay } from '@/features/transcription';
 import { MOCK_TRANSCRIPTION_RESULT } from '@/test/fixtures';
+import { createFullElectronAPIMock } from '@/test/electronAPIMocks';
+import type { ElectronAPI } from '@/types/electron';
 
 describe('OutputDisplay', () => {
   const mockTranscriptionText = MOCK_TRANSCRIPTION_RESULT.text ?? '';
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (window as unknown as { electronAPI?: ElectronAPI }).electronAPI = undefined;
   });
 
   it('should render transcription text', () => {
@@ -50,6 +53,31 @@ describe('OutputDisplay', () => {
 
     const wordCountElement = screen.getByText(/\d+ words/i);
     expect(wordCountElement).toBeInTheDocument();
+  });
+
+  it('should count transcript segment text instead of VTT metadata in media mode', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    window.electronAPI = createFullElectronAPIMock();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment
+
+00:00:04.000 --> 00:00:06.000
+Second segment`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(screen.getByText('4 words · 28 chars')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Selected audio preview')).toBeInTheDocument();
   });
 
   it('should call onCopy when copy button is clicked', async () => {
@@ -805,5 +833,211 @@ describe('OutputDisplay', () => {
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     expect(searchInput).toBeInTheDocument();
+  });
+
+  it('should render VTT as plain text when media mode is unavailable', () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment`}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(screen.queryByLabelText('Timestamped transcript')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Transcribed text')).toHaveTextContent('WEBVTT');
+    expect(screen.queryByRole('switch', { name: /media player/i })).not.toBeInTheDocument();
+  });
+
+  it('should render timestamped segments when media mode is available', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    window.electronAPI = createFullElectronAPIMock();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment
+
+00:00:04.000 --> 00:00:06.000
+Second segment`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(screen.getByLabelText('Timestamped transcript')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Play from 00:00:01.000/i })).toBeInTheDocument();
+    expect(screen.getByText('Second segment')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Selected audio preview')).toBeInTheDocument();
+  });
+
+  it('should seek and play media when a timestamp is clicked', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    const api = createFullElectronAPIMock();
+    window.electronAPI = api;
+    const playSpy = vi
+      .spyOn(window.HTMLMediaElement.prototype, 'play')
+      .mockResolvedValue(undefined);
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    await waitFor(() => {
+      expect(api.getMediaSource).toHaveBeenCalledWith('/path/file.mp3');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Play from 00:00:01.000/i }));
+
+    expect(playSpy).toHaveBeenCalled();
+    playSpy.mockRestore();
+  });
+
+  it('should toggle the media player while keeping the transcript visible', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    window.electronAPI = createFullElectronAPIMock();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(await screen.findByLabelText('Selected audio preview')).toBeInTheDocument();
+
+    const mediaSwitch = screen.getByRole('switch', { name: /media player/i });
+    expect(mediaSwitch).toBeChecked();
+
+    fireEvent.click(mediaSwitch);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Selected audio preview')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByLabelText('Timestamped transcript')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Transcribed text')).toHaveTextContent('WEBVTT');
+    expect(screen.getByLabelText('Transcribed text')).toHaveTextContent('First segment');
+    expect(mediaSwitch).not.toBeChecked();
+
+    fireEvent.click(mediaSwitch);
+
+    expect(await screen.findByLabelText('Selected audio preview')).toBeInTheDocument();
+    expect(screen.getByLabelText('Timestamped transcript')).toBeInTheDocument();
+  });
+
+  it('should highlight the active segment from media time updates', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    window.electronAPI = createFullElectronAPIMock();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment
+
+00:00:04.000 --> 00:00:06.000
+Second segment`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    const audio = await screen.findByLabelText('Selected audio preview');
+    Object.defineProperty(audio, 'currentTime', { value: 4.5, configurable: true });
+    fireEvent.timeUpdate(audio);
+
+    await waitFor(() => {
+      expect(screen.getByText('Second segment').closest('.transcript-segment')).toHaveClass(
+        'active'
+      );
+    });
+  });
+
+  it('should show unavailable media state while keeping transcript visible', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    const api = createFullElectronAPIMock();
+    api.getMediaSource = vi.fn().mockResolvedValue({ success: false, error: 'File not found' });
+    window.electronAPI = api;
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment`}
+        selectedFile={{ name: 'missing.mp3', path: '/path/missing.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(screen.getByText('First segment')).toBeInTheDocument();
+    expect(await screen.findByText('File not found')).toBeInTheDocument();
+  });
+
+  it('should search and highlight matches in timestamped segments', async () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+    window.electronAPI = createFullElectronAPIMock();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+alpha beta
+
+00:00:04.000 --> 00:00:06.000
+beta gamma`}
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /search/i }));
+    const searchInput = await screen.findByPlaceholderText(/search/i);
+    fireEvent.change(searchInput, { target: { value: 'beta' } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/1 of 2/i)).toBeInTheDocument();
+    });
+    expect(screen.getAllByText('beta')).toHaveLength(2);
   });
 });

@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import './OutputDisplay.css';
-import type { OutputFormat } from '../../../../types';
+import type { OutputFormat, SelectedFile } from '../../../../types';
 
 import { TranscriptionToolbar } from '../TranscriptionToolbar';
 import { TranscriptionSearch } from '../TranscriptionSearch';
 import { TranscriptionContent } from '../TranscriptionContent';
+import { TranscriptMediaPlayer } from '../TranscriptMediaPlayer';
+import { parseTranscriptSegments, type TranscriptSegment } from '../../utils/transcriptSegments';
 
 export interface OutputDisplayProps {
   text: string;
   onSave: (format: OutputFormat) => void;
   onCopy: () => void;
   copySuccess: boolean;
+  selectedFile?: SelectedFile | null;
 }
 
 interface SearchMatch {
@@ -18,38 +21,94 @@ interface SearchMatch {
   end: number;
 }
 
+function mayContainTranscriptSegments(text: string): boolean {
+  const trimmedText = text.trimStart();
+  return trimmedText.startsWith('WEBVTT') || text.includes('-->');
+}
+
+function findActiveSegmentIndex(
+  segments: readonly TranscriptSegment[],
+  playbackTime: number
+): number | null {
+  let low = 0;
+  let high = segments.length - 1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const segment = segments[mid];
+    if (!segment) {
+      return null;
+    }
+
+    if (playbackTime < segment.startSec) {
+      high = mid - 1;
+    } else if (playbackTime >= segment.endSec) {
+      low = mid + 1;
+    } else {
+      return segment.index;
+    }
+  }
+
+  return null;
+}
+
 function OutputDisplay({
   text,
   onSave,
   onCopy,
   copySuccess,
+  selectedFile = null,
 }: OutputDisplayProps): React.JSX.Element {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
+  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
+  const [isMediaPlayerEnabled, setIsMediaPlayerEnabled] = useState(true);
+  const mediaRef = useRef<HTMLMediaElement | null>(null);
+  const activeSegmentIndexRef = useRef<number | null>(null);
 
   const hasText = text.length > 0;
-  const wordCount = hasText ? text.trim().split(/\s+/).length : 0;
-  const charCount = hasText ? text.length : 0;
+  const canAttemptMediaMode = hasText && Boolean(selectedFile);
+  const shouldParseSegments = canAttemptMediaMode && mayContainTranscriptSegments(text);
+  const segments = useMemo(
+    () => (shouldParseSegments ? parseTranscriptSegments(text) : []),
+    [shouldParseSegments, text]
+  );
+  const hasSegments = segments.length > 0;
+  const canUseMediaMode = hasText && hasSegments && Boolean(selectedFile);
+  const isMediaModeEnabled = canUseMediaMode && isMediaPlayerEnabled;
+  const searchableText = isMediaModeEnabled
+    ? segments.map((segment) => segment.text).join('\n')
+    : text;
+  const statText = isMediaModeEnabled ? searchableText : text;
+  const trimmedStatText = statText.trim();
+  const wordCount = trimmedStatText ? trimmedStatText.split(/\s+/).length : 0;
+  const charCount = statText.length;
 
   const matches = useMemo((): SearchMatch[] => {
-    if (!searchQuery || !text) return [];
+    if (!searchQuery || !searchableText) return [];
 
     const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedQuery, 'gi');
     const results: SearchMatch[] = [];
 
     let match: RegExpExecArray | null;
-    while ((match = regex.exec(text)) !== null) {
+    while ((match = regex.exec(searchableText)) !== null) {
       results.push({ start: match.index, end: match.index + match[0].length });
     }
 
     return results;
-  }, [searchQuery, text]);
+  }, [searchQuery, searchableText]);
 
   useEffect(() => {
     setCurrentMatchIndex(0);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (currentMatchIndex >= matches.length) {
+      setCurrentMatchIndex(0);
+    }
+  }, [currentMatchIndex, matches.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
@@ -82,6 +141,10 @@ function OutputDisplay({
     }
   };
 
+  const handleToggleMediaPlayer = (enabled: boolean): void => {
+    setIsMediaPlayerEnabled(enabled);
+  };
+
   const handleCloseSearch = (): void => {
     setShowSearch(false);
     setSearchQuery('');
@@ -96,7 +159,7 @@ function OutputDisplay({
   };
 
   const highlightedText = useMemo((): React.JSX.Element[] | null => {
-    if (!searchQuery || !text || matches.length === 0) return null;
+    if (isMediaModeEnabled || !searchQuery || !text || matches.length === 0) return null;
 
     const parts: React.JSX.Element[] = [];
     let lastIndex = 0;
@@ -122,7 +185,48 @@ function OutputDisplay({
     }
 
     return parts;
-  }, [text, searchQuery, matches, currentMatchIndex]);
+  }, [isMediaModeEnabled, text, searchQuery, matches, currentMatchIndex]);
+
+  const updateActiveSegmentForPlayback = useCallback(
+    (nextPlaybackTime: number): void => {
+      if (!isMediaModeEnabled) {
+        return;
+      }
+
+      const nextActiveSegmentIndex = findActiveSegmentIndex(segments, nextPlaybackTime);
+      if (activeSegmentIndexRef.current === nextActiveSegmentIndex) {
+        return;
+      }
+
+      activeSegmentIndexRef.current = nextActiveSegmentIndex;
+      setActiveSegmentIndex(nextActiveSegmentIndex);
+    },
+    [isMediaModeEnabled, segments]
+  );
+
+  const handleSegmentClick = useCallback((segment: TranscriptSegment): void => {
+    const media = mediaRef.current;
+    if (!media) {
+      return;
+    }
+
+    media.currentTime = segment.startSec;
+    activeSegmentIndexRef.current = segment.index;
+    setActiveSegmentIndex(segment.index);
+    void media.play().catch(() => {});
+  }, []);
+
+  const handleMediaElementChange = useCallback((element: HTMLMediaElement | null): void => {
+    mediaRef.current = element;
+  }, []);
+
+  useEffect(() => {
+    if (!isMediaModeEnabled) {
+      mediaRef.current = null;
+      activeSegmentIndexRef.current = null;
+      setActiveSegmentIndex(null);
+    }
+  }, [isMediaModeEnabled]);
 
   return (
     <div className="output-container">
@@ -135,6 +239,9 @@ function OutputDisplay({
         charCount={charCount}
         onToggleSearch={handleToggleSearch}
         isSearchActive={showSearch}
+        showMediaToggle={canUseMediaMode}
+        isMediaPlayerEnabled={isMediaPlayerEnabled}
+        onToggleMediaPlayer={handleToggleMediaPlayer}
       />
 
       {showSearch && hasText && (
@@ -149,12 +256,24 @@ function OutputDisplay({
         />
       )}
 
+      {isMediaModeEnabled && selectedFile && (
+        <TranscriptMediaPlayer
+          selectedFile={selectedFile}
+          onMediaElementChange={handleMediaElementChange}
+          onPlaybackTimeChange={updateActiveSegmentForPlayback}
+        />
+      )}
+
       <TranscriptionContent
         hasText={hasText}
         text={text}
         highlightedText={highlightedText}
         currentMatchIndex={currentMatchIndex}
         matchCount={matches.length}
+        segments={isMediaModeEnabled ? segments : []}
+        activeSegmentIndex={activeSegmentIndex}
+        searchQuery={searchQuery}
+        onSegmentClick={handleSegmentClick}
       />
     </div>
   );

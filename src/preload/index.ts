@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getFileInfo: (filePath: string) => ipcRenderer.invoke('file:getInfo', filePath),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
+  getMediaSource: (filePath: string) => ipcRenderer.invoke('file:getMediaSource', filePath),
 
   listModels: () => ipcRenderer.invoke('models:list'),
   getGpuStatus: () => ipcRenderer.invoke('models:gpuStatus'),

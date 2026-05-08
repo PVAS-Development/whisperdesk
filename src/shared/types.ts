@@ -124,6 +124,15 @@ export interface SaveFileResult {
   error?: string;
 }
 
+export type MediaSourceType = 'audio' | 'video';
+
+export interface MediaSourceResult {
+  success: boolean;
+  url?: string;
+  mediaType?: MediaSourceType;
+  error?: string;
+}
+
 export interface AppInfo {
   isDev: boolean;
   version: string;
@@ -172,8 +181,7 @@ export const OUTPUT_FORMATS: readonly OutputFormatOption[] = [
   { value: 'txt', label: 'Plain Text', ext: '.txt' },
 ] as const;
 
-export const SUPPORTED_EXTENSIONS = [
-  // Audio
+export const AUDIO_EXTENSIONS = [
   'mp3',
   'wav',
   'm4a',
@@ -185,16 +193,11 @@ export const SUPPORTED_EXTENSIONS = [
   'wma',
   'aac',
   'aiff',
-  // Video
-  'mp4',
-  'mov',
-  'avi',
-  'mkv',
-  'webm',
-  'wmv',
-  'flv',
-  'm4v',
 ] as const;
+
+export const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v'] as const;
+
+export const SUPPORTED_EXTENSIONS = [...AUDIO_EXTENSIONS, ...VIDEO_EXTENSIONS] as const;
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
 

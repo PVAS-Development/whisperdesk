@@ -4,6 +4,7 @@ import type {
   TranscriptionProgress,
   SaveFileOptions,
   SaveFileResult,
+  MediaSourceResult,
   GpuInfo,
   ModelInfo,
   SelectedFile,
@@ -30,6 +31,11 @@ export async function openMultipleFilesDialog(): Promise<string[] | null> {
 
 export async function getFileInfo(filePath: string): Promise<SelectedFile | null> {
   return window.electronAPI?.getFileInfo(filePath) ?? null;
+}
+
+export async function getMediaSource(filePath: string): Promise<MediaSourceResult> {
+  const result = await window.electronAPI?.getMediaSource(filePath);
+  return result ?? { success: false, error: 'Electron API not available' };
 }
 
 export function getPathForFile(file: File): string | undefined {

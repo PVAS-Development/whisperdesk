@@ -14,6 +14,9 @@ export interface TranscriptionToolbarProps {
   charCount: number;
   onToggleSearch: () => void;
   isSearchActive: boolean;
+  showMediaToggle?: boolean;
+  isMediaPlayerEnabled?: boolean;
+  onToggleMediaPlayer?: (enabled: boolean) => void;
 }
 
 function TranscriptionToolbar({
@@ -25,6 +28,9 @@ function TranscriptionToolbar({
   charCount,
   onToggleSearch,
   isSearchActive,
+  showMediaToggle = false,
+  isMediaPlayerEnabled = true,
+  onToggleMediaPlayer,
 }: TranscriptionToolbarProps): React.JSX.Element {
   const [showSaveMenu, setShowSaveMenu] = useState<boolean>(false);
   const saveMenuRef = useRef<HTMLDivElement>(null);
@@ -59,6 +65,21 @@ function TranscriptionToolbar({
       </div>
       {hasText && (
         <div className="output-actions">
+          {showMediaToggle && (
+            <label className="media-toggle" title="Toggle media player and transcript segments">
+              <span className="media-toggle-label">Media Player</span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={isMediaPlayerEnabled}
+                onChange={(event) => onToggleMediaPlayer?.(event.currentTarget.checked)}
+                aria-label="Media player"
+              />
+              <span className="media-toggle-track" aria-hidden="true">
+                <span className="media-toggle-thumb" />
+              </span>
+            </label>
+          )}
           <Button
             variant="icon"
             icon={<Search size={14} />}

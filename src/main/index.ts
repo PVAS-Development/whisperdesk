@@ -5,9 +5,11 @@ import { registerIpcHandlers } from './ipc';
 import { initAnalytics, trackEvent, AnalyticsEvents } from './services/analytics';
 import { initAutoUpdater, checkForUpdates } from './services/auto-updater';
 import { safeSend } from './utils/safe-send';
+import { registerMediaProtocolHandler, registerMediaProtocolScheme } from './utils/media-protocol';
 import packageJson from '../../package.json';
 
 initAnalytics();
+registerMediaProtocolScheme();
 
 const APP_DISPLAY_NAME = 'WhisperDesk';
 const APP_USER_MODEL_ID = 'com.whisperdesk.app';
@@ -251,6 +253,7 @@ const createWindow = () => {
 };
 
 app.on('ready', () => {
+  registerMediaProtocolHandler();
   createWindow();
 
   if (!isDev) {

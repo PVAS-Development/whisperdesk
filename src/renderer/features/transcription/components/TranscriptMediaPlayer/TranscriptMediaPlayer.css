@@ -1,0 +1,106 @@
+.transcript-media-player {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.transcript-media-status,
+.transcript-media-unavailable {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.transcript-media-unavailable {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.transcript-video-preview {
+  width: 100%;
+  max-height: 240px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+}
+
+.transcript-media-player audio {
+  display: none;
+}
+
+.transcript-media-controls {
+  display: grid;
+  grid-template-columns: auto auto minmax(120px, 1fr) auto minmax(120px, 180px) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.transcript-media-time {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+}
+
+.transcript-media-seek {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.transcript-media-seek:disabled {
+  opacity: 0.5;
+}
+
+.transcript-media-volume {
+  display: grid;
+  grid-template-columns: auto minmax(72px, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.transcript-media-volume-slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.transcript-media-speed {
+  height: 32px;
+  min-width: 72px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.transcript-media-speed:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+@media (max-width: 640px) {
+  .transcript-media-controls {
+    grid-template-columns: auto auto 1fr auto auto;
+    row-gap: 8px;
+  }
+
+  .transcript-media-volume {
+    grid-column: 1 / 4;
+  }
+
+  .transcript-media-speed {
+    grid-column: 4 / 6;
+    width: 100%;
+  }
+
+  .transcript-video-preview {
+    max-height: 180px;
+  }
+}

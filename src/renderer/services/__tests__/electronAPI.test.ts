@@ -3,6 +3,7 @@ import {
   isElectronAvailable,
   openFileDialog,
   getFileInfo,
+  getMediaSource,
   getPathForFile,
   saveFile,
   startTranscription,
@@ -51,6 +52,9 @@ describe('electronAPI wrapper', () => {
 
     const info = await getFileInfo('/missing');
     expect(info).toBeNull();
+
+    const mediaSource = await getMediaSource('/missing');
+    expect(mediaSource.success).toBe(false);
 
     const pathForFile = getPathForFile(new File([''], 'test.mp3'));
     expect(pathForFile).toBeUndefined();
@@ -150,6 +154,9 @@ describe('electronAPI wrapper', () => {
 
     await getFileInfo('/path/file.mp3');
     expect(api.getFileInfo).toHaveBeenCalledWith('/path/file.mp3');
+
+    await getMediaSource('/path/file.mp3');
+    expect(api.getMediaSource).toHaveBeenCalledWith('/path/file.mp3');
 
     const testFile = new File([''], 'test.mp3');
     getPathForFile(testFile);
