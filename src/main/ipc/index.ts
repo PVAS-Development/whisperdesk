@@ -20,16 +20,16 @@ import { generateFileFingerprint } from '../utils/media-info';
 import { createMediaProtocolUrl } from '../utils/media-protocol';
 import { safeSend } from '../utils/safe-send';
 import { trackEvent, AnalyticsEvents } from '../services/analytics';
-import { SUPPORTED_EXTENSIONS } from '../../shared/types';
-import type { TranscriptionOptions, SaveFileOptions } from '../../shared/types';
+import { SUPPORTED_EXTENSIONS, VIDEO_EXTENSIONS } from '../../shared/types';
+import type { TranscriptionOptions, SaveFileOptions, SupportedExtension } from '../../shared/types';
 
 const OPEN_DIALOG_MEDIA_EXTENSIONS = [...SUPPORTED_EXTENSIONS];
-const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v']);
+const VIDEO_EXTENSION_SET = new Set<string>(VIDEO_EXTENSIONS);
 
-function getSupportedMediaExtension(filePath: string): string | null {
+function getSupportedMediaExtension(filePath: string): SupportedExtension | null {
   const extension = path.extname(filePath).replace('.', '').toLowerCase();
-  return SUPPORTED_EXTENSIONS.includes(extension as (typeof SUPPORTED_EXTENSIONS)[number])
-    ? extension
+  return SUPPORTED_EXTENSIONS.includes(extension as SupportedExtension)
+    ? (extension as SupportedExtension)
     : null;
 }
 
@@ -134,7 +134,28 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
         return { success: false, error: 'Invalid file path' };
       }
 
-      const resolvedPath = path.resolve(filePath);
+      const normalizedPath = path.resolve(filePath);
+      let resolvedPath: string;
+
+      try {
+        const linkStats = await fs.promises.lstat(normalizedPath);
+        if (linkStats.isSymbolicLink()) {
+          return { success: false, error: 'Unsupported media file' };
+        }
+
+        if (!linkStats.isFile()) {
+          return { success: false, error: 'Unsupported media file' };
+        }
+
+        resolvedPath = await fs.promises.realpath(normalizedPath);
+        const stats = await fs.promises.stat(resolvedPath);
+        if (!stats.isFile()) {
+          return { success: false, error: 'Unsupported media file' };
+        }
+      } catch {
+        return { success: false, error: 'File not found' };
+      }
+
       const extension = getSupportedMediaExtension(resolvedPath);
       if (!extension) {
         return { success: false, error: 'Unsupported media file' };
@@ -149,7 +170,7 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
       return {
         success: true,
         url: createMediaProtocolUrl(resolvedPath),
-        mediaType: VIDEO_EXTENSIONS.has(extension) ? 'video' : 'audio',
+        mediaType: VIDEO_EXTENSION_SET.has(extension) ? 'video' : 'audio',
       };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) };

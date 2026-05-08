@@ -35,11 +35,13 @@ function OutputDisplay({
   const mediaRef = useRef<HTMLMediaElement | null>(null);
 
   const hasText = text.length > 0;
-  const wordCount = hasText ? text.trim().split(/\s+/).length : 0;
-  const charCount = hasText ? text.length : 0;
   const segments = useMemo(() => parseTranscriptSegments(text), [text]);
   const hasSegments = segments.length > 0;
   const searchableText = hasSegments ? segments.map((segment) => segment.text).join('\n') : text;
+  const statText = hasSegments ? searchableText : text;
+  const trimmedStatText = statText.trim();
+  const wordCount = trimmedStatText ? trimmedStatText.split(/\s+/).length : 0;
+  const charCount = statText.length;
 
   const matches = useMemo((): SearchMatch[] => {
     if (!searchQuery || !searchableText) return [];
@@ -71,10 +73,26 @@ function OutputDisplay({
       return null;
     }
 
-    const activeSegment = segments.find(
-      (segment) => playbackTime >= segment.startSec && playbackTime < segment.endSec
-    );
-    return activeSegment?.index ?? null;
+    let low = 0;
+    let high = segments.length - 1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const segment = segments[mid];
+      if (!segment) {
+        return null;
+      }
+
+      if (playbackTime < segment.startSec) {
+        high = mid - 1;
+      } else if (playbackTime >= segment.endSec) {
+        low = mid + 1;
+      } else {
+        return segment.index;
+      }
+    }
+
+    return null;
   }, [hasSegments, playbackTime, segments]);
 
   useEffect(() => {

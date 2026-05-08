@@ -55,6 +55,28 @@ describe('OutputDisplay', () => {
     expect(wordCountElement).toBeInTheDocument();
   });
 
+  it('should count transcript segment text instead of VTT metadata', () => {
+    const onSave = vi.fn();
+    const onCopy = vi.fn();
+
+    render(
+      <OutputDisplay
+        text={`WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+First segment
+
+00:00:04.000 --> 00:00:06.000
+Second segment`}
+        onSave={onSave}
+        onCopy={onCopy}
+        copySuccess={false}
+      />
+    );
+
+    expect(screen.getByText('4 words · 28 chars')).toBeInTheDocument();
+  });
+
   it('should call onCopy when copy button is clicked', async () => {
     const onSave = vi.fn();
     const onCopy = vi.fn();
