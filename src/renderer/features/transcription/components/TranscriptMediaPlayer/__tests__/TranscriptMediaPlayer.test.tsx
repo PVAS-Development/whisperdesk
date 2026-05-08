@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TranscriptMediaPlayer } from '../TranscriptMediaPlayer';
 import { createFullElectronAPIMock } from '@/test/electronAPIMocks';
 import type { ElectronAPI } from '@/types/electron';
+import type { MediaSourceResult } from '@/types';
 
 function createMediaElementChangeHandler(): {
   mediaElement: { current: HTMLMediaElement | null };
@@ -69,6 +70,25 @@ describe('TranscriptMediaPlayer', () => {
       mediaType: 'audio',
     });
     expect(await screen.findByLabelText('Selected audio preview')).toBeInTheDocument();
+  });
+
+  it('does not flash unavailable state before resolving a selected media source', () => {
+    const { onMediaElementChange } = createMediaElementChangeHandler();
+    window.electronAPI = {
+      ...createFullElectronAPIMock(),
+      getMediaSource: vi.fn((_filePath: string) => new Promise<MediaSourceResult>(() => {})),
+    };
+
+    render(
+      <TranscriptMediaPlayer
+        selectedFile={{ name: 'file.mp3', path: '/path/file.mp3' }}
+        onMediaElementChange={onMediaElementChange}
+        onPlaybackTimeChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('Loading media preview...')).toBeInTheDocument();
+    expect(screen.queryByText('Media preview unavailable')).not.toBeInTheDocument();
   });
 
   it('renders unavailable state for missing media sources', async () => {

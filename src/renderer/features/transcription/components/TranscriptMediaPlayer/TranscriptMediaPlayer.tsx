@@ -11,6 +11,11 @@ export interface TranscriptMediaPlayerProps {
   onPlaybackTimeChange: (timeSec: number) => void;
 }
 
+interface MediaSourceState {
+  filePath: string;
+  result: MediaSourceResult;
+}
+
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2] as const;
 const DEFAULT_VOLUME = 1;
 const RESTORED_VOLUME = 0.8;
@@ -42,7 +47,7 @@ function TranscriptMediaPlayer({
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const latestPlaybackTimeRef = useRef(0);
   const playbackFrameRef = useRef<number | null>(null);
-  const [source, setSource] = useState<MediaSourceResult | null>(null);
+  const [sourceState, setSourceState] = useState<MediaSourceState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -82,23 +87,27 @@ function TranscriptMediaPlayer({
     onPlaybackTimeChange(0);
 
     if (!selectedFile?.path) {
-      setSource(null);
+      setSourceState(null);
       setIsLoading(false);
       return;
     }
 
+    const filePath = selectedFile.path;
     setIsLoading(true);
-    void getMediaSource(selectedFile.path)
+    void getMediaSource(filePath)
       .then((result) => {
         if (isMounted) {
-          setSource(result);
+          setSourceState({ filePath, result });
         }
       })
       .catch((error) => {
         if (isMounted) {
-          setSource({
-            success: false,
-            error: error instanceof Error ? error.message : String(error),
+          setSourceState({
+            filePath,
+            result: {
+              success: false,
+              error: error instanceof Error ? error.message : String(error),
+            },
           });
         }
       })
@@ -117,6 +126,8 @@ function TranscriptMediaPlayer({
     return null;
   }
 
+  const source = sourceState?.filePath === selectedFile.path ? sourceState.result : null;
+  const isResolvingSource = Boolean(selectedFile.path) && (isLoading || source === null);
   const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
 
   const handlePlayToggle = (): void => {
@@ -215,7 +226,7 @@ function TranscriptMediaPlayer({
     }
   };
 
-  if (isLoading) {
+  if (isResolvingSource) {
     return (
       <div className="transcript-media-player" role="status" aria-live="polite">
         <span className="transcript-media-status">Loading media preview...</span>
