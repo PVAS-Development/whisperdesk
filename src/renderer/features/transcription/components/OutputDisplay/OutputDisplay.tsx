@@ -32,13 +32,18 @@ function OutputDisplay({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
   const [playbackTime, setPlaybackTime] = useState(0);
+  const [isMediaPlayerEnabled, setIsMediaPlayerEnabled] = useState(true);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
 
   const hasText = text.length > 0;
   const segments = useMemo(() => parseTranscriptSegments(text), [text]);
   const hasSegments = segments.length > 0;
-  const searchableText = hasSegments ? segments.map((segment) => segment.text).join('\n') : text;
-  const statText = hasSegments ? searchableText : text;
+  const canUseMediaMode = hasText && hasSegments && Boolean(selectedFile);
+  const isMediaModeEnabled = canUseMediaMode && isMediaPlayerEnabled;
+  const searchableText = isMediaModeEnabled
+    ? segments.map((segment) => segment.text).join('\n')
+    : text;
+  const statText = isMediaModeEnabled ? searchableText : text;
   const trimmedStatText = statText.trim();
   const wordCount = trimmedStatText ? trimmedStatText.split(/\s+/).length : 0;
   const charCount = statText.length;
@@ -69,7 +74,7 @@ function OutputDisplay({
   }, [currentMatchIndex, matches.length]);
 
   const activeSegmentIndex = useMemo((): number | null => {
-    if (!hasSegments) {
+    if (!isMediaModeEnabled) {
       return null;
     }
 
@@ -93,7 +98,7 @@ function OutputDisplay({
     }
 
     return null;
-  }, [hasSegments, playbackTime, segments]);
+  }, [isMediaModeEnabled, playbackTime, segments]);
 
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
@@ -126,6 +131,10 @@ function OutputDisplay({
     }
   };
 
+  const handleToggleMediaPlayer = (enabled: boolean): void => {
+    setIsMediaPlayerEnabled(enabled);
+  };
+
   const handleCloseSearch = (): void => {
     setShowSearch(false);
     setSearchQuery('');
@@ -140,7 +149,7 @@ function OutputDisplay({
   };
 
   const highlightedText = useMemo((): React.JSX.Element[] | null => {
-    if (hasSegments || !searchQuery || !text || matches.length === 0) return null;
+    if (isMediaModeEnabled || !searchQuery || !text || matches.length === 0) return null;
 
     const parts: React.JSX.Element[] = [];
     let lastIndex = 0;
@@ -166,7 +175,7 @@ function OutputDisplay({
     }
 
     return parts;
-  }, [hasSegments, text, searchQuery, matches, currentMatchIndex]);
+  }, [isMediaModeEnabled, text, searchQuery, matches, currentMatchIndex]);
 
   const handleSegmentClick = useCallback((segment: TranscriptSegment): void => {
     const media = mediaRef.current;
@@ -183,6 +192,13 @@ function OutputDisplay({
     mediaRef.current = element;
   }, []);
 
+  useEffect(() => {
+    if (!isMediaModeEnabled) {
+      mediaRef.current = null;
+      setPlaybackTime(0);
+    }
+  }, [isMediaModeEnabled]);
+
   return (
     <div className="output-container">
       <TranscriptionToolbar
@@ -194,6 +210,9 @@ function OutputDisplay({
         charCount={charCount}
         onToggleSearch={handleToggleSearch}
         isSearchActive={showSearch}
+        showMediaToggle={canUseMediaMode}
+        isMediaPlayerEnabled={isMediaPlayerEnabled}
+        onToggleMediaPlayer={handleToggleMediaPlayer}
       />
 
       {showSearch && hasText && (
@@ -208,7 +227,7 @@ function OutputDisplay({
         />
       )}
 
-      {hasText && hasSegments && selectedFile && (
+      {isMediaModeEnabled && selectedFile && (
         <TranscriptMediaPlayer
           selectedFile={selectedFile}
           onMediaElementChange={handleMediaElementChange}
@@ -222,7 +241,7 @@ function OutputDisplay({
         highlightedText={highlightedText}
         currentMatchIndex={currentMatchIndex}
         matchCount={matches.length}
-        segments={segments}
+        segments={isMediaModeEnabled ? segments : []}
         activeSegmentIndex={activeSegmentIndex}
         searchQuery={searchQuery}
         onSegmentClick={handleSegmentClick}

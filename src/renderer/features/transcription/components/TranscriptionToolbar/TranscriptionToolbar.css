@@ -27,7 +27,64 @@
 
 .output-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.media-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.media-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.media-toggle-track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.media-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.media-toggle input:checked + .media-toggle-track {
+  background: var(--accent-light);
+  border-color: var(--accent-border);
+}
+
+.media-toggle input:checked + .media-toggle-track .media-toggle-thumb {
+  transform: translateX(14px);
+  background: var(--accent);
+}
+
+.media-toggle input:focus-visible + .media-toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .save-dropdown {
