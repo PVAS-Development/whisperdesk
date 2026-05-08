@@ -24,6 +24,10 @@ A beautiful, native macOS desktop application for transcribing audio and video f
 - **Live Batch ETA** - See estimated remaining time while batch processing is running
 - **Completion Notifications** - Native notification when a batch finishes
 - **Multiple Formats** - Supports MP3, WAV, M4A, FLAC, OGG, OPUS, OGA, AMR, WMA, AAC, AIFF, MP4, MOV, AVI, MKV, WebM, WMV, FLV, M4V
+- **Embedded Media Preview** - Play the selected audio or video beside your transcript
+- **Transcript Navigation** - Click timestamped transcript segments to seek directly to that moment in the media
+- **Secure Local Streaming** - Media previews use a private `whisperdesk-media://` protocol with approved local files only
+- **Cleaner Subtitles** - Improved VTT/SRT segmentation with better word-boundary splitting for readable captions
 - **Multiple Models** - Choose from tiny, base, small, medium, large-v3, or large-v3-turbo Whisper models (including English-only variants)
 - **Output Formats** - Export as VTT subtitles, SRT subtitles, plain text, Word (`.docx`), PDF, or Markdown
 - **Finder Reveal After Save** - Prompt to reveal the saved transcript directly in Finder
@@ -108,7 +112,8 @@ npm run electron:build
 1. **Open Files** - Drag and drop audio/video files (single or batch) into the app, or click to browse
 2. **Configure Settings** - Choose your preferred model, language, and output format
 3. **Transcribe** - Click "Transcribe" to process the entire queue sequentially
-4. **Save/Copy** - Save the transcription from the save dialog (choose from `.txt`, `.docx`, `.pdf`, `.md`, `.srt`, or `.vtt` formats) or copy to clipboard
+4. **Review with Media** - For timestamped output, play the selected media and click transcript segments to jump to the matching audio/video moment
+5. **Save/Copy** - Save the transcription from the save dialog (choose from `.txt`, `.docx`, `.pdf`, `.md`, `.srt`, or `.vtt` formats) or copy to clipboard
 
 ### Keyboard Shortcuts
 
@@ -211,7 +216,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for clear histo
 
 ### Testing
 
-WhisperDesk has a comprehensive test suite with **335+ tests** covering utilities, services, hooks, and React components.
+WhisperDesk has a comprehensive test suite with **580+ tests** covering utilities, services, hooks, and React components.
 
 #### Run Tests
 
@@ -233,7 +238,7 @@ npm run test:coverage
 
 - **Unit Tests** - Utilities, formatters, validators, storage, and services
 - **Component Tests** - SettingsPanel, FileDropZone, OutputDisplay
-- **Service Tests** - Electron API, transcription service, model service, history storage
+- **Service Tests** - Electron API, transcription service, model service, history storage, and secure media authorization
 - Test Framework: [Vitest](https://vitest.dev/) with jsdom
 - Component Testing: [@testing-library/react](https://testing-library.com/react)
 - **Pre-commit Hooks** - Lint and format checks run automatically before every commit (via husky + lint-staged)
@@ -244,7 +249,7 @@ Tests run automatically in GitHub Actions on every PR and push:
 
 - ✅ Linting & formatting checks
 - ✅ TypeScript type checking
-- ✅ Unit & component tests (335+ tests)
+- ✅ Unit & component tests (580+ tests)
 - ✅ Production build validation
 
 ### Available Scripts
@@ -283,6 +288,7 @@ This project follows a modern Electron architecture with strict separation of co
 - **Context Isolation**: Enabled. Renderer cannot access Node.js primitives directly.
 - **Sandbox**: Enabled. Renderer runs in a sandboxed environment.
 - **IPC**: All communication happens via typed IPC channels defined in `src/main/ipc/`.
+- **Media Preview Authorization**: Local previews are limited to user-approved media paths and served through time-bound `whisperdesk-media://` URLs.
 
 ### Project Structure
 
@@ -359,6 +365,7 @@ Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) 
 
 - **Local Processing**: All audio/video processing happens **locally** on your device. Your files never leave your computer.
 - **No Cloud Uploads**: We do not upload your media files or transcriptions to any server.
+- **Private Media Preview**: Transcript playback uses local, approved media files only. Preview URLs are temporary and are not raw filesystem paths.
 - **Anonymous Analytics**: We collect minimal, anonymous usage data (e.g., app launches, feature usage) to improve the app. No personal data or file content is collected.
 - **Code Signing**: The app is **code-signed and notarized** by Apple for your safety.
 
