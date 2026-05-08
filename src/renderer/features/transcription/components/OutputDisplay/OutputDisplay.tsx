@@ -21,6 +21,37 @@ interface SearchMatch {
   end: number;
 }
 
+function mayContainTranscriptSegments(text: string): boolean {
+  const trimmedText = text.trimStart();
+  return trimmedText.startsWith('WEBVTT') || text.includes('-->');
+}
+
+function findActiveSegmentIndex(
+  segments: readonly TranscriptSegment[],
+  playbackTime: number
+): number | null {
+  let low = 0;
+  let high = segments.length - 1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const segment = segments[mid];
+    if (!segment) {
+      return null;
+    }
+
+    if (playbackTime < segment.startSec) {
+      high = mid - 1;
+    } else if (playbackTime >= segment.endSec) {
+      low = mid + 1;
+    } else {
+      return segment.index;
+    }
+  }
+
+  return null;
+}
+
 function OutputDisplay({
   text,
   onSave,
@@ -31,12 +62,18 @@ function OutputDisplay({
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
-  const [playbackTime, setPlaybackTime] = useState(0);
+  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
   const [isMediaPlayerEnabled, setIsMediaPlayerEnabled] = useState(true);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
+  const activeSegmentIndexRef = useRef<number | null>(null);
 
   const hasText = text.length > 0;
-  const segments = useMemo(() => parseTranscriptSegments(text), [text]);
+  const canAttemptMediaMode = hasText && Boolean(selectedFile);
+  const shouldParseSegments = canAttemptMediaMode && mayContainTranscriptSegments(text);
+  const segments = useMemo(
+    () => (shouldParseSegments ? parseTranscriptSegments(text) : []),
+    [shouldParseSegments, text]
+  );
   const hasSegments = segments.length > 0;
   const canUseMediaMode = hasText && hasSegments && Boolean(selectedFile);
   const isMediaModeEnabled = canUseMediaMode && isMediaPlayerEnabled;
@@ -72,33 +109,6 @@ function OutputDisplay({
       setCurrentMatchIndex(0);
     }
   }, [currentMatchIndex, matches.length]);
-
-  const activeSegmentIndex = useMemo((): number | null => {
-    if (!isMediaModeEnabled) {
-      return null;
-    }
-
-    let low = 0;
-    let high = segments.length - 1;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      const segment = segments[mid];
-      if (!segment) {
-        return null;
-      }
-
-      if (playbackTime < segment.startSec) {
-        high = mid - 1;
-      } else if (playbackTime >= segment.endSec) {
-        low = mid + 1;
-      } else {
-        return segment.index;
-      }
-    }
-
-    return null;
-  }, [isMediaModeEnabled, playbackTime, segments]);
 
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
@@ -177,6 +187,23 @@ function OutputDisplay({
     return parts;
   }, [isMediaModeEnabled, text, searchQuery, matches, currentMatchIndex]);
 
+  const updateActiveSegmentForPlayback = useCallback(
+    (nextPlaybackTime: number): void => {
+      if (!isMediaModeEnabled) {
+        return;
+      }
+
+      const nextActiveSegmentIndex = findActiveSegmentIndex(segments, nextPlaybackTime);
+      if (activeSegmentIndexRef.current === nextActiveSegmentIndex) {
+        return;
+      }
+
+      activeSegmentIndexRef.current = nextActiveSegmentIndex;
+      setActiveSegmentIndex(nextActiveSegmentIndex);
+    },
+    [isMediaModeEnabled, segments]
+  );
+
   const handleSegmentClick = useCallback((segment: TranscriptSegment): void => {
     const media = mediaRef.current;
     if (!media) {
@@ -184,7 +211,8 @@ function OutputDisplay({
     }
 
     media.currentTime = segment.startSec;
-    setPlaybackTime(segment.startSec);
+    activeSegmentIndexRef.current = segment.index;
+    setActiveSegmentIndex(segment.index);
     void media.play().catch(() => {});
   }, []);
 
@@ -195,7 +223,8 @@ function OutputDisplay({
   useEffect(() => {
     if (!isMediaModeEnabled) {
       mediaRef.current = null;
-      setPlaybackTime(0);
+      activeSegmentIndexRef.current = null;
+      setActiveSegmentIndex(null);
     }
   }, [isMediaModeEnabled]);
 
@@ -231,7 +260,7 @@ function OutputDisplay({
         <TranscriptMediaPlayer
           selectedFile={selectedFile}
           onMediaElementChange={handleMediaElementChange}
-          onPlaybackTimeChange={setPlaybackTime}
+          onPlaybackTimeChange={updateActiveSegmentForPlayback}
         />
       )}
 

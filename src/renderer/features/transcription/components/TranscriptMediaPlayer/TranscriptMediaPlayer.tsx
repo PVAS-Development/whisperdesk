@@ -40,6 +40,8 @@ function TranscriptMediaPlayer({
   onPlaybackTimeChange,
 }: TranscriptMediaPlayerProps): React.JSX.Element | null {
   const mediaRef = useRef<HTMLMediaElement | null>(null);
+  const latestPlaybackTimeRef = useRef(0);
+  const playbackFrameRef = useRef<number | null>(null);
   const [source, setSource] = useState<MediaSourceResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,6 +50,28 @@ function TranscriptMediaPlayer({
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
+
+  const emitPlaybackTimeChange = (nextTime: number): void => {
+    latestPlaybackTimeRef.current = nextTime;
+
+    if (playbackFrameRef.current !== null) {
+      return;
+    }
+
+    playbackFrameRef.current = window.requestAnimationFrame(() => {
+      playbackFrameRef.current = null;
+      onPlaybackTimeChange(latestPlaybackTimeRef.current);
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (playbackFrameRef.current !== null) {
+        window.cancelAnimationFrame(playbackFrameRef.current);
+        playbackFrameRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -169,7 +193,7 @@ function TranscriptMediaPlayer({
   const handleTimeUpdate = (event: React.SyntheticEvent<HTMLMediaElement>): void => {
     const nextTime = event.currentTarget.currentTime;
     setCurrentTime(nextTime);
-    onPlaybackTimeChange(nextTime);
+    emitPlaybackTimeChange(nextTime);
   };
 
   const handleLoadedMetadata = (event: React.SyntheticEvent<HTMLMediaElement>): void => {

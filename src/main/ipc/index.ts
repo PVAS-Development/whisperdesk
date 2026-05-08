@@ -18,20 +18,17 @@ import {
 } from '../utils/export-helper';
 import { generateFileFingerprint } from '../utils/media-info';
 import { createMediaProtocolUrl } from '../utils/media-protocol';
+import {
+  approveMediaFilePaths,
+  resolveApprovedMediaFilePath,
+} from '../utils/media-source-authorization';
 import { safeSend } from '../utils/safe-send';
 import { trackEvent, AnalyticsEvents } from '../services/analytics';
 import { SUPPORTED_EXTENSIONS, VIDEO_EXTENSIONS } from '../../shared/types';
-import type { TranscriptionOptions, SaveFileOptions, SupportedExtension } from '../../shared/types';
+import type { TranscriptionOptions, SaveFileOptions } from '../../shared/types';
 
 const OPEN_DIALOG_MEDIA_EXTENSIONS = [...SUPPORTED_EXTENSIONS];
 const VIDEO_EXTENSION_SET = new Set<string>(VIDEO_EXTENSIONS);
-
-function getSupportedMediaExtension(filePath: string): SupportedExtension | null {
-  const extension = path.extname(filePath).replace('.', '').toLowerCase();
-  return SUPPORTED_EXTENSIONS.includes(extension as SupportedExtension)
-    ? (extension as SupportedExtension)
-    : null;
-}
 
 export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
   ipcMain.handle('dialog:openFile', async () => {
@@ -50,6 +47,7 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
     if (canceled) {
       return null;
     }
+    await approveMediaFilePaths(filePaths);
     return filePaths[0];
   });
 
@@ -66,7 +64,12 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
         },
       ],
     });
-    return canceled ? null : filePaths;
+    if (canceled) {
+      return null;
+    }
+
+    await approveMediaFilePaths(filePaths);
+    return filePaths;
   });
 
   ipcMain.handle('dialog:saveFile', async (_event, options: SaveFileOptions) => {
@@ -126,51 +129,15 @@ export function registerIpcHandlers(getMainWindow: () => BrowserWindow | null) {
 
   ipcMain.handle('file:getMediaSource', async (_event, filePath: string) => {
     try {
-      if (typeof filePath !== 'string' || filePath.trim().length === 0) {
-        return { success: false, error: 'Invalid file path' };
-      }
-
-      if (!path.isAbsolute(filePath)) {
-        return { success: false, error: 'Invalid file path' };
-      }
-
-      const normalizedPath = path.resolve(filePath);
-      let resolvedPath: string;
-
-      try {
-        const linkStats = await fs.promises.lstat(normalizedPath);
-        if (linkStats.isSymbolicLink()) {
-          return { success: false, error: 'Unsupported media file' };
-        }
-
-        if (!linkStats.isFile()) {
-          return { success: false, error: 'Unsupported media file' };
-        }
-
-        resolvedPath = await fs.promises.realpath(normalizedPath);
-        const stats = await fs.promises.stat(resolvedPath);
-        if (!stats.isFile()) {
-          return { success: false, error: 'Unsupported media file' };
-        }
-      } catch {
-        return { success: false, error: 'File not found' };
-      }
-
-      const extension = getSupportedMediaExtension(resolvedPath);
-      if (!extension) {
-        return { success: false, error: 'Unsupported media file' };
-      }
-
-      try {
-        await fs.promises.access(resolvedPath, fs.constants.R_OK);
-      } catch {
-        return { success: false, error: 'File not found' };
+      const validation = await resolveApprovedMediaFilePath(filePath);
+      if (!validation.success) {
+        return { success: false, error: validation.error };
       }
 
       return {
         success: true,
-        url: createMediaProtocolUrl(resolvedPath),
-        mediaType: VIDEO_EXTENSION_SET.has(extension) ? 'video' : 'audio',
+        url: createMediaProtocolUrl(validation.filePath),
+        mediaType: VIDEO_EXTENSION_SET.has(validation.extension) ? 'video' : 'audio',
       };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) };

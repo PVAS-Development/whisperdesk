@@ -8,6 +8,10 @@ export const MEDIA_PROTOCOL = 'whisperdesk-media';
 
 const MEDIA_SOURCE_TTL_MS = 30 * 60 * 1000;
 const MAX_MEDIA_SOURCES = 100;
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store',
+  Pragma: 'no-cache',
+};
 
 interface MediaSourceEntry {
   filePath: string;
@@ -79,10 +83,16 @@ function createMediaErrorResponse(error: unknown): Response {
     errorCode === 'EACCES' ||
     errorCode === 'EPERM'
   ) {
-    return new Response('Media source not found', { status: 404 });
+    return new Response('Media source not found', {
+      status: 404,
+      headers: NO_STORE_HEADERS,
+    });
   }
 
-  return new Response('Unable to load media source', { status: 500 });
+  return new Response('Unable to load media source', {
+    status: 500,
+    headers: NO_STORE_HEADERS,
+  });
 }
 
 function getContentType(filePath: string): string {
@@ -171,6 +181,7 @@ async function createMediaResponse(request: Request, filePath: string): Promise<
       status: 416,
       headers: {
         'Accept-Ranges': 'bytes',
+        ...NO_STORE_HEADERS,
         'Content-Range': `bytes */${fileSize}`,
       },
     });
@@ -188,6 +199,7 @@ async function createMediaResponse(request: Request, filePath: string): Promise<
     status: range ? 206 : 200,
     headers: {
       'Accept-Ranges': 'bytes',
+      ...NO_STORE_HEADERS,
       'Content-Length': String(contentLength),
       'Content-Type': contentType,
       ...(range ? { 'Content-Range': `bytes ${start}-${end}/${fileSize}` } : {}),
@@ -220,7 +232,10 @@ export function registerMediaProtocolHandler(): void {
     const entry = getMediaSourceEntry(token);
 
     if (!entry) {
-      return new Response('Media source not found', { status: 404 });
+      return new Response('Media source not found', {
+        status: 404,
+        headers: NO_STORE_HEADERS,
+      });
     }
 
     try {

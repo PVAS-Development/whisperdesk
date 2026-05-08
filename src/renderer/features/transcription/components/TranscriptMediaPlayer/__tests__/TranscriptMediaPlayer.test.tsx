@@ -204,7 +204,9 @@ describe('TranscriptMediaPlayer', () => {
 
     Object.defineProperty(audio, 'currentTime', { value: 65, configurable: true });
     fireEvent.timeUpdate(audio);
-    expect(onPlaybackTimeChange).toHaveBeenCalledWith(65);
+    await waitFor(() => {
+      expect(onPlaybackTimeChange).toHaveBeenCalledWith(65);
+    });
     expect(screen.getByText('01:05')).toBeInTheDocument();
 
     Object.defineProperty(audio, 'currentTime', { value: -5, configurable: true });

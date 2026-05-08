@@ -118,6 +118,8 @@ describe('media-protocol', () => {
     const response = await handler(createProtocolRequest(url));
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Pragma')).toBe('no-cache');
     expect(await response.text()).toBe('Media source not found');
 
     statMock.mockClear();
@@ -139,6 +141,8 @@ describe('media-protocol', () => {
     const response = await getRegisteredHandler()(createProtocolRequest(url));
 
     expect(response.status).toBe(500);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Pragma')).toBe('no-cache');
     expect(await response.text()).toBe('Unable to load media source');
   });
 
@@ -153,6 +157,7 @@ describe('media-protocol', () => {
     const response = await getRegisteredHandler()(createProtocolRequest(url));
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
     expect(await response.text()).toBe('Media source not found');
   });
 
@@ -176,6 +181,8 @@ describe('media-protocol', () => {
     const response = await getRegisteredHandler()(createProtocolRequest(pathnameUrl));
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Pragma')).toBe('no-cache');
     expect(response.headers.get('Content-Type')).toBe('application/octet-stream');
     expect(response.headers.get('Content-Length')).toBe('12');
     expect(response.headers.get('Content-Range')).toBeNull();
@@ -236,6 +243,8 @@ describe('media-protocol', () => {
     const explicitRangeResponse = await handler(createProtocolRequest(url, { range: 'bytes=2-4' }));
 
     expect(explicitRangeResponse.status).toBe(206);
+    expect(explicitRangeResponse.headers.get('Cache-Control')).toBe('no-store');
+    expect(explicitRangeResponse.headers.get('Pragma')).toBe('no-cache');
     expect(explicitRangeResponse.headers.get('Content-Type')).toBe('video/mp4');
     expect(explicitRangeResponse.headers.get('Content-Length')).toBe('3');
     expect(explicitRangeResponse.headers.get('Content-Range')).toBe('bytes 2-4/10');
@@ -278,6 +287,8 @@ describe('media-protocol', () => {
     );
 
     expect(missingRangeBoundsResponse.status).toBe(416);
+    expect(missingRangeBoundsResponse.headers.get('Cache-Control')).toBe('no-store');
+    expect(missingRangeBoundsResponse.headers.get('Pragma')).toBe('no-cache');
     expect(missingRangeBoundsResponse.headers.get('Content-Range')).toBe('bytes */10');
 
     const invalidSuffixRangeResponse = await handler(
