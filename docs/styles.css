@@ -584,6 +584,11 @@ img {
   color: #3b82f6;
 }
 
+.feature-icon.green {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
 .feature-icon.orange {
   background: rgba(245, 158, 11, 0.1);
   color: #f59e0b;
